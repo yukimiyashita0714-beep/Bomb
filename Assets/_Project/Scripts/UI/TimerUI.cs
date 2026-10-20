@@ -30,6 +30,7 @@ public class TimerUI : MonoBehaviour
     // Events
     // ==========================================
 
+    // Žc‚èŽžŠÔ‚ª‚»‚ÌŽžŠÔ‚É‚È‚Á‚½‚çEvent‚ð‘—‚é
     public event Action OnTenSecond;
     public event Action OnThirtySecond;
     public event Action OnOneMinute;
