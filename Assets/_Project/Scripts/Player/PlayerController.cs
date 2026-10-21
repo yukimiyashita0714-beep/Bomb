@@ -4,6 +4,7 @@ namespace Bomb.Player
 {
     /// <summary>
     /// CharacterController を使ったプレイヤーの水平移動・ダッシュ・向き変更を扱う。
+    /// 速度などの数値は <see cref="PlayerData"/> から読む。
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(PlayerInputReader))]
@@ -14,21 +15,9 @@ namespace Bomb.Player
         // Serialize Fields
         // ==========================================
 
-        [Header("Movement")]
-        [SerializeField, Tooltip("通常時の水平移動速度 (m/s)")]
-        [Range(0f, 20f)]
-        private float _walkSpeed = 4f;
-
-        [SerializeField, Tooltip("ダッシュ時の水平移動速度 (m/s)")]
-        [Range(0f, 40f)]
-        private float _dashSpeed = 8f;
-
-        [SerializeField, Tooltip("進行方向へ向き直る速さ (度/秒)。0 で向きを変えない")]
-        private float _turnSpeedDegrees = 720f;
-
-        [Header("Gravity")]
-        [SerializeField, Tooltip("重力加速度 (m/s^2)。下向きなので負の値")]
-        private float _gravity = -20f;
+        [Header("Data")]
+        [SerializeField, Tooltip("移動と投擲の調整値。数値はこのアセット側で変える")]
+        private PlayerData _data;
 
         [Header("References")]
         [SerializeField, Tooltip("移動の基準にするカメラ。未設定ならワールド軸基準で動く")]
@@ -57,8 +46,8 @@ namespace Bomb.Player
         /// <summary>現在の水平移動速度 (m/s)。アニメーションのブレンドなどに使う。</summary>
         public float CurrentSpeed => _currentSpeed;
 
-        /// <summary>ダッシュ入力中かつ実際に移動しているとき true。</summary>
-        public bool IsDashing => _currentSpeed > _walkSpeed;
+        /// <summary>ダッシュ速度で移動しているとき true。</summary>
+        public bool IsDashing => _data != null && _currentSpeed > _data.WalkSpeed;
 
         /// <summary>接地しているとき true。</summary>
         public bool IsGrounded => _characterController.isGrounded;
@@ -71,6 +60,12 @@ namespace Bomb.Player
         {
             _characterController = GetComponent<CharacterController>();
             _inputReader = GetComponent<PlayerInputReader>();
+
+            if (_data == null)
+            {
+                Debug.LogError($"[{nameof(PlayerController)}] PlayerData が未設定のため動作できない。", this);
+                enabled = false;
+            }
         }
 
         private void Update()
@@ -123,12 +118,12 @@ namespace Bomb.Player
                 return 0f;
             }
 
-            return _inputReader.IsDashing ? _dashSpeed : _walkSpeed;
+            return _inputReader.IsDashing ? _data.DashSpeed : _data.WalkSpeed;
         }
 
         private void RotateTowards(Vector3 direction)
         {
-            if (direction.sqrMagnitude < INPUT_THRESHOLD_SQR || _turnSpeedDegrees <= 0f)
+            if (direction.sqrMagnitude < INPUT_THRESHOLD_SQR || _data.TurnSpeedDegrees <= 0f)
             {
                 return;
             }
@@ -137,7 +132,7 @@ namespace Bomb.Player
             transform.rotation = Quaternion.RotateTowards(
                 transform.rotation,
                 targetRotation,
-                _turnSpeedDegrees * Time.deltaTime);
+                _data.TurnSpeedDegrees * Time.deltaTime);
         }
 
         private void ApplyGravity()
@@ -149,7 +144,7 @@ namespace Bomb.Player
                 return;
             }
 
-            _verticalVelocity += _gravity * Time.deltaTime;
+            _verticalVelocity += _data.Gravity * Time.deltaTime;
         }
     }
 }

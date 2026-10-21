@@ -2,7 +2,10 @@
     "name": "Bomb.Editors",
     "rootNamespace": "Bomb.Editors",
     "references": [
-        "Bomb.Player"
+        "Bomb.Player",
+        "Bomb.Battle",
+        "Bomb.Hud",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"
