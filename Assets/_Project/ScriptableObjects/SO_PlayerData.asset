@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a222b1fd4ac43474284399af03ea133e, type: 3}
   m_Name: SO_PlayerData
   m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerData
-  _walkSpeed: 4
-  _dashSpeed: 8
+  _walkSpeed: 5
+  _dashSpeed: 11
   _turnSpeedDegrees: 720
   _gravity: -20
   _throwCooldown: 1.5

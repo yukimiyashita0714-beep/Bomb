@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3715227231001904254}
   - component: {fileID: 3318182218909358987}
   - component: {fileID: 18697505869398218}
+  - component: {fileID: 3902445128813132657}
   m_Layer: 0
   m_Name: P_Grenade
   m_TagString: Untagged
@@ -96,6 +97,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Bomb.Battle::Bomb.Battle.Grenade
   _data: {fileID: 11400000, guid: 2682861d0c6557d4b9ab70018a6a7a12, type: 2}
+--- !u!114 &3902445128813132657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8626708492992328768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3102285b7ab9241820dac67066225b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bomb.Battle::Bomb.Battle.GrenadeExplosionView
+  _explosionVfxPrefab: {fileID: 3546503584072692249, guid: ba2a742fd7b4f0941a3b8e75a13af5c0, type: 3}
+  _vfxBaseRadiusMeters: 5
+  _vfxLifetimeSeconds: 4
+  _hidesBodyOnExplode: 1
 --- !u!1001 &8627127471094743973
 PrefabInstance:
   m_ObjectHideFlags: 0

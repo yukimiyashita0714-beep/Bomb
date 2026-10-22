@@ -5,6 +5,7 @@
         "Bomb.Player",
         "Bomb.Battle",
         "Bomb.Hud",
+        "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],
     "includePlatforms": [

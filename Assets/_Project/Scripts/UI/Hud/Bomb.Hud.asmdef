@@ -3,6 +3,7 @@
     "rootNamespace": "Bomb.Hud",
     "references": [
         "Bomb.Player",
+        "Unity.InputSystem",
         "UnityEngine.UI"
     ],
     "includePlatforms": [],
