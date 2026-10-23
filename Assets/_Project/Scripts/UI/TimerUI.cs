@@ -3,96 +3,99 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class TimerUI : MonoBehaviour
+namespace Bomb.UI
 {
-    // ==========================================
-    // Serialize Fields
-    // ==========================================
-
-    [SerializeField, Tooltip("ŠÔ‚ÌƒeƒLƒXƒg")] TextMeshProUGUI _timerText;
-
-    [SerializeField, Tooltip("§ŒÀŠÔ")] private float _limitTime;
-
-    // ==========================================
-    // Private Fields
-    // ==========================================
-
-    private Dictionary<float, Action> _timerEvents;
-
-    private float _limitTimer;
-    private float _prevLimitTimer;
-
-    // ==========================================
-    // Properties
-    // ==========================================
-
-    // ==========================================
-    // Events
-    // ==========================================
-
-    // c‚èŠÔ‚ª‚»‚ÌŠÔ‚É‚È‚Á‚½‚çEvent‚ğ‘—‚é
-    public event Action OnTenSecond;
-    public event Action OnThirtySecond;
-    public event Action OnOneMinute;
-    public event Action OnFiveMinute;
-
-    // ==========================================
-    // Unity Messages
-    // ==========================================
-
-    private void Start()
+    public class TimerUI : MonoBehaviour
     {
-        _limitTimer = _limitTime;
-        _prevLimitTimer = _limitTimer;
+        // ==========================================
+        // Serialize Fields
+        // ==========================================
 
-        _timerEvents = new Dictionary<float, Action>
+        [SerializeField, Tooltip("æ™‚é–“ã®ãƒ†ã‚­ã‚¹ãƒˆ")] TextMeshProUGUI _timerText;
+
+        [SerializeField, Tooltip("åˆ¶é™æ™‚é–“")] private float _limitTime;
+
+        // ==========================================
+        // Private Fields
+        // ==========================================
+
+        private Dictionary<float, Action> _timerEvents;
+
+        private float _limitTimer;
+        private float _prevLimitTimer;
+
+        // ==========================================
+        // Properties
+        // ==========================================
+
+        // ==========================================
+        // Events
+        // ==========================================
+
+        // æ®‹ã‚Šæ™‚é–“ãŒãã®æ™‚é–“ã«ãªã£ãŸã‚‰Eventã‚’é€ã‚‹
+        public event Action OnTenSecond;
+        public event Action OnThirtySecond;
+        public event Action OnOneMinute;
+        public event Action OnFiveMinute;
+
+        // ==========================================
+        // Unity Messages
+        // ==========================================
+
+        private void Start()
         {
-            { 10, () => OnTenSecond?.Invoke() },
-            { 30, () => OnThirtySecond?.Invoke() },
-            { 60, () => OnOneMinute?.Invoke() },
-            { 300, () => OnFiveMinute?.Invoke() }
-        };
-    }
+            _limitTimer = _limitTime;
+            _prevLimitTimer = _limitTimer;
 
-    private void Update()
-    {
-        Display();
-        PassageOfTime();
-    }
-
-    // ==========================================
-    // Public Methods
-    // ==========================================
-
-    // ==========================================
-    // Private Methods
-    // ==========================================
-
-    /// <summary>
-    /// ƒ^ƒCƒ}[‚ÌŠÔ‚Ì•\¦
-    /// </summary>
-    private void Display()
-    {
-        int minutes = (int)(_limitTimer / 60);
-        int seconds = (int)(_limitTimer % 60);
-
-        //•\¦
-        _timerText.text = $"{minutes:00} : {seconds:00}";
-    }
-
-    /// <summary>
-    /// ŠÔŒo‰ß
-    /// </summary>
-    private void PassageOfTime()
-    {
-        _prevLimitTimer = _limitTimer;
-        _limitTimer = Mathf.Max(0f, _limitTimer - Time.deltaTime);
-
-        foreach (var timerEvent in _timerEvents)
-        {
-            if (_limitTimer <= timerEvent.Key && timerEvent.Key < _prevLimitTimer)
+            _timerEvents = new Dictionary<float, Action>
             {
-                timerEvent.Value?.Invoke();
+                { 10, () => OnTenSecond?.Invoke() },
+                { 30, () => OnThirtySecond?.Invoke() },
+                { 60, () => OnOneMinute?.Invoke() },
+                { 300, () => OnFiveMinute?.Invoke() }
+            };
+        }
+
+        private void Update()
+        {
+            Display();
+            PassageOfTime();
+        }
+
+        // ==========================================
+        // Public Methods
+        // ==========================================
+
+        // ==========================================
+        // Private Methods
+        // ==========================================
+
+        /// <summary>
+        /// ã‚¿ã‚¤ãƒãƒ¼ã®æ™‚é–“ã®è¡¨ç¤º
+        /// </summary>
+        private void Display()
+        {
+            int minutes = (int)(_limitTimer / 60);
+            int seconds = (int)(_limitTimer % 60);
+
+            //è¡¨ç¤º
+            _timerText.text = $"{minutes:00} : {seconds:00}";
+        }
+
+        /// <summary>
+        /// æ™‚é–“çµŒé
+        /// </summary>
+        private void PassageOfTime()
+        {
+            _prevLimitTimer = _limitTimer;
+            _limitTimer = Mathf.Max(0f, _limitTimer - Time.deltaTime);
+
+            foreach (var timerEvent in _timerEvents)
+            {
+                if (_limitTimer <= timerEvent.Key && timerEvent.Key < _prevLimitTimer)
+                {
+                    timerEvent.Value?.Invoke();
+                }
             }
         }
     }

@@ -8,7 +8,9 @@ namespace Bomb.Hud
     /// 投擲のチャージ量とクールタイムをリング状のゲージで表示する。
     /// 下地のグレーは常に出し、その上に黄緑を Radial360 で重ねるので、
     /// 「緑が出ている＝チャージ中」が一目で分かる。
+    /// 投擲キーを押している間だけ、アルファをフェードさせて出し入れする。
     /// </summary>
+    [RequireComponent(typeof(CanvasGroup))]
     [DisallowMultipleComponent]
     public class ChargeGaugeUI : MonoBehaviour
     {
@@ -27,14 +29,23 @@ namespace Bomb.Hud
         private Image _fill;
 
         [Header("Follow")]
-        [SerializeField, Tooltip("プレイヤーの頭上に追従させる。切るとその場に固定される")]
+        [SerializeField, Tooltip("プレイヤーに追従させる。切るとその場に固定される")]
         private bool _followTarget = true;
 
-        [SerializeField, Tooltip("追従先からのワールド座標オフセット (m)")]
-        private Vector3 _worldOffset = new Vector3(0f, 2.6f, 0f);
+        [SerializeField, Tooltip("プレイヤーから見たオフセット (m)。x=右 / y=上 / z=前。後ろ右斜め上は x+ y+ z-")]
+        private Vector3 _localOffset = new Vector3(1.1f, 2.4f, -1.2f);
 
         [SerializeField, Tooltip("画面座標への変換に使うカメラ。未設定なら Camera.main")]
         private Camera _camera;
+
+        [Header("Fade")]
+        [SerializeField, Tooltip("表示しきるまでの時間 (秒)")]
+        [Range(0f, 2f)]
+        private float _fadeInDuration = 0.2f;
+
+        [SerializeField, Tooltip("消えきるまでの時間 (秒)")]
+        [Range(0f, 2f)]
+        private float _fadeOutDuration = 0.5f;
 
         [Header("Colors")]
         [SerializeField, Tooltip("チャージ中の色")]
@@ -65,6 +76,8 @@ namespace Bomb.Hud
         private const float FULL_CHARGE_THRESHOLD = 0.999f;
 
         private RectTransform _rectTransform;
+        private CanvasGroup _canvasGroup;
+        private PlayerInputReader _inputReader;
 
         // ==========================================
         // Unity Messages
@@ -73,6 +86,18 @@ namespace Bomb.Hud
         private void Awake()
         {
             _rectTransform = (RectTransform)transform;
+
+            _canvasGroup = GetComponent<CanvasGroup>();
+
+            if (_canvasGroup == null)
+            {
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+
+            // 飾りなので、クリックを横取りしないようにしておく。
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
+            _canvasGroup.alpha = 0f;
 
             if (_camera == null)
             {
@@ -85,6 +110,10 @@ namespace Bomb.Hud
                 enabled = false;
                 return;
             }
+
+            // 押しっぱなし判定は入力側から取る。クールタイム中は PlayerThrower の
+            // IsCharging が立たないため、それだけではクールタイムを見せられない。
+            _inputReader = _thrower.GetComponent<PlayerInputReader>();
 
             _fill.type = Image.Type.Filled;
             _fill.fillMethod = Image.FillMethod.Radial360;
@@ -108,12 +137,14 @@ namespace Bomb.Hud
 
         private void LateUpdate()
         {
-            if (!_followTarget)
+            // カメラの背後に回ると座標が反転して画面の逆側に出るので、その間は即座に隠す。
+            if (_followTarget && !TryUpdateScreenPosition())
             {
+                _canvasGroup.alpha = 0f;
                 return;
             }
 
-            FollowTarget();
+            UpdateFade();
         }
 
         // ==========================================
@@ -165,31 +196,69 @@ namespace Bomb.Hud
             _rectTransform.localScale = Vector3.one;
         }
 
-        private void FollowTarget()
+        /// <summary>投擲キーを押している間と、クールタイム中は表示する。</summary>
+        private bool ShouldShow()
+        {
+            // クールタイム中は押していなくても出す。待ち時間が見えないと次を投げる判断ができない。
+            if (!_thrower.CanThrow)
+            {
+                return true;
+            }
+
+            if (_inputReader != null)
+            {
+                return _inputReader.ThrowHeld;
+            }
+
+            // 入力側が取れない構成では、せめてチャージ中だけは出す。
+            return _thrower.IsCharging;
+        }
+
+        private void UpdateFade()
+        {
+            float target = ShouldShow() ? 1f : 0f;
+
+            if (Mathf.Approximately(_canvasGroup.alpha, target))
+            {
+                return;
+            }
+
+            float duration = target > _canvasGroup.alpha ? _fadeInDuration : _fadeOutDuration;
+
+            if (duration <= 0f)
+            {
+                _canvasGroup.alpha = target;
+                return;
+            }
+
+            _canvasGroup.alpha = Mathf.MoveTowards(_canvasGroup.alpha, target, Time.deltaTime / duration);
+        }
+
+        /// <summary>
+        /// プレイヤー基準のオフセットを画面座標に変換して位置を更新する。
+        /// カメラの背後に回っていて位置が決まらない場合は false。
+        /// </summary>
+        private bool TryUpdateScreenPosition()
         {
             if (_camera == null)
             {
-                return;
+                return false;
             }
 
-            Vector3 worldPosition = _thrower.transform.position + _worldOffset;
+            Transform target = _thrower.transform;
+
+            // プレイヤーの回転を掛けることで、視点を回しても後ろ右斜め上の位置関係を保つ。
+            Vector3 worldPosition = target.position + target.rotation * _localOffset;
             Vector3 screenPosition = _camera.WorldToScreenPoint(worldPosition);
 
-            // カメラの背後に回ると座標が反転して画面の逆側に出るので、その間は隠す。
-            bool isBehindCamera = screenPosition.z <= 0f;
-            if (_background.enabled == isBehindCamera)
+            if (screenPosition.z <= 0f)
             {
-                _background.enabled = !isBehindCamera;
-                _fill.enabled = !isBehindCamera;
-            }
-
-            if (isBehindCamera)
-            {
-                return;
+                return false;
             }
 
             screenPosition.z = 0f;
             _rectTransform.position = screenPosition;
+            return true;
         }
     }
 }

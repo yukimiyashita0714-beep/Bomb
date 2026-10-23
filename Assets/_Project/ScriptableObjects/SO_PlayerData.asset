@@ -16,7 +16,7 @@ MonoBehaviour:
   _dashSpeed: 11
   _turnSpeedDegrees: 720
   _gravity: -20
-  _throwCooldown: 1.5
+  _throwCooldown: 1
   _throwAngleDegrees: 30
   _throwOffset: {x: 0, y: 0.8, z: 0.6}
   _fixedThrowImpulse: 4.5

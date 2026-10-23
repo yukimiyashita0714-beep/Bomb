@@ -1,127 +1,130 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HpUI : MonoBehaviour
+namespace Bomb.UI
 {
-    // ==========================================
-    // Serialize Fields
-    // ==========================================
-
-    [SerializeField] private Animator _animator;
-
-    [SerializeField] private Image _hpValue;
-
-    [SerializeField, Tooltip("Å‘å‘Ì—Í")] private float _maxHp;
-    [Space(10)]
-    [SerializeField, Tooltip("‰ñ•œ‚Ü‚Å‚ÌŠÔ")] private float _recoveryCooltime;
-    [SerializeField, Tooltip("‰ñ•œ—Ê")] private float _recoveryValue;
-    [SerializeField, Tooltip("‰ñ•œŠÔŠÔŠu")] private float _recoveryTime;
-
-    // ==========================================
-    // Private Fields
-    // ==========================================
-
-    private float _hp;
-
-    private float _recoveryCooltimer;
-    private float _recoveryTimer;
-
-    // ==========================================
-    // Properties
-    // ==========================================
-
-    // ==========================================
-    // Events
-    // ==========================================
-
-    // ==========================================
-    // Unity Messages
-    // ==========================================
-
-    private void Start()
+    public class HpUI : MonoBehaviour
     {
-        _hp = _maxHp;
-    }
+        // ==========================================
+        // Serialize Fields
+        // ==========================================
 
-    private void Update()
-    {
-        HpRecovery();
-        Display();
-    }
+        [SerializeField] private Animator _animator;
 
-    // ==========================================
-    // Public Methods
-    // ==========================================
+        [SerializeField] private Image _hpValue;
 
-    public void Recovery(float value)
-    {
-        if (_maxHp == _hp)
-        {
-            return;
-        }
+        [SerializeField, Tooltip("æœ€å¤§ä½“åŠ›")] private float _maxHp;
+        [Space(10)]
+        [SerializeField, Tooltip("å›å¾©ã¾ã§ã®æ™‚é–“")] private float _recoveryCooltime;
+        [SerializeField, Tooltip("å›å¾©é‡")] private float _recoveryValue;
+        [SerializeField, Tooltip("å›å¾©æ™‚é–“é–“éš”")] private float _recoveryTime;
 
-        _hp += value;
+        // ==========================================
+        // Private Fields
+        // ==========================================
 
-        if (_maxHp <= _hp)
+        private float _hp;
+
+        private float _recoveryCooltimer;
+        private float _recoveryTimer;
+
+        // ==========================================
+        // Properties
+        // ==========================================
+
+        // ==========================================
+        // Events
+        // ==========================================
+
+        // ==========================================
+        // Unity Messages
+        // ==========================================
+
+        private void Start()
         {
             _hp = _maxHp;
         }
 
-        _animator.SetTrigger("Recovery");
-    }
-
-    public void Damage(float value)
-    {
-        _hp -= value;
-
-        if (_hp <= 0)
+        private void Update()
         {
-            _hp = 0;
+            HpRecovery();
+            Display();
         }
 
-        //Ä¶‚Ü‚Å‚ÌƒN[ƒ‹ƒ^ƒCƒ€ƒŠƒZƒbƒg
-        _recoveryCooltimer = _recoveryCooltime;
+        // ==========================================
+        // Public Methods
+        // ==========================================
 
-        _animator.SetTrigger("Damage");
-    }
-
-    // ==========================================
-    // Private Methods
-    // ==========================================
-
-    private void Display()
-    {
-        _hpValue.fillAmount = _hp / _maxHp;
-    }
-
-    private void HpRecovery()
-    {
-        //ƒN[ƒ‹ƒ^ƒCƒ€
-        if (0 < _recoveryCooltimer)
+        public void Recovery(float value)
         {
-            _recoveryCooltimer -= Time.deltaTime;
-            return;
+            if (_maxHp == _hp)
+            {
+                return;
+            }
+
+            _hp += value;
+
+            if (_maxHp <= _hp)
+            {
+                _hp = _maxHp;
+            }
+
+            _animator.SetTrigger("Recovery");
         }
 
-        //ŠÔŠu
-        if (0 < _recoveryTimer)
+        public void Damage(float value)
         {
-            _recoveryTimer -= Time.deltaTime;
-            return;
+            _hp -= value;
+
+            if (_hp <= 0)
+            {
+                _hp = 0;
+            }
+
+            //å†ç”Ÿã¾ã§ã®ã‚¯ãƒ¼ãƒ«ã‚¿ã‚¤ãƒ ãƒªã‚»ãƒƒãƒˆ
+            _recoveryCooltimer = _recoveryCooltime;
+
+            _animator.SetTrigger("Damage");
         }
 
-        //Ä¶‚Ü‚Å‚ÌŠÔŠuƒŠƒZƒbƒg
-        _recoveryTimer = _recoveryTime;
-        Recovery(_recoveryValue);
-    }
+        // ==========================================
+        // Private Methods
+        // ==========================================
 
-    // ==========================================
-    // Debug
-    // ==========================================
+        private void Display()
+        {
+            _hpValue.fillAmount = _hp / _maxHp;
+        }
 
-    [ContextMenu("Damage10")]
-    private void DamageDebug()
-    {
-        Damage(10);
+        private void HpRecovery()
+        {
+            //ã‚¯ãƒ¼ãƒ«ã‚¿ã‚¤ãƒ 
+            if (0 < _recoveryCooltimer)
+            {
+                _recoveryCooltimer -= Time.deltaTime;
+                return;
+            }
+
+            //é–“éš”
+            if (0 < _recoveryTimer)
+            {
+                _recoveryTimer -= Time.deltaTime;
+                return;
+            }
+
+            //å†ç”Ÿã¾ã§ã®é–“éš”ãƒªã‚»ãƒƒãƒˆ
+            _recoveryTimer = _recoveryTime;
+            Recovery(_recoveryValue);
+        }
+
+        // ==========================================
+        // Debug
+        // ==========================================
+
+        [ContextMenu("Damage10")]
+        private void DamageDebug()
+        {
+            Damage(10);
+        }
     }
 }

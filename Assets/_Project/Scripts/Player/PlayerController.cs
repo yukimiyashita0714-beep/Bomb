@@ -20,7 +20,7 @@ namespace Bomb.Player
         private PlayerData _data;
 
         [Header("References")]
-        [SerializeField, Tooltip("移動の基準にするカメラ。未設定ならワールド軸基準で動く")]
+        [SerializeField, Tooltip("移動と向きの基準にするカメラ。未設定ならワールド軸基準で動く")]
         private Transform _cameraTransform;
 
         // ==========================================
@@ -73,7 +73,7 @@ namespace Bomb.Player
             Vector3 moveDirection = CalculateMoveDirection(_inputReader.MoveInput);
             _currentSpeed = CalculateSpeed(moveDirection);
 
-            RotateTowards(moveDirection);
+            FaceCameraYaw(moveDirection);
             ApplyGravity();
 
             Vector3 velocity = moveDirection * _currentSpeed;
@@ -85,6 +85,36 @@ namespace Bomb.Player
         // Private Methods
         // ==========================================
 
+        /// <summary>
+        /// カメラの前方を水平面に投影して返す。
+        /// カメラ未設定や真上／真下向きで方向が決まらない場合は false。
+        /// </summary>
+        private bool TryGetCameraForward(out Vector3 forward)
+        {
+            forward = Vector3.zero;
+
+            if (_cameraTransform == null)
+            {
+                return false;
+            }
+
+            Vector3 flattened = Vector3.ProjectOnPlane(_cameraTransform.forward, Vector3.up);
+
+            // 真下／真上を向いたカメラでは forward が潰れるため、up 側を前方として代用する。
+            if (flattened.sqrMagnitude < INPUT_THRESHOLD_SQR)
+            {
+                flattened = Vector3.ProjectOnPlane(_cameraTransform.up, Vector3.up);
+            }
+
+            if (flattened.sqrMagnitude < INPUT_THRESHOLD_SQR)
+            {
+                return false;
+            }
+
+            forward = flattened.normalized;
+            return true;
+        }
+
         private Vector3 CalculateMoveDirection(Vector2 input)
         {
             if (input.sqrMagnitude < INPUT_THRESHOLD_SQR)
@@ -92,20 +122,11 @@ namespace Bomb.Player
                 return Vector3.zero;
             }
 
-            if (_cameraTransform == null)
+            if (!TryGetCameraForward(out Vector3 forward))
             {
                 return new Vector3(input.x, 0f, input.y).normalized;
             }
 
-            Vector3 forward = Vector3.ProjectOnPlane(_cameraTransform.forward, Vector3.up);
-
-            // 真下／真上を向いたカメラでは forward が潰れるため、up 側を前方として代用する。
-            if (forward.sqrMagnitude < INPUT_THRESHOLD_SQR)
-            {
-                forward = Vector3.ProjectOnPlane(_cameraTransform.up, Vector3.up);
-            }
-
-            forward.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, forward);
 
             return (forward * input.y + right * input.x).normalized;
@@ -119,6 +140,24 @@ namespace Bomb.Player
             }
 
             return _inputReader.IsDashing ? _data.DashSpeed : _data.WalkSpeed;
+        }
+
+        /// <summary>
+        /// カメラの向きに正面を合わせる。投擲方向は transform.forward から決まるため、
+        /// ここを即座に追従させることで「見ている奥に投げる」が保証される。
+        /// </summary>
+        private void FaceCameraYaw(Vector3 moveDirection)
+        {
+            if (!TryGetCameraForward(out Vector3 forward))
+            {
+                // カメラが無い環境では、従来どおり移動方向を向く。
+                RotateTowards(moveDirection);
+                return;
+            }
+
+            // 補間を挟まないのは、振り向き中に投げたときだけ狙いがズレるのを避けるため。
+            // カメラ側が既に減衰を持っているので、見た目はこれで十分滑らかになる。
+            transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
         }
 
         private void RotateTowards(Vector3 direction)

@@ -605,17 +605,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>operate</b>
-
-
-    WASD     move
-
-    Shift        dash
-
-    F           
-    Charge with F and throw.
-
-    R           UI close      '
+  m_text: "<b>operate</b>\n\nWASD     move\nShift        dash\nF            Charge
+    with F and throw.\nR           UI close      \nQ           Reload scene"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
@@ -1783,6 +1774,7 @@ GameObject:
   m_Component:
   - component: {fileID: 685740638}
   - component: {fileID: 685740639}
+  - component: {fileID: 685740640}
   m_Layer: 0
   m_Name: ChargeGauge
   m_TagString: Untagged
@@ -1827,14 +1819,28 @@ MonoBehaviour:
   _background: {fileID: 595475460}
   _fill: {fileID: 1802645660}
   _followTarget: 1
-  _worldOffset: {x: 0, y: 2.6, z: 0}
+  _localOffset: {x: 1.1, y: 2.4, z: -1.2}
   _camera: {fileID: 801952448}
+  _fadeInDuration: 0.2
+  _fadeOutDuration: 0.5
   _chargingColor: {r: 1, g: 1, b: 1, a: 1}
   _fullChargeColor: {r: 1, g: 0.95, b: 0.3, a: 1}
   _cooldownColor: {r: 1, g: 1, b: 1, a: 0.25}
   _idleBackgroundColor: {r: 1, g: 1, b: 1, a: 0.8}
   _activeBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
   _fullChargeScale: 1.25
+--- !u!225 &685740640
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 685740637}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &741199240
 GameObject:
   m_ObjectHideFlags: 0
@@ -4531,13 +4537,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2024086338}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09853764, y: -0.00000003315785, z: 0.0000000032832748, w: 0.99513334}
+  m_LocalRotation: {x: 0.09853762, y: 0.000000033157853, z: -0.0000000032832743, w: 0.99513334}
   m_LocalPosition: {x: 0, y: 7, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1781858416}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 11, y: 0, z: 0}
 --- !u!114 &2024086340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4560,7 +4566,7 @@ MonoBehaviour:
       Enabled: 1
       Input:
         InputAction: {fileID: -5630151704836100654, guid: 1d6e640e716dc4ff6989b73d02023f2b, type: 3}
-        Gain: 40
+        Gain: 5
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
@@ -4571,7 +4577,7 @@ MonoBehaviour:
       Enabled: 1
       Input:
         InputAction: {fileID: -5630151704836100654, guid: 1d6e640e716dc4ff6989b73d02023f2b, type: 3}
-        Gain: -40
+        Gain: -2
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
