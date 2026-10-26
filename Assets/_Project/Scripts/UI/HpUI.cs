@@ -17,7 +17,7 @@ namespace Bomb.UI
         [Space(10)]
         [SerializeField, Tooltip("回復までの時間")] private float _recoveryCooltime;
         [SerializeField, Tooltip("回復量")] private float _recoveryValue;
-        [SerializeField, Tooltip("回復時間間隔")] private float _recoveryTime;
+        [SerializeField, Tooltip("回復時間間隔")] private float _recoveryInterval;
 
         // ==========================================
         // Private Fields
@@ -113,7 +113,7 @@ namespace Bomb.UI
             }
 
             //再生までの間隔リセット
-            _recoveryTimer = _recoveryTime;
+            _recoveryTimer = _recoveryInterval;
             Recovery(_recoveryValue);
         }
 
