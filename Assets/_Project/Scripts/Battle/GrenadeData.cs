@@ -34,6 +34,13 @@ namespace Bomb.Battle
         [SerializeField, Tooltip("爆風が影響する Layer")]
         private LayerMask _affectedLayers = ~0;
 
+        [Header("Occlusion")]
+        [SerializeField, Tooltip("爆風をさえぎる Layer。壁や地形が入っている Layer を選ぶ")]
+        private LayerMask _occluderLayers = ~0;
+
+        [SerializeField, Tooltip("動くブロック (Rigidbody 付き) も爆風をさえぎる。OFF なら壁などの動かない物だけがさえぎる")]
+        private bool _isBlockedByRigidbodies = false;
+
         [Header("Damage")]
         [SerializeField, Tooltip("爆心で受けるダメージ。投げた本人も範囲内なら受ける")]
         [Range(0f, 100f)]
@@ -66,6 +73,12 @@ namespace Bomb.Battle
 
         /// <summary>爆風が影響する Layer。</summary>
         public LayerMask AffectedLayers => _affectedLayers;
+
+        /// <summary>爆風をさえぎる Layer。</summary>
+        public LayerMask OccluderLayers => _occluderLayers;
+
+        /// <summary>Rigidbody 付きの動く物も爆風をさえぎるなら true。</summary>
+        public bool IsBlockedByRigidbodies => _isBlockedByRigidbodies;
 
         /// <summary>爆心で受けるダメージ。</summary>
         public float MaxDamage => _maxDamage;

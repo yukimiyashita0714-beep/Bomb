@@ -19,6 +19,10 @@ MonoBehaviour:
   _affectedLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  _occluderLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _isBlockedByRigidbodies: 0
   _maxDamage: 8
   _edgeDamageRatio: 0.3
   _destroyDelay: 0
