@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraData
   _cameraGainX: 30
   _cameraGainY: -30
-  _targetPos: {x: 1, y: 1, z: -2}
+  _cameraPos: {x: -0.7, y: 0.6, z: 0}
+  _targetPos: {x: 0.6, y: 0.8, z: 0}
+  _cameraRadius: 3
