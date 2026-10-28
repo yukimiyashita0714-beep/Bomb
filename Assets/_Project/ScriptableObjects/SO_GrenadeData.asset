@@ -19,4 +19,6 @@ MonoBehaviour:
   _affectedLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  _maxDamage: 8
+  _edgeDamageRatio: 0.3
   _destroyDelay: 0

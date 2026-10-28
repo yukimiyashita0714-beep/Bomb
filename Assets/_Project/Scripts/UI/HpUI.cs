@@ -1,3 +1,4 @@
+using Bomb.Player;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,9 @@ namespace Bomb.UI
         [SerializeField] private Animator _animator;
 
         [SerializeField] private Image _hpValue;
+
+        [SerializeField, Tooltip("ダメージを受け取るプレイヤー。爆風の自傷ダメージもここから届く")]
+        private PlayerDamageReceiver _damageReceiver;
 
         [SerializeField, Tooltip("最大体力")] private float _maxHp;
         [Space(10)]
@@ -40,6 +44,14 @@ namespace Bomb.UI
         // Unity Messages
         // ==========================================
 
+        private void OnEnable()
+        {
+            if (_damageReceiver != null)
+            {
+                _damageReceiver.OnDamaged += Damage;
+            }
+        }
+
         private void Start()
         {
             _hp = _maxHp;
@@ -49,6 +61,14 @@ namespace Bomb.UI
         {
             HpRecovery();
             Display();
+        }
+
+        private void OnDisable()
+        {
+            if (_damageReceiver != null)
+            {
+                _damageReceiver.OnDamaged -= Damage;
+            }
         }
 
         // ==========================================

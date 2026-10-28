@@ -904,6 +904,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HpUI
   _animator: {fileID: 317010663}
   _hpValue: {fileID: 163239815}
+  _damageReceiver: {fileID: 1842946635548509441}
   _maxHp: 20
   _recoveryCooltime: 4
   _recoveryValue: 1
@@ -4851,6 +4852,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdaa053d73f5cf548891761d6b53539b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerThrower
+--- !u!114 &1842946635548509441 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5512837400911827301, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
+  m_PrefabInstance: {fileID: 1842946635548509438}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ad516f638ce42d597c9e75c7f2223a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerDamageReceiver
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
