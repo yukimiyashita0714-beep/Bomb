@@ -8,8 +8,10 @@ public class CameraDirector : MonoBehaviour
     // ==========================================
 
     [SerializeField] private CameraData _data;
-    [SerializeField] private CinemachineThirdPersonFollow _thirdPersonFollow;
+    [SerializeField] private CinemachineOrbitalFollow _orbitalFollow;
     [SerializeField] private CinemachineInputAxisController _inputAxisController;
+
+    [SerializeField] private Transform _cameraTarget;
 
     // ==========================================
     // Unity Messages
@@ -30,7 +32,10 @@ public class CameraDirector : MonoBehaviour
 
     private void CameraDataUpdate()
     {
-        _thirdPersonFollow.ShoulderOffset = _data.TargetPos;
+        _orbitalFollow.TargetOffset = _data.CameraPos;
+        _orbitalFollow.Radius = _data.CameraRadius;
+
+        _cameraTarget.localPosition = _data.TargetPos;
 
         _inputAxisController.Controllers[0].Input.Gain = _data.CameraGainX;
         _inputAxisController.Controllers[1].Input.Gain = _data.CameraGainY;
