@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
+using Bomb.Core;
 using UnityEngine;
 
 namespace Bomb.Battle
 {
     /// <summary>
-    /// 投げられたグレネード。信管を数えて爆発し、周囲の Rigidbody を吹き飛ばす。
+    /// 投げられたグレネード。信管を数えて爆発し、周囲の Rigidbody を吹き飛ばして
+    /// <see cref="IDamageable"/> にダメージを与える。投げた本人も例外にしない。
     /// 投げる力は <see cref="Throw"/> で外から与える。自分では飛び方を決めない。
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
@@ -26,6 +29,12 @@ namespace Bomb.Battle
         private const int MAX_OVERLAP_COUNT = 64;
 
         private static readonly Collider[] OverlapBuffer = new Collider[MAX_OVERLAP_COUNT];
+
+        /// <summary>
+        /// 1回の爆発で同じ相手に二重でダメージを入れないための記録。
+        /// Collider を複数持つ相手は OverlapSphere に何度も拾われる。
+        /// </summary>
+        private static readonly HashSet<IDamageable> DamagedBuffer = new HashSet<IDamageable>();
 
         private Rigidbody _rigidbody;
         private float _fuseTimer;
@@ -134,9 +143,15 @@ namespace Bomb.Battle
                 _data.AffectedLayers,
                 QueryTriggerInteraction.Ignore);
 
+            DamagedBuffer.Clear();
+
             for (int i = 0; i < hitCount; i++)
             {
-                Rigidbody body = OverlapBuffer[i].attachedRigidbody;
+                Collider hit = OverlapBuffer[i];
+
+                ApplyDamage(hit, center);
+
+                Rigidbody body = hit.attachedRigidbody;
 
                 // 自分自身と、Rigidbody を持たない地形は吹き飛ばせない。
                 if (body == null || body == _rigidbody)
@@ -152,9 +167,34 @@ namespace Bomb.Battle
                     ForceMode.Impulse);
             }
 
+            DamagedBuffer.Clear();
+
             OnExploded?.Invoke(center, radius);
 
             Destroy(gameObject, _data.DestroyDelay);
+        }
+
+        private void ApplyDamage(Collider hit, Vector3 center)
+        {
+            // Collider が子オブジェクトに付いている相手もいるので、親までさかのぼって探す。
+            IDamageable damageable = hit.GetComponentInParent<IDamageable>();
+
+            if (damageable == null || !DamagedBuffer.Add(damageable))
+            {
+                return;
+            }
+
+            // 中心点だと背の高い相手ほど遠く扱われるので、爆心に一番近い表面までの距離で測る。
+            // Collider.ClosestPoint は非凸の MeshCollider で使えないため、全種類で動く Bounds で近似する。
+            float distanceMeters = Vector3.Distance(center, hit.bounds.ClosestPoint(center));
+            float damage = _data.GetDamageAtDistance(distanceMeters);
+
+            if (damage <= 0f)
+            {
+                return;
+            }
+
+            damageable.TakeDamage(damage);
         }
     }
 }

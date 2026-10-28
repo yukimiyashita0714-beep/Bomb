@@ -1,7 +1,9 @@
 {
     "name": "Bomb.Battle",
     "rootNamespace": "Bomb.Battle",
-    "references": [],
+    "references": [
+        "Bomb.Core"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

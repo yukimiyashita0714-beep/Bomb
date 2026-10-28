@@ -2,6 +2,7 @@
     "name": "Bomb.Player",
     "rootNamespace": "Bomb.Player",
     "references": [
+        "Bomb.Core",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

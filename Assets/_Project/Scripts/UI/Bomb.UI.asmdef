@@ -2,6 +2,7 @@
     "name": "Bomb.UI",
     "rootNamespace": "Bomb.UI",
     "references": [
+        "Bomb.Player",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],
