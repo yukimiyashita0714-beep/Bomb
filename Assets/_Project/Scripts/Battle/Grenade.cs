@@ -8,6 +8,7 @@ namespace Bomb.Battle
     /// <summary>
     /// 投げられたグレネード。信管を数えて爆発し、周囲の Rigidbody を吹き飛ばして
     /// <see cref="IDamageable"/> にダメージを与える。投げた本人も例外にしない。
+    /// 壁の向こう側には爆風が届かない。
     /// 投げる力は <see cref="Throw"/> で外から与える。自分では飛び方を決めない。
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
@@ -28,7 +29,12 @@ namespace Bomb.Battle
         /// <summary>OverlapSphere が一度に拾う上限。毎回配列を確保しないため使い回す。</summary>
         private const int MAX_OVERLAP_COUNT = 64;
 
+        /// <summary>遮蔽判定の Raycast が一度に拾う上限。</summary>
+        private const int MAX_OCCLUSION_HIT_COUNT = 16;
+
         private static readonly Collider[] OverlapBuffer = new Collider[MAX_OVERLAP_COUNT];
+
+        private static readonly RaycastHit[] OcclusionBuffer = new RaycastHit[MAX_OCCLUSION_HIT_COUNT];
 
         /// <summary>
         /// 1回の爆発で同じ相手に二重でダメージを入れないための記録。
@@ -149,6 +155,11 @@ namespace Bomb.Battle
             {
                 Collider hit = OverlapBuffer[i];
 
+                if (!IsExposedToBlast(hit, center))
+                {
+                    continue;
+                }
+
                 ApplyDamage(hit, center);
 
                 Rigidbody body = hit.attachedRigidbody;
@@ -172,6 +183,73 @@ namespace Bomb.Battle
             OnExploded?.Invoke(center, radius);
 
             Destroy(gameObject, _data.DestroyDelay);
+        }
+
+        /// <summary>
+        /// 爆心から相手が見えていれば true。壁越しに倒れるのを防ぐ。
+        /// 一番近い表面と中心の2点を試し、どちらかが通れば当てる。
+        /// 1点だけだと、床すれすれの線が地面にかすって物陰扱いになることがある。
+        /// </summary>
+        private bool IsExposedToBlast(Collider target, Vector3 center)
+        {
+            Bounds bounds = target.bounds;
+
+            return HasClearLine(center, bounds.ClosestPoint(center), target)
+                || HasClearLine(center, bounds.center, target);
+        }
+
+        private bool HasClearLine(Vector3 from, Vector3 to, Collider target)
+        {
+            Vector3 offset = to - from;
+            float distance = offset.magnitude;
+
+            // 爆心が相手に食い込んでいるなら、さえぎる物は無い。
+            if (distance <= Mathf.Epsilon)
+            {
+                return true;
+            }
+
+            int hitCount = Physics.RaycastNonAlloc(
+                from,
+                offset / distance,
+                OcclusionBuffer,
+                distance,
+                _data.OccluderLayers,
+                QueryTriggerInteraction.Ignore);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                if (IsOccluder(OcclusionBuffer[i].collider, target))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsOccluder(Collider candidate, Collider target)
+        {
+            if (candidate == target)
+            {
+                return false;
+            }
+
+            Rigidbody body = candidate.attachedRigidbody;
+
+            if (body == null)
+            {
+                return true;
+            }
+
+            // 自分自身と、相手の別パーツは壁ではない。
+            if (body == _rigidbody || body == target.attachedRigidbody)
+            {
+                return false;
+            }
+
+            // Kinematic は動かない壁として扱う。
+            return body.isKinematic || _data.IsBlockedByRigidbodies;
         }
 
         private void ApplyDamage(Collider hit, Vector3 center)
