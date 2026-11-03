@@ -41,6 +41,13 @@ namespace Bomb.Battle
         [SerializeField, Tooltip("動くブロック (Rigidbody 付き) も爆風をさえぎる。OFF なら壁などの動かない物だけがさえぎる")]
         private bool _isBlockedByRigidbodies = false;
 
+        [Header("Other Grenades")]
+        [SerializeField, Tooltip("ほかのグレネードの爆風で吹き飛ぶ。OFF なら爆風は他のグレネードを素通りする")]
+        private bool _isPushedByOtherGrenades = false;
+
+        [SerializeField, Tooltip("グレネード同士がぶつかる。OFF ならすり抜ける")]
+        private bool _collidesWithOtherGrenades = false;
+
         [Header("Damage")]
         [SerializeField, Tooltip("爆心で受けるダメージ。投げた本人も範囲内なら受ける")]
         [Range(0f, 100f)]
@@ -79,6 +86,12 @@ namespace Bomb.Battle
 
         /// <summary>Rigidbody 付きの動く物も爆風をさえぎるなら true。</summary>
         public bool IsBlockedByRigidbodies => _isBlockedByRigidbodies;
+
+        /// <summary>ほかのグレネードの爆風で吹き飛ぶなら true。</summary>
+        public bool IsPushedByOtherGrenades => _isPushedByOtherGrenades;
+
+        /// <summary>グレネード同士がぶつかるなら true。</summary>
+        public bool CollidesWithOtherGrenades => _collidesWithOtherGrenades;
 
         /// <summary>爆心で受けるダメージ。</summary>
         public float MaxDamage => _maxDamage;

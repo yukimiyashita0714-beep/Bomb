@@ -9,6 +9,7 @@ namespace Bomb.Battle
     /// 投げられたグレネード。信管を数えて爆発し、周囲の Rigidbody を吹き飛ばして
     /// <see cref="IDamageable"/> にダメージを与える。投げた本人も例外にしない。
     /// 壁の向こう側には爆風が届かない。
+    /// ほかのグレネードには干渉しない (爆風で飛ばさない・ぶつからない・爆風をさえぎらない)。
     /// 投げる力は <see cref="Throw"/> で外から与える。自分では飛び方を決めない。
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
@@ -42,7 +43,11 @@ namespace Bomb.Battle
         /// </summary>
         private static readonly HashSet<IDamageable> DamagedBuffer = new HashSet<IDamageable>();
 
+        /// <summary>シーンに出ているグレネード。生成時に既存のものとの衝突を切るために持つ。</summary>
+        private static readonly List<Grenade> ActiveGrenades = new List<Grenade>();
+
         private Rigidbody _rigidbody;
+        private Collider[] _colliders;
         private float _fuseTimer;
         private bool _hasExploded;
 
@@ -81,6 +86,7 @@ namespace Bomb.Battle
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
+            _colliders = GetComponentsInChildren<Collider>(true);
 
             if (_data == null)
             {
@@ -90,6 +96,29 @@ namespace Bomb.Battle
             }
 
             _fuseTimer = _data.FuseSeconds;
+        }
+
+        private void OnEnable()
+        {
+            if (_data == null)
+            {
+                return;
+            }
+
+            if (!_data.CollidesWithOtherGrenades)
+            {
+                for (int i = 0; i < ActiveGrenades.Count; i++)
+                {
+                    IgnoreCollisionWith(ActiveGrenades[i]);
+                }
+            }
+
+            ActiveGrenades.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            ActiveGrenades.Remove(this);
         }
 
         private void Update()
@@ -154,6 +183,20 @@ namespace Bomb.Battle
             for (int i = 0; i < hitCount; i++)
             {
                 Collider hit = OverlapBuffer[i];
+                Rigidbody body = hit.attachedRigidbody;
+
+                // 自分自身は爆風の対象にしない。
+                if (body != null && body == _rigidbody)
+                {
+                    continue;
+                }
+
+                // ほかのグレネードは、設定で許したときだけ吹き飛ばす。
+                // 同時に投げた2個が互いを弾き合って、狙った場所からずれるのを防ぐ。
+                if (IsGrenade(body) && !_data.IsPushedByOtherGrenades)
+                {
+                    continue;
+                }
 
                 if (!IsExposedToBlast(hit, center))
                 {
@@ -162,10 +205,8 @@ namespace Bomb.Battle
 
                 ApplyDamage(hit, center);
 
-                Rigidbody body = hit.attachedRigidbody;
-
-                // 自分自身と、Rigidbody を持たない地形は吹き飛ばせない。
-                if (body == null || body == _rigidbody)
+                // Rigidbody を持たない地形は吹き飛ばせない。
+                if (body == null)
                 {
                     continue;
                 }
@@ -248,8 +289,35 @@ namespace Bomb.Battle
                 return false;
             }
 
+            // ほかのグレネードは小さく、盾にすると不自然なので壁として扱わない。
+            if (IsGrenade(body))
+            {
+                return false;
+            }
+
             // Kinematic は動かない壁として扱う。
             return body.isKinematic || _data.IsBlockedByRigidbodies;
+        }
+
+        private static bool IsGrenade(Rigidbody body)
+        {
+            return body != null && body.TryGetComponent(out Grenade _);
+        }
+
+        private void IgnoreCollisionWith(Grenade other)
+        {
+            if (other == null || other == this)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _colliders.Length; i++)
+            {
+                for (int j = 0; j < other._colliders.Length; j++)
+                {
+                    Physics.IgnoreCollision(_colliders[i], other._colliders[j]);
+                }
+            }
         }
 
         private void ApplyDamage(Collider hit, Vector3 center)
