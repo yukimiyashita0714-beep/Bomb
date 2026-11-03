@@ -74,7 +74,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee4200e98540dea42af019aec43f4b5a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerInputReader
+  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerInputReceiver
 --- !u!114 &107390997530308502
 MonoBehaviour:
   m_ObjectHideFlags: 0

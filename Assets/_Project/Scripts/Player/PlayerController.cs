@@ -7,7 +7,7 @@ namespace Bomb.Player
     /// 速度などの数値は <see cref="PlayerData"/> から読む。
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
-    [RequireComponent(typeof(PlayerInputReader))]
+    [RequireComponent(typeof(PlayerInputReceiver))]
     [DisallowMultipleComponent]
     public class PlayerController : MonoBehaviour
     {
@@ -34,7 +34,7 @@ namespace Bomb.Player
         private const float GROUND_STICK_VELOCITY = -2f;
 
         private CharacterController _characterController;
-        private PlayerInputReader _inputReader;
+        private PlayerInputReceiver _inputReceiver;
 
         private float _verticalVelocity;
         private float _currentSpeed;
@@ -59,7 +59,7 @@ namespace Bomb.Player
         private void Awake()
         {
             _characterController = GetComponent<CharacterController>();
-            _inputReader = GetComponent<PlayerInputReader>();
+            _inputReceiver = GetComponent<PlayerInputReceiver>();
 
             if (_data == null)
             {
@@ -70,7 +70,7 @@ namespace Bomb.Player
 
         private void Update()
         {
-            Vector3 moveDirection = CalculateMoveDirection(_inputReader.MoveInput);
+            Vector3 moveDirection = CalculateMoveDirection(_inputReceiver.Move);
             _currentSpeed = CalculateSpeed(moveDirection);
 
             FaceCameraYaw(moveDirection);
@@ -139,7 +139,7 @@ namespace Bomb.Player
                 return 0f;
             }
 
-            return _inputReader.IsDashing ? _data.DashSpeed : _data.WalkSpeed;
+            return _inputReceiver.IsDashing ? _data.DashSpeed : _data.WalkSpeed;
         }
 
         /// <summary>

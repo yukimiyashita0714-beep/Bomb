@@ -77,7 +77,6 @@ namespace Bomb.Hud
 
         private RectTransform _rectTransform;
         private CanvasGroup _canvasGroup;
-        private PlayerInputReader _inputReader;
 
         // ==========================================
         // Unity Messages
@@ -110,10 +109,6 @@ namespace Bomb.Hud
                 enabled = false;
                 return;
             }
-
-            // 押しっぱなし判定は入力側から取る。クールタイム中は PlayerThrower の
-            // IsCharging が立たないため、それだけではクールタイムを見せられない。
-            _inputReader = _thrower.GetComponent<PlayerInputReader>();
 
             _fill.type = Image.Type.Filled;
             _fill.fillMethod = Image.FillMethod.Radial360;
@@ -205,13 +200,9 @@ namespace Bomb.Hud
                 return true;
             }
 
-            if (_inputReader != null)
-            {
-                return _inputReader.ThrowHeld;
-            }
-
-            // 入力側が取れない構成では、せめてチャージ中だけは出す。
-            return _thrower.IsCharging;
+            // 押しっぱなし判定はキー入力から取る。クールタイム中は IsCharging が立たないため、
+            // それだけではクールタイム明けを待っている間を見せられない。
+            return _thrower.IsThrowHeld || _thrower.IsCharging;
         }
 
         private void UpdateFade()
