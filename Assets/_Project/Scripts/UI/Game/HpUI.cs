@@ -14,14 +14,10 @@ namespace Bomb.UI
 
         [SerializeField] private Image _hpValue;
 
+        [SerializeField] private PlayerData _data; 
+
         [SerializeField, Tooltip("ダメージを受け取るプレイヤー。爆風の自傷ダメージもここから届く")]
         private PlayerDamageReceiver _damageReceiver;
-
-        [SerializeField, Tooltip("最大体力")] private float _maxHp;
-        [Space(10)]
-        [SerializeField, Tooltip("回復までの時間")] private float _recoveryCooltime;
-        [SerializeField, Tooltip("回復量")] private float _recoveryValue;
-        [SerializeField, Tooltip("回復時間間隔")] private float _recoveryInterval;
 
         // ==========================================
         // Private Fields
@@ -54,7 +50,7 @@ namespace Bomb.UI
 
         private void Start()
         {
-            _hp = _maxHp;
+            _hp = _data.MaxHp;
         }
 
         private void Update()
@@ -77,16 +73,16 @@ namespace Bomb.UI
 
         public void Recovery(float value)
         {
-            if (_maxHp == _hp)
+            if (_data.MaxHp == _hp)
             {
                 return;
             }
 
             _hp += value;
 
-            if (_maxHp <= _hp)
+            if (_data.MaxHp <= _hp)
             {
-                _hp = _maxHp;
+                _hp = _data.MaxHp;
             }
 
             _animator.SetTrigger("Recovery");
@@ -102,7 +98,7 @@ namespace Bomb.UI
             }
 
             //再生までのクールタイムリセット
-            _recoveryCooltimer = _recoveryCooltime;
+            _recoveryCooltimer = _data.HpRecoveryCooltime;
 
             _animator.SetTrigger("Damage");
         }
@@ -113,7 +109,7 @@ namespace Bomb.UI
 
         private void Display()
         {
-            _hpValue.fillAmount = _hp / _maxHp;
+            _hpValue.fillAmount = _hp / _data.MaxHp;
         }
 
         private void HpRecovery()
@@ -133,8 +129,8 @@ namespace Bomb.UI
             }
 
             //再生までの間隔リセット
-            _recoveryTimer = _recoveryInterval;
-            Recovery(_recoveryValue);
+            _recoveryTimer = _data.HpRecoveryInterval;
+            Recovery(_data.HpRecoveryValue);
         }
 
         // ==========================================

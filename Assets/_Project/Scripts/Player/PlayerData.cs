@@ -26,6 +26,23 @@ namespace Bomb.Player
         [Range(0.05f, 1f)]
         private float _dashDuration = 0.2f;
 
+        [Header("Hp")]
+        [SerializeField, Tooltip("最大体力")]
+        [Min(1f)]
+        private float _maxHp;
+
+        [SerializeField, Tooltip("体力回復までの時間")]
+        [Min(0f)]
+        private float _hpRecoveryCooltime;
+
+        [SerializeField, Tooltip("体力回復量")]
+        [Min(0f)]
+        private float _hpRecoveryValue;
+
+        [SerializeField, Tooltip("体力回復時間間隔")]
+        [Min(0f)]
+        private float _hpRecoveryInterval;
+
         [Header("Stamina")]
         [SerializeField, Tooltip("スタミナの最大値")]
         [Min(1f)]
@@ -98,6 +115,18 @@ namespace Bomb.Player
 
         /// <summary>1回のダッシュが続く時間 (秒)。</summary>
         public float DashDuration => _dashDuration;
+
+        /// <summary> 最大体力 </summary>
+        public float MaxHp => _maxHp;
+
+        /// <summary> 体力回復までの時間 </summary>
+        public float HpRecoveryCooltime => _hpRecoveryCooltime;
+
+        /// <summary> 体力回復量 </summary>
+        public float HpRecoveryValue => _hpRecoveryValue;
+
+        /// <summary> 体力回復時間間隔 </summary>
+        public float HpRecoveryInterval => _hpRecoveryInterval;
 
         /// <summary>スタミナの最大値。</summary>
         public float MaxStamina => _maxStamina;

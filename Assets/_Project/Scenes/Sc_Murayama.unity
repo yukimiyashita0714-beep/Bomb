@@ -337,11 +337,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HpUI
   _animator: {fileID: 14776183}
   _hpValue: {fileID: 785404624}
+  _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
   _damageReceiver: {fileID: 1937825191}
-  _maxHp: 20
-  _recoveryCooltime: 4
-  _recoveryValue: 1
-  _recoveryInterval: 0
 --- !u!1 &75422568
 GameObject:
   m_ObjectHideFlags: 0
