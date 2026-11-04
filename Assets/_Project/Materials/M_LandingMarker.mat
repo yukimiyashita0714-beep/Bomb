@@ -51,6 +51,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
@@ -60,13 +61,15 @@ Material:
     - _DstBlend: 10
     - _DstBlendAlpha: 10
     - _QueueOffset: 0
+    - _SampleGI: 0
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
     - _Surface: 1
+    - _XRMotionVectorsPass: 1
     - _ZTest: 4
     - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0.69, g: 0.93, b: 0.33, a: 0.35}
-    - _Color: {r: 0.69, g: 0.93, b: 0.33, a: 0.35}
+    - _Color: {r: 0.69, g: 0.93, b: 0.32999998, a: 0.35}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -17,11 +17,17 @@ namespace Bomb.UI
         [SerializeField, Tooltip("ダメージを受け取るプレイヤー。爆風の自傷ダメージもここから届く")]
         private PlayerDamageReceiver _damageReceiver;
 
-        [SerializeField, Tooltip("最大体力")] private float _maxHp;
-        [Space(10)]
-        [SerializeField, Tooltip("回復までの時間")] private float _recoveryCooltime;
-        [SerializeField, Tooltip("回復量")] private float _recoveryValue;
-        [SerializeField, Tooltip("回復時間間隔")] private float _recoveryInterval;
+        [SerializeField, Tooltip("最大体力")] 
+        private float _maxHp;
+
+        [SerializeField, Tooltip("回復までの時間")] 
+        private float _recoveryCooltime;
+
+        [SerializeField, Tooltip("回復量")] 
+        private float _recoveryValue;
+
+        [SerializeField, Tooltip("回復時間間隔")] 
+        private float _recoveryInterval;
 
         // ==========================================
         // Private Fields
