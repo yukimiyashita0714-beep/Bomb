@@ -13,10 +13,16 @@ MonoBehaviour:
   m_Name: SO_PlayerData
   m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerData
   _walkSpeed: 5
-  _dashSpeed: 11
+  _dashSpeed: 40
+  _dashDuration: 0.12
+  _maxStamina: 99
+  _dashStaminaCost: 33
+  _staminaRecoveryDelay: 0.8
+  _staminaRecoveryPerSecond: 25
   _turnSpeedDegrees: 720
   _gravity: -20
-  _throwCooldown: 1
+  _jumpHeight: 1.2
+  _throwCooldown: 0.5
   _throwAngleDegrees: 30
   _throwOffset: {x: 0, y: 0.8, z: 0.6}
   _fixedThrowImpulse: 4.5
