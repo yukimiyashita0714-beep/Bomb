@@ -1,15 +1,14 @@
-using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Bomb.Hud
 {
     /// <summary>
-    /// 操作説明パネルの開閉。R を押すたびに画面の右外へスライドして隠れ、もう一度押すと戻る。
-    /// 表示する文言はパネル側（Text）が持ち、ここは位置の出し入れだけを受け持つ。
-    /// 画面右端にアンカーされた RectTransform に付ける前提。
+    /// 操作説明パネルの中身を、キーボード用とコントローラー用で切り替える。
+    /// R キー／ゲームパッドの View（PS は Share）を押すたびに入れ替わる。
+    /// パネルの見た目はシーン側が持ち、ここは表示する文言の差し替えだけを受け持つ。
     /// </summary>
-    [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
     public class ControlGuideUI : MonoBehaviour
     {
@@ -17,43 +16,55 @@ namespace Bomb.Hud
         // Serialize Fields
         // ==========================================
 
-        [Header("Slide")]
-        [SerializeField, Tooltip("スライドにかける時間 (秒)")]
-        [Range(0.05f, 2f)]
-        private float _slideSeconds = 0.35f;
+        [Header("References")]
+        [SerializeField, Tooltip("説明を表示するテキスト。未設定なら子から探す")]
+        private TMP_Text _guideText;
 
-        [SerializeField, Tooltip("スライドの加減速。横軸が進み具合、縦軸が移動量の割合")]
-        private AnimationCurve _slideCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        // NOTE: <pos=> で2列目の書き出し位置をそろえている。空白で並べるとフォント幅でずれるため。
+        [Header("Guides")]
+        [SerializeField, TextArea(4, 12), Tooltip("キーボード操作の説明")]
+        private string _keyboardGuide =
+            "<b>Keyboard</b>\n\n" +
+            "WASD<pos=45%>move\n" +
+            "Shift<pos=45%>dash\n" +
+            "Space<pos=45%>jump\n" +
+            "F<pos=45%>charge and throw\n" +
+            "R<pos=45%>controller guide\n" +
+            "Q<pos=45%>reload scene";
 
-        [SerializeField, Tooltip("隠れたときに画面外へ余分に逃がす距離 (px)。端が見切れるなら増やす")]
-        [Range(0f, 200f)]
-        private float _hiddenMarginPixels = 24f;
+        [SerializeField, TextArea(4, 12), Tooltip("コントローラー操作の説明。Xbox の表記に PS の表記を括弧で添える")]
+        private string _gamepadGuide =
+            "<b>Controller</b>\n\n" +
+            "L Stick<pos=45%>move\n" +
+            "L Stick push<pos=45%>dash\n" +
+            "A (×)<pos=45%>jump\n" +
+            "RT (R2)<pos=45%>charge and throw\n" +
+            "View (Share)<pos=45%>keyboard guide";
 
         [Header("Startup")]
-        [SerializeField, Tooltip("開始時に表示しておく")]
-        private bool _isVisibleOnStart = true;
+        [SerializeField, Tooltip("開始時にコントローラー用を表示する。切るとキーボード用から始まる")]
+        private bool _isGamepadOnStart;
 
         // ==========================================
         // Private Fields
         // ==========================================
 
-        private const string TOGGLE_ACTION_NAME = "ToggleControlGuide";
-        private const string KEY_TOGGLE = "<Keyboard>/r";
+        private const string SWITCH_ACTION_NAME = "SwitchControlGuide";
+        private const string KEY_SWITCH = "<Keyboard>/r";
+        private const string PAD_SWITCH = "<Gamepad>/select";
 
-        private RectTransform _rectTransform;
-        private InputAction _toggleAction;
-        private Coroutine _slideRoutine;
+        /// <summary>行が増えて枠からはみ出すときに、ここまでは文字を縮めてよい。</summary>
+        private const float MIN_FONT_SIZE = 14f;
 
-        private Vector2 _shownPosition;
-        private Vector2 _hiddenPosition;
-        private bool _isVisible = true;
+        private InputAction _switchAction;
+        private bool _isGamepadGuide;
 
         // ==========================================
         // Properties
         // ==========================================
 
-        /// <summary>表示されている（またはこれから表示される）なら true。</summary>
-        public bool IsVisible => _isVisible;
+        /// <summary>コントローラー用の説明を表示しているなら true。</summary>
+        public bool IsGamepadGuide => _isGamepadGuide;
 
         // ==========================================
         // Unity Messages
@@ -61,102 +72,67 @@ namespace Bomb.Hud
 
         private void Awake()
         {
-            _rectTransform = (RectTransform)transform;
+            if (_guideText == null)
+            {
+                _guideText = GetComponentInChildren<TMP_Text>(true);
+            }
 
-            // 配置された位置をそのまま「見えている位置」として覚える。
-            // 座標をコードに書くと、Inspector で動かしたときに合わなくなる。
-            _shownPosition = _rectTransform.anchoredPosition;
+            if (_guideText == null)
+            {
+                Debug.LogError($"[{nameof(ControlGuideUI)}] 説明を出すテキストが見つからないため動作できない。", this);
+                enabled = false;
+                return;
+            }
 
-            // 右端アンカー前提で、自分の幅ぶん右へ逃がせば画面外に出きる。
-            float slideDistance = _rectTransform.rect.width
-                + Mathf.Abs(_shownPosition.x)
-                + _hiddenMarginPixels;
-            _hiddenPosition = _shownPosition + (Vector2.right * slideDistance);
+            // 今のパネルの大きさに収まらない行数になったときだけ縮む。収まるなら元の大きさのまま。
+            _guideText.fontSizeMax = _guideText.fontSize;
+            _guideText.fontSizeMin = Mathf.Min(MIN_FONT_SIZE, _guideText.fontSize);
+            _guideText.enableAutoSizing = true;
 
-            _isVisible = _isVisibleOnStart;
-            _rectTransform.anchoredPosition = _isVisible ? _shownPosition : _hiddenPosition;
+            _switchAction = new InputAction(SWITCH_ACTION_NAME, InputActionType.Button, KEY_SWITCH);
+            _switchAction.AddBinding(PAD_SWITCH);
 
-            _toggleAction = new InputAction(TOGGLE_ACTION_NAME, InputActionType.Button, KEY_TOGGLE);
+            SetGamepadGuide(_isGamepadOnStart);
         }
 
         private void OnEnable()
         {
-            _toggleAction.Enable();
+            _switchAction?.Enable();
         }
 
         private void Update()
         {
-            if (_toggleAction.WasPressedThisFrame())
+            if (_switchAction.WasPressedThisFrame())
             {
-                Toggle();
+                Switch();
             }
         }
 
         private void OnDisable()
         {
-            _toggleAction.Disable();
+            _switchAction?.Disable();
         }
 
         private void OnDestroy()
         {
-            _toggleAction.Dispose();
+            _switchAction?.Dispose();
         }
 
         // ==========================================
         // Public Methods
         // ==========================================
 
-        /// <summary>表示と非表示を入れ替える。</summary>
-        public void Toggle()
+        /// <summary>キーボード用とコントローラー用を入れ替える。</summary>
+        public void Switch()
         {
-            SetVisible(!_isVisible);
+            SetGamepadGuide(!_isGamepadGuide);
         }
 
-        /// <summary>スライドしながら表示状態を変える。同じ状態なら何もしない。</summary>
-        public void SetVisible(bool isVisible)
+        /// <summary>true でコントローラー用、false でキーボード用の説明を表示する。</summary>
+        public void SetGamepadGuide(bool isGamepad)
         {
-            if (_isVisible == isVisible)
-            {
-                return;
-            }
-
-            _isVisible = isVisible;
-
-            if (_slideRoutine != null)
-            {
-                StopCoroutine(_slideRoutine);
-            }
-
-            _slideRoutine = StartCoroutine(SlideRoutine(isVisible ? _shownPosition : _hiddenPosition));
-        }
-
-        // ==========================================
-        // Private Methods
-        // ==========================================
-
-        private IEnumerator SlideRoutine(Vector2 target)
-        {
-            // 動いている途中で押し直されても繋がるよう、現在地から動かす。
-            Vector2 start = _rectTransform.anchoredPosition;
-            float elapsed = 0f;
-
-            while (elapsed < _slideSeconds)
-            {
-                // ポーズ中でも説明は開きたいので、timeScale の影響を受けない時間で進める。
-                elapsed += Time.unscaledDeltaTime;
-
-                float progress = Mathf.Clamp01(elapsed / _slideSeconds);
-                _rectTransform.anchoredPosition = Vector2.LerpUnclamped(
-                    start,
-                    target,
-                    _slideCurve.Evaluate(progress));
-
-                yield return null;
-            }
-
-            // 誤差を残さないよう最後に実測値で合わせる。
-            _rectTransform.anchoredPosition = target;
-            _slideRoutine = null;
+            _isGamepadGuide = isGamepad;
+            _guideText.text = isGamepad ? _gamepadGuide : _keyboardGuide;
         }
     }
 }
