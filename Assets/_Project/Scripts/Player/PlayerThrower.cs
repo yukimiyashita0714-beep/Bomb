@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Bomb.Player
 {
@@ -14,10 +15,9 @@ namespace Bomb.Player
     }
 
     /// <summary>
-    /// F キーでグレネードを投げる。クールタイムとチャージの管理もここが持つ。
+    /// F キー（ゲームパッドは RT / R2）でグレネードを投げる。クールタイムとチャージの管理もここが持つ。
     /// グレネードの中身（信管・爆発）には触らず、Rigidbody に力を加えるところまでを担当する。
     /// </summary>
-    [RequireComponent(typeof(PlayerInputReader))]
     [DisallowMultipleComponent]
     public class PlayerThrower : MonoBehaviour
     {
@@ -44,7 +44,12 @@ namespace Bomb.Player
         /// <summary>投げた瞬間に加えるひねりの強さ。投擲力に対する倍率。</summary>
         private const float SPIN_RATIO = 0.3f;
 
-        private PlayerInputReader _inputReader;
+        private const string THROW_ACTION_NAME = "Throw";
+        private const string KEY_THROW = "<Keyboard>/f";
+        private const string PAD_THROW = "<Gamepad>/rightTrigger";
+
+        // NOTE: 投擲入力は ReceiveActions から外しているため、別の入力クラスに分けるまでここで持つ
+        private InputAction _throwAction;
         private CharacterController _characterController;
 
         private float _cooldownTimer;
@@ -58,6 +63,9 @@ namespace Bomb.Player
 
         /// <summary>投げられる状態なら true。</summary>
         public bool CanThrow => _cooldownTimer <= 0f;
+
+        /// <summary>投擲キーが押されている間 true。UI の表示判定に使う。</summary>
+        public bool IsThrowHeld => _throwAction != null && _throwAction.IsPressed();
 
         /// <summary>クールタイムの残り割合 (1 で投げた直後、0 で投げられる)。UI ゲージ向け。</summary>
         public float CooldownRatio
@@ -141,7 +149,9 @@ namespace Bomb.Player
 
         private void Awake()
         {
-            _inputReader = GetComponent<PlayerInputReader>();
+            // 長押しチャージに使うので、IsPressed / WasPressedThisFrame で押下状態をそのまま見る。
+            _throwAction = new InputAction(THROW_ACTION_NAME, InputActionType.Button, KEY_THROW);
+            _throwAction.AddBinding(PAD_THROW);
             _characterController = GetComponent<CharacterController>();
 
             if (_data == null)
@@ -163,6 +173,21 @@ namespace Bomb.Player
             {
                 _projectileMass = prefabBody.mass;
             }
+        }
+
+        private void OnEnable()
+        {
+            _throwAction.Enable();
+        }
+
+        private void OnDisable()
+        {
+            _throwAction.Disable();
+        }
+
+        private void OnDestroy()
+        {
+            _throwAction.Dispose();
         }
 
         private void Update()
@@ -196,7 +221,7 @@ namespace Bomb.Player
 
         private void UpdateFixedMode()
         {
-            if (!_inputReader.ThrowPressedThisFrame || !CanThrow)
+            if (!_throwAction.WasPressedThisFrame() || !CanThrow)
             {
                 return;
             }
@@ -210,7 +235,7 @@ namespace Bomb.Player
             {
                 // クールタイム中はチャージ自体を始めさせない。
                 // 始められてしまうと、溜め終わった瞬間に飛ぶ挙動になって待ち時間が意味を失う。
-                if (_inputReader.ThrowPressedThisFrame && CanThrow)
+                if (_throwAction.WasPressedThisFrame() && CanThrow)
                 {
                     _isCharging = true;
                     _chargeTimer = 0f;
@@ -220,14 +245,14 @@ namespace Bomb.Player
                 return;
             }
 
-            if (_inputReader.ThrowHeld)
+            if (_throwAction.IsPressed())
             {
                 _chargeTimer = Mathf.Min(_chargeTimer + Time.deltaTime, _data.MaxChargeTime);
                 OnChargeRatioChanged?.Invoke(ChargeRatio);
                 return;
             }
 
-            // 離した。ThrowReleasedThisFrame を待たずに「押していない」で判定するのは、
+            // 離した。WasReleasedThisFrame を待たずに「押していない」で判定するのは、
             // フォーカスが外れてキーを離した場合に溜めっぱなしで固まるのを避けるため。
             float impulse = _data.GetChargedImpulse(ChargeRatio);
 

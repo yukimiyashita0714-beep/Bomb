@@ -34,6 +34,29 @@ namespace Bomb.Battle
         [SerializeField, Tooltip("爆風が影響する Layer")]
         private LayerMask _affectedLayers = ~0;
 
+        [Header("Occlusion")]
+        [SerializeField, Tooltip("爆風をさえぎる Layer。壁や地形が入っている Layer を選ぶ")]
+        private LayerMask _occluderLayers = ~0;
+
+        [SerializeField, Tooltip("動くブロック (Rigidbody 付き) も爆風をさえぎる。OFF なら壁などの動かない物だけがさえぎる")]
+        private bool _isBlockedByRigidbodies = false;
+
+        [Header("Other Grenades")]
+        [SerializeField, Tooltip("ほかのグレネードの爆風で吹き飛ぶ。OFF なら爆風は他のグレネードを素通りする")]
+        private bool _isPushedByOtherGrenades = false;
+
+        [SerializeField, Tooltip("グレネード同士がぶつかる。OFF ならすり抜ける")]
+        private bool _collidesWithOtherGrenades = false;
+
+        [Header("Damage")]
+        [SerializeField, Tooltip("爆心で受けるダメージ。投げた本人も範囲内なら受ける")]
+        [Range(0f, 100f)]
+        private float _maxDamage = 8f;
+
+        [SerializeField, Tooltip("爆風の縁で受けるダメージの割合。1 で距離に関係なく一定")]
+        [Range(0f, 1f)]
+        private float _edgeDamageRatio = 0.3f;
+
         [Header("Lifetime")]
         [SerializeField, Tooltip("爆発後に本体を消すまでの猶予 (秒)。VFX を足すときはこの間に再生する")]
         [Range(0f, 5f)]
@@ -58,7 +81,45 @@ namespace Bomb.Battle
         /// <summary>爆風が影響する Layer。</summary>
         public LayerMask AffectedLayers => _affectedLayers;
 
+        /// <summary>爆風をさえぎる Layer。</summary>
+        public LayerMask OccluderLayers => _occluderLayers;
+
+        /// <summary>Rigidbody 付きの動く物も爆風をさえぎるなら true。</summary>
+        public bool IsBlockedByRigidbodies => _isBlockedByRigidbodies;
+
+        /// <summary>ほかのグレネードの爆風で吹き飛ぶなら true。</summary>
+        public bool IsPushedByOtherGrenades => _isPushedByOtherGrenades;
+
+        /// <summary>グレネード同士がぶつかるなら true。</summary>
+        public bool CollidesWithOtherGrenades => _collidesWithOtherGrenades;
+
+        /// <summary>爆心で受けるダメージ。</summary>
+        public float MaxDamage => _maxDamage;
+
+        /// <summary>爆風の縁で受けるダメージの割合 (0〜1)。</summary>
+        public float EdgeDamageRatio => _edgeDamageRatio;
+
         /// <summary>爆発後に本体を消すまでの猶予 (秒)。</summary>
         public float DestroyDelay => _destroyDelay;
+
+        // ==========================================
+        // Public Methods
+        // ==========================================
+
+        /// <summary>
+        /// 爆心からの距離に応じたダメージを返す。爆心で <see cref="MaxDamage"/>、縁で
+        /// <see cref="MaxDamage"/> × <see cref="EdgeDamageRatio"/> になるよう直線で減らす。
+        /// </summary>
+        /// <param name="distanceMeters">爆心から相手の表面までの距離 (m)。</param>
+        public float GetDamageAtDistance(float distanceMeters)
+        {
+            if (_explosionRadius <= 0f)
+            {
+                return _maxDamage;
+            }
+
+            float t = Mathf.Clamp01(distanceMeters / _explosionRadius);
+            return _maxDamage * Mathf.Lerp(1f, _edgeDamageRatio, t);
+        }
     }
 }

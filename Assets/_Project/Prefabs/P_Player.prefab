@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 8327440296160111247}
   - component: {fileID: 107390997530308502}
   - component: {fileID: 4007211199498807896}
+  - component: {fileID: 5512837400911827301}
+  - component: {fileID: 8666636167521298838}
   m_Layer: 0
   m_Name: P_Player
   m_TagString: Untagged
@@ -35,6 +37,7 @@ Transform:
   m_Children:
   - {fileID: 2322778533651264781}
   - {fileID: 6569844798539621500}
+  - {fileID: 6850347792425939201}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &7969529161909670395
@@ -73,7 +76,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee4200e98540dea42af019aec43f4b5a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerInputReader
+  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerInputReceiver
 --- !u!114 &107390997530308502
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,6 +106,63 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
   _mode: 1
   _grenadePrefab: {fileID: 8626708492992328768, guid: 5f96b2efc47612448a8a25380a84f774, type: 3}
+--- !u!114 &5512837400911827301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 696694294117523230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ad516f638ce42d597c9e75c7f2223a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerDamageReceiver
+  _damageMultiplier: 1
+--- !u!114 &8666636167521298838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 696694294117523230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 152490139b90c95489029a8bc464de7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerStamina
+  _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
+--- !u!1 &2517524684850762829
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6850347792425939201}
+  m_Layer: 0
+  m_Name: CameraTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6850347792425939201
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2517524684850762829}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.5, y: 0.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8055337187762937421}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6229041872193895371
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,6 +352,14 @@ MonoBehaviour:
   _timeStep: 0.04
   _maxPoints: 80
   _groundY: 0.02
+  _collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _ignoresMovingBodies: 1
+  _showsLandingMarker: 1
+  _landingMarkerMaterial: {fileID: 2100000, guid: 9ff4cfe519e5429ba0bc9f24638c1dfe, type: 2}
+  _landingMarkerDiameter: 0.8
+  _landingMarkerAlpha: 0.35
   _showWhileIdleInFixedMode: 1
   _emptyColor: {r: 0.72, g: 0.74, b: 0.75, a: 0.5}
   _fullColor: {r: 0.69, g: 0.93, b: 0.33, a: 0.95}

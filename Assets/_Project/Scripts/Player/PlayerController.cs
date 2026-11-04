@@ -3,11 +3,12 @@ using UnityEngine;
 namespace Bomb.Player
 {
     /// <summary>
-    /// CharacterController を使ったプレイヤーの水平移動・ダッシュ・向き変更を扱う。
+    /// CharacterController を使ったプレイヤーの水平移動・ダッシュ・ジャンプ・向き変更を扱う。
     /// 速度などの数値は <see cref="PlayerData"/> から読む。
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
-    [RequireComponent(typeof(PlayerInputReader))]
+    [RequireComponent(typeof(PlayerInputReceiver))]
+    [RequireComponent(typeof(PlayerStamina))]
     [DisallowMultipleComponent]
     public class PlayerController : MonoBehaviour
     {
@@ -34,10 +35,14 @@ namespace Bomb.Player
         private const float GROUND_STICK_VELOCITY = -2f;
 
         private CharacterController _characterController;
-        private PlayerInputReader _inputReader;
+        private PlayerInputReceiver _inputReceiver;
+        private PlayerStamina _stamina;
 
         private float _verticalVelocity;
         private float _currentSpeed;
+
+        private float _dashTimer;
+        private Vector3 _dashDirection;
 
         // ==========================================
         // Properties
@@ -46,8 +51,8 @@ namespace Bomb.Player
         /// <summary>現在の水平移動速度 (m/s)。アニメーションのブレンドなどに使う。</summary>
         public float CurrentSpeed => _currentSpeed;
 
-        /// <summary>ダッシュ速度で移動しているとき true。</summary>
-        public bool IsDashing => _data != null && _currentSpeed > _data.WalkSpeed;
+        /// <summary>一瞬のダッシュで移動しているとき true。</summary>
+        public bool IsDashing => _dashTimer > 0f;
 
         /// <summary>接地しているとき true。</summary>
         public bool IsGrounded => _characterController.isGrounded;
@@ -59,7 +64,14 @@ namespace Bomb.Player
         private void Awake()
         {
             _characterController = GetComponent<CharacterController>();
-            _inputReader = GetComponent<PlayerInputReader>();
+            _inputReceiver = GetComponent<PlayerInputReceiver>();
+            _stamina = GetComponent<PlayerStamina>();
+
+            // RequireComponent は既に置いてあるプレハブには自動で付かないので、無い場合を知らせておく。
+            if (_stamina == null)
+            {
+                Debug.LogWarning($"[{nameof(PlayerController)}] PlayerStamina が無いのでダッシュできない。", this);
+            }
 
             if (_data == null)
             {
@@ -70,13 +82,18 @@ namespace Bomb.Player
 
         private void Update()
         {
-            Vector3 moveDirection = CalculateMoveDirection(_inputReader.MoveInput);
-            _currentSpeed = CalculateSpeed(moveDirection);
+            Vector3 moveDirection = CalculateMoveDirection(_inputReceiver.Move);
+
+            TickDashTimer();
+            TryStartDash(moveDirection);
+
+            Vector3 velocity = CalculateHorizontalVelocity(moveDirection);
+            _currentSpeed = velocity.magnitude;
 
             FaceCameraYaw(moveDirection);
             ApplyGravity();
+            TryJump();
 
-            Vector3 velocity = moveDirection * _currentSpeed;
             velocity.y = _verticalVelocity;
             _characterController.Move(velocity * Time.deltaTime);
         }
@@ -132,14 +149,47 @@ namespace Bomb.Player
             return (forward * input.y + right * input.x).normalized;
         }
 
-        private float CalculateSpeed(Vector3 moveDirection)
+        private void TickDashTimer()
         {
-            if (moveDirection.sqrMagnitude < INPUT_THRESHOLD_SQR)
+            _dashTimer = Mathf.Max(0f, _dashTimer - Time.deltaTime);
+        }
+
+        private void TryStartDash(Vector3 moveDirection)
+        {
+            // スタミナ不足やダッシュ中に押した分を残すと、後で勝手に飛び出すので毎フレーム消す。
+            if (!_inputReceiver.ConsumeDashRequest())
             {
-                return 0f;
+                return;
             }
 
-            return _inputReader.IsDashing ? _data.DashSpeed : _data.WalkSpeed;
+            // ダッシュ中に重ねて押しても延長しない。延長できると連打で距離が伸び放題になる。
+            if (_dashTimer > 0f)
+            {
+                return;
+            }
+
+            if (_stamina == null || !_stamina.TryConsume(_data.DashStaminaCost))
+            {
+                return;
+            }
+
+            // 入力が無いときは正面へ出す。止まった状態から押しても何も起きないと押し損に感じるため。
+            _dashDirection = moveDirection.sqrMagnitude >= INPUT_THRESHOLD_SQR
+                ? moveDirection
+                : Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+
+            _dashTimer = _data.DashDuration;
+        }
+
+        private Vector3 CalculateHorizontalVelocity(Vector3 moveDirection)
+        {
+            // ダッシュ中は押した瞬間の向きに固定する。途中で曲がれると回避に使ったときに狙いがブレる。
+            if (_dashTimer > 0f)
+            {
+                return _dashDirection * _data.DashSpeed;
+            }
+
+            return moveDirection * _data.WalkSpeed;
         }
 
         /// <summary>
@@ -184,6 +234,19 @@ namespace Bomb.Player
             }
 
             _verticalVelocity += _data.Gravity * Time.deltaTime;
+        }
+
+        private void TryJump()
+        {
+            // 空中で押した分を残すと着地した瞬間に勝手に跳ぶため、接地していなくても毎フレーム消す。
+            // 接地中しか跳べないので、二段ジャンプにはならない。
+            if (!_inputReceiver.ConsumeJumpRequest() || !_characterController.isGrounded)
+            {
+                return;
+            }
+
+            // 高さ h まで上がる初速は v = √(2|g|h)。重力が負の値なので符号を反転して使う。
+            _verticalVelocity = Mathf.Sqrt(Mathf.Max(0f, -2f * _data.Gravity * _data.JumpHeight));
         }
     }
 }

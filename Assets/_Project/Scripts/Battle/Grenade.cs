@@ -1,10 +1,15 @@
 using System;
+using System.Collections.Generic;
+using Bomb.Core;
 using UnityEngine;
 
 namespace Bomb.Battle
 {
     /// <summary>
-    /// 投げられたグレネード。信管を数えて爆発し、周囲の Rigidbody を吹き飛ばす。
+    /// 投げられたグレネード。信管を数えて爆発し、周囲の Rigidbody を吹き飛ばして
+    /// <see cref="IDamageable"/> にダメージを与える。投げた本人も例外にしない。
+    /// 壁の向こう側には爆風が届かない。
+    /// ほかのグレネードには干渉しない (爆風で飛ばさない・ぶつからない・爆風をさえぎらない)。
     /// 投げる力は <see cref="Throw"/> で外から与える。自分では飛び方を決めない。
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
@@ -25,9 +30,24 @@ namespace Bomb.Battle
         /// <summary>OverlapSphere が一度に拾う上限。毎回配列を確保しないため使い回す。</summary>
         private const int MAX_OVERLAP_COUNT = 64;
 
+        /// <summary>遮蔽判定の Raycast が一度に拾う上限。</summary>
+        private const int MAX_OCCLUSION_HIT_COUNT = 16;
+
         private static readonly Collider[] OverlapBuffer = new Collider[MAX_OVERLAP_COUNT];
 
+        private static readonly RaycastHit[] OcclusionBuffer = new RaycastHit[MAX_OCCLUSION_HIT_COUNT];
+
+        /// <summary>
+        /// 1回の爆発で同じ相手に二重でダメージを入れないための記録。
+        /// Collider を複数持つ相手は OverlapSphere に何度も拾われる。
+        /// </summary>
+        private static readonly HashSet<IDamageable> DamagedBuffer = new HashSet<IDamageable>();
+
+        /// <summary>シーンに出ているグレネード。生成時に既存のものとの衝突を切るために持つ。</summary>
+        private static readonly List<Grenade> ActiveGrenades = new List<Grenade>();
+
         private Rigidbody _rigidbody;
+        private Collider[] _colliders;
         private float _fuseTimer;
         private bool _hasExploded;
 
@@ -66,6 +86,7 @@ namespace Bomb.Battle
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
+            _colliders = GetComponentsInChildren<Collider>(true);
 
             if (_data == null)
             {
@@ -75,6 +96,29 @@ namespace Bomb.Battle
             }
 
             _fuseTimer = _data.FuseSeconds;
+        }
+
+        private void OnEnable()
+        {
+            if (_data == null)
+            {
+                return;
+            }
+
+            if (!_data.CollidesWithOtherGrenades)
+            {
+                for (int i = 0; i < ActiveGrenades.Count; i++)
+                {
+                    IgnoreCollisionWith(ActiveGrenades[i]);
+                }
+            }
+
+            ActiveGrenades.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            ActiveGrenades.Remove(this);
         }
 
         private void Update()
@@ -134,12 +178,35 @@ namespace Bomb.Battle
                 _data.AffectedLayers,
                 QueryTriggerInteraction.Ignore);
 
+            DamagedBuffer.Clear();
+
             for (int i = 0; i < hitCount; i++)
             {
-                Rigidbody body = OverlapBuffer[i].attachedRigidbody;
+                Collider hit = OverlapBuffer[i];
+                Rigidbody body = hit.attachedRigidbody;
 
-                // 自分自身と、Rigidbody を持たない地形は吹き飛ばせない。
-                if (body == null || body == _rigidbody)
+                // 自分自身は爆風の対象にしない。
+                if (body != null && body == _rigidbody)
+                {
+                    continue;
+                }
+
+                // ほかのグレネードは、設定で許したときだけ吹き飛ばす。
+                // 同時に投げた2個が互いを弾き合って、狙った場所からずれるのを防ぐ。
+                if (IsGrenade(body) && !_data.IsPushedByOtherGrenades)
+                {
+                    continue;
+                }
+
+                if (!IsExposedToBlast(hit, center))
+                {
+                    continue;
+                }
+
+                ApplyDamage(hit, center);
+
+                // Rigidbody を持たない地形は吹き飛ばせない。
+                if (body == null)
                 {
                     continue;
                 }
@@ -152,9 +219,128 @@ namespace Bomb.Battle
                     ForceMode.Impulse);
             }
 
+            DamagedBuffer.Clear();
+
             OnExploded?.Invoke(center, radius);
 
             Destroy(gameObject, _data.DestroyDelay);
+        }
+
+        /// <summary>
+        /// 爆心から相手が見えていれば true。壁越しに倒れるのを防ぐ。
+        /// 一番近い表面と中心の2点を試し、どちらかが通れば当てる。
+        /// 1点だけだと、床すれすれの線が地面にかすって物陰扱いになることがある。
+        /// </summary>
+        private bool IsExposedToBlast(Collider target, Vector3 center)
+        {
+            Bounds bounds = target.bounds;
+
+            return HasClearLine(center, bounds.ClosestPoint(center), target)
+                || HasClearLine(center, bounds.center, target);
+        }
+
+        private bool HasClearLine(Vector3 from, Vector3 to, Collider target)
+        {
+            Vector3 offset = to - from;
+            float distance = offset.magnitude;
+
+            // 爆心が相手に食い込んでいるなら、さえぎる物は無い。
+            if (distance <= Mathf.Epsilon)
+            {
+                return true;
+            }
+
+            int hitCount = Physics.RaycastNonAlloc(
+                from,
+                offset / distance,
+                OcclusionBuffer,
+                distance,
+                _data.OccluderLayers,
+                QueryTriggerInteraction.Ignore);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                if (IsOccluder(OcclusionBuffer[i].collider, target))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsOccluder(Collider candidate, Collider target)
+        {
+            if (candidate == target)
+            {
+                return false;
+            }
+
+            Rigidbody body = candidate.attachedRigidbody;
+
+            if (body == null)
+            {
+                return true;
+            }
+
+            // 自分自身と、相手の別パーツは壁ではない。
+            if (body == _rigidbody || body == target.attachedRigidbody)
+            {
+                return false;
+            }
+
+            // ほかのグレネードは小さく、盾にすると不自然なので壁として扱わない。
+            if (IsGrenade(body))
+            {
+                return false;
+            }
+
+            // Kinematic は動かない壁として扱う。
+            return body.isKinematic || _data.IsBlockedByRigidbodies;
+        }
+
+        private static bool IsGrenade(Rigidbody body)
+        {
+            return body != null && body.TryGetComponent(out Grenade _);
+        }
+
+        private void IgnoreCollisionWith(Grenade other)
+        {
+            if (other == null || other == this)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _colliders.Length; i++)
+            {
+                for (int j = 0; j < other._colliders.Length; j++)
+                {
+                    Physics.IgnoreCollision(_colliders[i], other._colliders[j]);
+                }
+            }
+        }
+
+        private void ApplyDamage(Collider hit, Vector3 center)
+        {
+            // Collider が子オブジェクトに付いている相手もいるので、親までさかのぼって探す。
+            IDamageable damageable = hit.GetComponentInParent<IDamageable>();
+
+            if (damageable == null || !DamagedBuffer.Add(damageable))
+            {
+                return;
+            }
+
+            // 中心点だと背の高い相手ほど遠く扱われるので、爆心に一番近い表面までの距離で測る。
+            // Collider.ClosestPoint は非凸の MeshCollider で使えないため、全種類で動く Bounds で近似する。
+            float distanceMeters = Vector3.Distance(center, hit.bounds.ClosestPoint(center));
+            float damage = _data.GetDamageAtDistance(distanceMeters);
+
+            if (damage <= 0f)
+            {
+                return;
+            }
+
+            damageable.TakeDamage(damage);
         }
     }
 }
