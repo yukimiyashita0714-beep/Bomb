@@ -15,10 +15,10 @@ MonoBehaviour:
   _walkSpeed: 5
   _dashSpeed: 40
   _dashDuration: 0.12
-  _maxHp: 0
-  _hpRecoveryCooltime: 0
-  _hpRecoveryValue: 0
-  _hpRecoveryInterval: 0
+  _maxHp: 30
+  _hpRecoveryCooltime: 2.5
+  _hpRecoveryValue: 1
+  _hpRecoveryInterval: 0.25
   _maxStamina: 99
   _dashStaminaCost: 33
   _staminaRecoveryDelay: 0.8
