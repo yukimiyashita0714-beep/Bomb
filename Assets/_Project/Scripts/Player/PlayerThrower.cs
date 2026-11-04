@@ -15,7 +15,7 @@ namespace Bomb.Player
     }
 
     /// <summary>
-    /// F キーでグレネードを投げる。クールタイムとチャージの管理もここが持つ。
+    /// F キー（ゲームパッドは RT / R2）でグレネードを投げる。クールタイムとチャージの管理もここが持つ。
     /// グレネードの中身（信管・爆発）には触らず、Rigidbody に力を加えるところまでを担当する。
     /// </summary>
     [DisallowMultipleComponent]
@@ -46,6 +46,7 @@ namespace Bomb.Player
 
         private const string THROW_ACTION_NAME = "Throw";
         private const string KEY_THROW = "<Keyboard>/f";
+        private const string PAD_THROW = "<Gamepad>/rightTrigger";
 
         // NOTE: 投擲入力は ReceiveActions から外しているため、別の入力クラスに分けるまでここで持つ
         private InputAction _throwAction;
@@ -150,6 +151,7 @@ namespace Bomb.Player
         {
             // 長押しチャージに使うので、IsPressed / WasPressedThisFrame で押下状態をそのまま見る。
             _throwAction = new InputAction(THROW_ACTION_NAME, InputActionType.Button, KEY_THROW);
+            _throwAction.AddBinding(PAD_THROW);
             _characterController = GetComponent<CharacterController>();
 
             if (_data == null)

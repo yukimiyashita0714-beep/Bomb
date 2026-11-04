@@ -4,6 +4,7 @@
     "references": [
         "Bomb.Player",
         "Unity.InputSystem",
+        "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],
     "includePlatforms": [],

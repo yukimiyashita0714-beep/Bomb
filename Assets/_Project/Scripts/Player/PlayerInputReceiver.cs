@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 namespace Bomb.Player
 {
     /// <summary>
-    /// プレイヤー操作（移動・ダッシュ）の入力を受け取り、読み取り専用プロパティとして公開する。
+    /// プレイヤー操作（移動・ダッシュ・ジャンプ）の入力を受け取り、読み取り専用プロパティとして公開する。
     /// 入力の取得だけを担当し、移動の判断は呼び出し側が行う。
     /// </summary>
     [DisallowMultipleComponent]
@@ -24,7 +24,8 @@ namespace Bomb.Player
         private ReceiveActions _action;
 
         private Vector2 _move;
-        private bool _isDashing;
+        private bool _isDashRequested;
+        private bool _isJumpRequested;
 
         // ==========================================
         // Properties
@@ -32,9 +33,6 @@ namespace Bomb.Player
 
         /// <summary>水平入力。x が左右、y が前後。範囲は -1〜1。離している間は Vector2.zero。</summary>
         public Vector2 Move => _move;
-
-        /// <summary>ダッシュ入力が押されている間 true。</summary>
-        public bool IsDashing => _isDashing;
 
         // ==========================================
         // Unity Messages
@@ -58,12 +56,39 @@ namespace Bomb.Player
 
             // NOTE: 無効化中は離した通知が来ないため、押しっぱなしの値が残らないよう戻す
             _move = Vector2.zero;
-            _isDashing = false;
+            _isDashRequested = false;
+            _isJumpRequested = false;
         }
 
         private void OnDestroy()
         {
             _action.Dispose();
+        }
+
+        // ==========================================
+        // Public Methods
+        // ==========================================
+
+        /// <summary>
+        /// ダッシュ入力が押されていれば true を返し、記録を消す。
+        /// ダッシュは押した瞬間に一度だけ出すので、ジャンプと同じく受け取ったら消す形にしている。
+        /// </summary>
+        public bool ConsumeDashRequest()
+        {
+            bool isRequested = _isDashRequested;
+            _isDashRequested = false;
+            return isRequested;
+        }
+
+        /// <summary>
+        /// ジャンプ入力が押されていれば true を返し、記録を消す。
+        /// 押した瞬間の1回だけ跳ばせたいので、値を見るのではなく受け取ったら消す形にしている。
+        /// </summary>
+        public bool ConsumeJumpRequest()
+        {
+            bool isRequested = _isJumpRequested;
+            _isJumpRequested = false;
+            return isRequested;
         }
 
         // ==========================================
@@ -76,6 +101,7 @@ namespace Bomb.Player
 
             BindValue(player.Move, OnMove);
             BindButton(player.Dash, OnDash);
+            BindButton(player.Jump, OnJump);
 
             // Value型: started / performed / canceled を受け、canceled で値を戻せるようにする
             void BindValue(InputAction action, Action<InputAction.CallbackContext> callback)
@@ -117,7 +143,17 @@ namespace Bomb.Player
 
         private void OnDash(InputAction.CallbackContext context)
         {
-            _isDashing = context.ReadValueAsButton();
+            // Dash は Press(Press And Release) なので離したときも performed が来る。押したときだけ記録する。
+            if (context.ReadValueAsButton())
+            {
+                _isDashRequested = true;
+            }
+        }
+
+        private void OnJump(InputAction.CallbackContext context)
+        {
+            // Jump は Press 指定なしなので、performed は押したときだけ来る。
+            _isJumpRequested = true;
         }
     }
 }
