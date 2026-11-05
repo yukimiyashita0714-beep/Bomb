@@ -24,9 +24,14 @@ namespace Bomb.UI
         private float _limitTimer;
         private float _prevLimitTimer;
 
+        private bool _isTimeUp;
+
         // ==========================================
         // Properties
         // ==========================================
+
+        /// <summary>残り時間が 0 になったら true。</summary>
+        public bool IsTimeUp => _isTimeUp;
 
         // ==========================================
         // Events
@@ -37,6 +42,9 @@ namespace Bomb.UI
         public event Action OnThirtySecond;
         public event Action OnOneMinute;
         public event Action OnFiveMinute;
+
+        /// <summary>残り時間が 0 になった瞬間に一度だけ送る。</summary>
+        public event Action OnTimeUp;
 
         // ==========================================
         // Unity Messages
@@ -87,6 +95,12 @@ namespace Bomb.UI
         /// </summary>
         private void PassageOfTime()
         {
+            // 時間切れ後はイベントを送り直さないように止める
+            if (_isTimeUp)
+            {
+                return;
+            }
+
             _prevLimitTimer = _limitTimer;
             _limitTimer = Mathf.Max(0f, _limitTimer - Time.deltaTime);
 
@@ -97,6 +111,23 @@ namespace Bomb.UI
                     timerEvent.Value?.Invoke();
                 }
             }
+
+            if (_limitTimer <= 0f)
+            {
+                _isTimeUp = true;
+                OnTimeUp?.Invoke();
+            }
+        }
+
+        // ==========================================
+        // Debug
+        // ==========================================
+
+        [ContextMenu("TimeUp")]
+        private void TimeUpDebug()
+        {
+            // 再生中に右クリックメニューから呼ぶと、次のフレームで時間切れになる
+            _limitTimer = 0f;
         }
     }
 }
