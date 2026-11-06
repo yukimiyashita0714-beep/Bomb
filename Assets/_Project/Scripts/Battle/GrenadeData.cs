@@ -18,6 +18,10 @@ namespace Bomb.Battle
         [Range(0.1f, 15f)]
         private float _fuseSeconds = 3f;
 
+        [Header("Contact")]
+        [SerializeField, Tooltip("壊せるブロックに当たったら信管を待たずに即爆発する")]
+        private bool _isDetonatedOnDestructibleHit = true;
+
         [Header("Explosion")]
         [SerializeField, Tooltip("爆発が届く半径 (m)")]
         [Range(0.5f, 30f)]
@@ -68,6 +72,9 @@ namespace Bomb.Battle
 
         /// <summary>投げてから爆発するまでの時間 (秒)。</summary>
         public float FuseSeconds => _fuseSeconds;
+
+        /// <summary>壊せるブロックに当たったら即爆発するなら true。</summary>
+        public bool IsDetonatedOnDestructibleHit => _isDetonatedOnDestructibleHit;
 
         /// <summary>爆発が届く半径 (m)。</summary>
         public float ExplosionRadius => _explosionRadius;

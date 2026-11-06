@@ -136,6 +136,25 @@ namespace Bomb.Battle
             }
         }
 
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (_hasExploded || !_data.IsDetonatedOnDestructibleHit)
+            {
+                return;
+            }
+
+            // Collider が子オブジェクトに付いているブロックもあるので、親までさかのぼって探す。
+            DestructibleBlock block = collision.collider.GetComponentInParent<DestructibleBlock>();
+
+            // 消えかけのブロックは判定を切っているので普通は当たらないが、切る前の同じフレームに当たることがある。
+            if (block == null || block.IsBreaking)
+            {
+                return;
+            }
+
+            Detonate();
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (_data == null)
