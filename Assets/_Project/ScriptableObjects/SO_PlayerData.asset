@@ -30,6 +30,6 @@ MonoBehaviour:
   _throwAngleDegrees: 30
   _throwOffset: {x: 0, y: 0.8, z: 0.6}
   _fixedThrowImpulse: 4.5
-  _minChargeImpulse: 2.2
-  _maxChargeImpulse: 7
-  _maxChargeTime: 1.2
+  _minChargeImpulse: 2
+  _maxChargeImpulse: 5
+  _maxChargeTime: 0.6
