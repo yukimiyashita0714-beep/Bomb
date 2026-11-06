@@ -39,6 +39,11 @@ namespace Bomb.Battle
         private Vector3 _initialScale;
         private bool _isBreaking;
 
+        /// <summary>Rigidbody に回転を任せられないときに、自分で回す軸と速さ。</summary>
+        private Vector3 _spinAxis;
+        private float _spinDegreesPerSecond;
+        private bool _isSpinningByTransform;
+
         // ==========================================
         // Properties
         // ==========================================
@@ -103,14 +108,43 @@ namespace Bomb.Battle
                 _renderers[i].shadowCastingMode = ShadowCastingMode.Off;
             }
 
+            StartSpin();
             StartCoroutine(FadeOutRoutine());
+        }
+
+        /// <summary>
+        /// ブロックごとに軸と速さを変えて回す。全部同じ向きに回ると、まとめて消えるときに作り物っぽく見える。
+        /// </summary>
+        private void StartSpin()
+        {
+            _spinAxis = Random.onUnitSphere;
+            _spinDegreesPerSecond = Random.Range(_data.MinSpinDegreesPerSecond, _data.MaxSpinDegreesPerSecond);
+
+            bool isMovedByPhysics = _rigidbody != null && !_rigidbody.isKinematic;
+
+            if (!isMovedByPhysics)
+            {
+                _isSpinningByTransform = true;
+                return;
+            }
+
+            // 物理で動いている間に transform を回すと物理とずれるので、回転も Rigidbody に任せる。
+            // 既定の上限 (7 rad/s) だと速い回転が頭打ちになるので、出したい速さまで上げておく。
+            float spinRadiansPerSecond = _spinDegreesPerSecond * Mathf.Deg2Rad;
+            _rigidbody.maxAngularVelocity = Mathf.Max(_rigidbody.maxAngularVelocity, spinRadiansPerSecond);
+            _rigidbody.angularVelocity = _spinAxis * spinRadiansPerSecond;
         }
 
         private IEnumerator FadeOutRoutine()
         {
-            if (_data.FadeDelaySeconds > 0f)
+            // 待っている間も回し続け、壊れた瞬間から回って見えるようにする。
+            float delayElapsedSeconds = 0f;
+
+            while (delayElapsedSeconds < _data.FadeDelaySeconds)
             {
-                yield return new WaitForSeconds(_data.FadeDelaySeconds);
+                delayElapsedSeconds += Time.deltaTime;
+                TickSpin();
+                yield return null;
             }
 
             bool isTransparentFade = _data.FadeMaterial != null;
@@ -119,10 +153,8 @@ namespace Bomb.Battle
             {
                 SwapToFadeMaterial();
             }
-            else
-            {
-                _initialScale = transform.localScale;
-            }
+
+            _initialScale = transform.localScale;
 
             float durationSeconds = _data.FadeDurationSeconds;
             float elapsedSeconds = 0f;
@@ -130,21 +162,30 @@ namespace Bomb.Battle
             while (elapsedSeconds < durationSeconds)
             {
                 elapsedSeconds += Time.deltaTime;
-                float remainRatio = 1f - Mathf.Clamp01(elapsedSeconds / durationSeconds);
+                float progressRatio = Mathf.Clamp01(elapsedSeconds / durationSeconds);
+
+                TickSpin();
+                transform.localScale = _initialScale * _data.GetShrinkScale(progressRatio);
 
                 if (isTransparentFade)
                 {
-                    ApplyAlpha(remainRatio);
-                }
-                else
-                {
-                    transform.localScale = _initialScale * remainRatio;
+                    ApplyAlpha(1f - progressRatio);
                 }
 
                 yield return null;
             }
 
             Destroy(gameObject);
+        }
+
+        private void TickSpin()
+        {
+            if (!_isSpinningByTransform)
+            {
+                return;
+            }
+
+            transform.Rotate(_spinAxis, _spinDegreesPerSecond * Time.deltaTime, Space.World);
         }
 
         /// <summary>
