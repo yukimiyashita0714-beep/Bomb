@@ -24,6 +24,7 @@ public class PlayerInputReceiver : MonoBehaviour
     private Vector2 _move;
     private bool _isDashRequested;
     private bool _isJumpRequested;
+    private bool _isInteractRequested;
 
     // ==========================================
     // Properties
@@ -89,6 +90,17 @@ public class PlayerInputReceiver : MonoBehaviour
         return isRequested;
     }
 
+    /// <summary>
+    /// インタラクト入力が押されていれば true を返し、記録を消す。
+    /// 値を見るのではなく受け取ったら消す形にしている。
+    /// </summary>
+    public bool ConsumeInteractRequest()
+    {
+        bool isRequested = _isInteractRequested;
+        _isInteractRequested = false;
+        return isRequested;
+    }
+
     // ==========================================
     // Private Methods
     // ==========================================
@@ -100,6 +112,7 @@ public class PlayerInputReceiver : MonoBehaviour
         BindValue(player.Move, OnMove);
         BindButton(player.Dash, OnDash);
         BindButton(player.Jump, OnJump);
+        BindButton(player.Interact, OnInteract);
 
         // Value型: started / performed / canceled を受け、canceled で値を戻せるようにする
         void BindValue(InputAction action, Action<InputAction.CallbackContext> callback)
@@ -152,5 +165,11 @@ public class PlayerInputReceiver : MonoBehaviour
     {
         // Jump は Press 指定なしなので、performed は押したときだけ来る。
         _isJumpRequested = true;
+    }
+
+    private void OnInteract(InputAction.CallbackContext context)
+    {
+        // Interact は Press 指定なしなので、performed は押したときだけ来る。
+        _isInteractRequested = true;
     }
 }

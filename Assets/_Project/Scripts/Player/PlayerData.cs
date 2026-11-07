@@ -101,6 +101,11 @@ public class PlayerData : ScriptableObject
     [Range(0.1f, 5f)]
     private float _maxChargeTime = 1.2f;
 
+    [Header("インタラクト")]
+    [SerializeField, Tooltip("インタラクトの発生範囲")]
+    [Range(0f, 5f)]
+    private float _interactRadius = 1f;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -161,6 +166,9 @@ public class PlayerData : ScriptableObject
 
     /// <summary>チャージが最大になるまでの長押し時間 (秒)。</summary>
     public float MaxChargeTime => _maxChargeTime;
+
+    /// <summary> インタラクトの発生範囲 </summary>
+    public float InteractRadius => _interactRadius;
 
     // ==========================================
     // Public Methods
