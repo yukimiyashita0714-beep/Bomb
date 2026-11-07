@@ -1552,7 +1552,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa81fa7cbeb58e14492d723fee1551b6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.UI::Bomb.UI.StaminaUI
+  m_EditorClassIdentifier: Assembly-CSharp::StaminaUI
   _stamina: {fileID: 1842946635548509441}
   _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
   _staminaValue: {fileID: 971159997}
@@ -1745,7 +1745,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1e425c98af5bc643bf957a882662cac, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Hud::Bomb.Hud.ChargeGaugeUI
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeGaugeUI
   _thrower: {fileID: 1842946635548509440}
   _background: {fileID: 595475460}
   _fill: {fileID: 1802645660}
@@ -1941,7 +1941,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 65d2f77ac1868834dba30a11fd9aee09, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.UI::Bomb.UI.GameOverUI
+  m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
   _timer: {fileID: 1326347641}
   _canvasGroup: {fileID: 732201126}
   _firstSelectedButton: {fileID: 1282356492}
@@ -2258,7 +2258,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 818207966}
-        m_TargetAssemblyTypeName: Bomb.UI.ResultUI, Bomb.UI
+        m_TargetAssemblyTypeName: ResultUI, Assembly-CSharp
         m_MethodName: OnRestart
         m_Mode: 1
         m_Arguments:
@@ -2360,7 +2360,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e83a319604bacda438e5e697f04a6c11, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.UI::Bomb.UI.ResultUI
+  m_EditorClassIdentifier: Assembly-CSharp::ResultUI
   _animator: {fileID: 818207967}
   _setButton: {fileID: 742687185}
 --- !u!95 &818207967
@@ -2498,7 +2498,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b37a133cd4ea754abac1b458b67ee8d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Hud::Bomb.Hud.ControlGuideUI
+  m_EditorClassIdentifier: Assembly-CSharp::ControlGuideUI
   _guideText: {fileID: 0}
   _keyboardGuide: '<b>Keyboard</b>
 
@@ -2937,7 +2937,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 732201125}
-        m_TargetAssemblyTypeName: Bomb.UI.GameOverUI, Bomb.UI
+        m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
         m_MethodName: OnRetry
         m_Mode: 0
         m_Arguments:
@@ -4162,7 +4162,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 732201125}
-        m_TargetAssemblyTypeName: Bomb.UI.GameOverUI, Bomb.UI
+        m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
         m_MethodName: OnBackToTitle
         m_Mode: 0
         m_Arguments:
@@ -4789,7 +4789,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdaa053d73f5cf548891761d6b53539b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerThrower
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerThrower
 --- !u!114 &1842946635548509441 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8666636167521298838, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
@@ -4800,7 +4800,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 152490139b90c95489029a8bc464de7e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerStamina
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStamina
 --- !u!114 &1842946635548509442 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5512837400911827301, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
@@ -4811,7 +4811,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ad516f638ce42d597c9e75c7f2223a0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerDamageReceiver
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageReceiver
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
