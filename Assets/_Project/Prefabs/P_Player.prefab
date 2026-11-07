@@ -76,7 +76,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee4200e98540dea42af019aec43f4b5a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerInputReceiver
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputReceiver
 --- !u!114 &107390997530308502
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88,7 +88,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f87a94f0066c204fb3a8e3e056475f7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerController
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
   _cameraTransform: {fileID: 0}
 --- !u!114 &4007211199498807896
@@ -102,7 +102,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdaa053d73f5cf548891761d6b53539b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerThrower
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerThrower
   _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
   _mode: 1
   _grenadePrefab: {fileID: 8626708492992328768, guid: 5f96b2efc47612448a8a25380a84f774, type: 3}
@@ -117,7 +117,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ad516f638ce42d597c9e75c7f2223a0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerDamageReceiver
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageReceiver
   _damageMultiplier: 1
 --- !u!114 &8666636167521298838
 MonoBehaviour:
@@ -130,7 +130,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 152490139b90c95489029a8bc464de7e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerStamina
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStamina
   _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
 --- !u!1 &2517524684850762829
 GameObject:
@@ -347,7 +347,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdf4bd50e8b519f4d9a57f452e1ceccf, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.ThrowTrajectoryView
+  m_EditorClassIdentifier: Assembly-CSharp::ThrowTrajectoryView
   _thrower: {fileID: 4007211199498807896}
   _timeStep: 0.04
   _maxPoints: 80

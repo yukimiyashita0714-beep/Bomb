@@ -821,7 +821,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1e425c98af5bc643bf957a882662cac, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Hud::Bomb.Hud.ChargeGaugeUI
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeGaugeUI
   _thrower: {fileID: 1842946635548509440}
   _background: {fileID: 595475460}
   _fill: {fileID: 1802645660}
@@ -1195,7 +1195,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b37a133cd4ea754abac1b458b67ee8d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Hud::Bomb.Hud.ControlGuideUI
+  m_EditorClassIdentifier: Assembly-CSharp::ControlGuideUI
   _guideText: {fileID: 0}
   _keyboardGuide: '<b>Keyboard</b>
 
@@ -2590,7 +2590,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdaa053d73f5cf548891761d6b53539b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerThrower
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerThrower
 --- !u!1001 &6833682171969642305
 PrefabInstance:
   m_ObjectHideFlags: 0
