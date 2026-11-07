@@ -85,165 +85,198 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
     public @ReceiveActions()
     {
         asset = InputActionAsset.FromJson(@"{
-""version"": 1,
-""name"": ""ReceiveActions"",
-""maps"": [
-    {
-        ""name"": ""Player"",
-        ""id"": ""906bb4ac-32d4-497d-95e4-6580a49b3cc5"",
-        ""actions"": [
-            {
-                ""name"": ""Move"",
-                ""type"": ""Value"",
-                ""id"": ""eb1b3300-7ac3-4c73-ab18-5b85975fa1b4"",
-                ""expectedControlType"": ""Vector2"",
-                ""processors"": """",
-                ""interactions"": """",
-                ""initialStateCheck"": true,
-                ""priority"": 0
-            },
-            {
-                ""name"": ""Dash"",
-                ""type"": ""Button"",
-                ""id"": ""9f9f3c10-483a-4934-9d9b-18bb3af59bff"",
-                ""expectedControlType"": ""Button"",
-                ""processors"": """",
-                ""interactions"": ""Press(behavior=2)"",
-                ""initialStateCheck"": false,
-                ""priority"": 0
-            },
-            {
-                ""name"": ""Jump"",
-                ""type"": ""Button"",
-                ""id"": ""c3a1e7d2-5b4f-4e8a-9d6c-2f1b8a7e4d90"",
-                ""expectedControlType"": ""Button"",
-                ""processors"": """",
-                ""interactions"": """",
-                ""initialStateCheck"": false,
-                ""priority"": 0
-            }
-        ],
-        ""bindings"": [
-            {
-                ""name"": ""WASD"",
-                ""id"": ""55822097-a9f9-4900-a196-8955db0ec6a2"",
-                ""path"": ""2DVector"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Move"",
-                ""isComposite"": true,
-                ""isPartOfComposite"": false
-            },
-            {
-                ""name"": ""up"",
-                ""id"": ""87bdb678-b74b-45f8-abcc-e02f03f27a2d"",
-                ""path"": ""<Keyboard>/w"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Move"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": true
-            },
-            {
-                ""name"": ""down"",
-                ""id"": ""f717670e-94dc-43a4-b17d-7c7268783a81"",
-                ""path"": ""<Keyboard>/s"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Move"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": true
-            },
-            {
-                ""name"": ""left"",
-                ""id"": ""171ee77a-8946-4c5b-85dd-6f39cdcb7cae"",
-                ""path"": ""<Keyboard>/a"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Move"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": true
-            },
-            {
-                ""name"": ""right"",
-                ""id"": ""5ac39150-0b1a-427c-ac94-8b6dd741e098"",
-                ""path"": ""<Keyboard>/d"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Move"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": true
-            },
-            {
-                ""name"": """",
-                ""id"": ""94ad66ae-682f-42f9-8db3-81dc432c9f1d"",
-                ""path"": ""<Gamepad>/leftStick"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Move"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": false
-            },
-            {
-                ""name"": """",
-                ""id"": ""669dc656-4ae7-4b4c-be21-b1d90f4fd32a"",
-                ""path"": ""<Keyboard>/shift"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Dash"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": false
-            },
-            {
-                ""name"": """",
-                ""id"": ""161ef08a-7e10-4885-a6b6-a2c269f5fc29"",
-                ""path"": ""<Gamepad>/leftStickPress"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Dash"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": false
-            },
-            {
-                ""name"": """",
-                ""id"": ""7e2d4c1a-8f3b-4a6e-b5d9-1c0f2e3a4b57"",
-                ""path"": ""<Keyboard>/space"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Jump"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": false
-            },
-            {
-                ""name"": """",
-                ""id"": ""a9b8c7d6-1e2f-4a3b-8c5d-6e7f8091a2b3"",
-                ""path"": ""<Gamepad>/buttonSouth"",
-                ""interactions"": """",
-                ""processors"": """",
-                ""groups"": """",
-                ""action"": ""Jump"",
-                ""isComposite"": false,
-                ""isPartOfComposite"": false
-            }
-        ]
-    }
-],
-""controlSchemes"": []
+    ""version"": 1,
+    ""name"": ""ReceiveActions"",
+    ""maps"": [
+        {
+            ""name"": ""Player"",
+            ""id"": ""906bb4ac-32d4-497d-95e4-6580a49b3cc5"",
+            ""actions"": [
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
+                    ""id"": ""eb1b3300-7ac3-4c73-ab18-5b85975fa1b4"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Dash"",
+                    ""type"": ""Button"",
+                    ""id"": ""9f9f3c10-483a-4934-9d9b-18bb3af59bff"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""c3a1e7d2-5b4f-4e8a-9d6c-2f1b8a7e4d90"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""6f2e51dc-4bf8-4a07-83a3-3b113363d7bf"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""55822097-a9f9-4900-a196-8955db0ec6a2"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""87bdb678-b74b-45f8-abcc-e02f03f27a2d"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""f717670e-94dc-43a4-b17d-7c7268783a81"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""171ee77a-8946-4c5b-85dd-6f39cdcb7cae"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""5ac39150-0b1a-427c-ac94-8b6dd741e098"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""94ad66ae-682f-42f9-8db3-81dc432c9f1d"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""669dc656-4ae7-4b4c-be21-b1d90f4fd32a"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""161ef08a-7e10-4885-a6b6-a2c269f5fc29"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7e2d4c1a-8f3b-4a6e-b5d9-1c0f2e3a4b57"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a9b8c7d6-1e2f-4a3b-8c5d-6e7f8091a2b3"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e346aa0e-2a9d-46b4-8eb5-3bf1c58fd041"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aa5d5097-a8cb-4792-b8f4-6bc1ccc1f46a"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        }
+    ],
+    ""controlSchemes"": []
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
     }
 
     ~@ReceiveActions()
@@ -327,6 +360,7 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Dash;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Interact;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -350,6 +384,10 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Jump".
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Interact".
+        /// </summary>
+        public InputAction @Interact => m_Wrapper.m_Player_Interact;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -385,6 +423,9 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
         }
 
         /// <summary>
@@ -405,6 +446,9 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
         }
 
         /// <summary>
@@ -466,5 +510,12 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract(InputAction.CallbackContext context);
     }
 }
