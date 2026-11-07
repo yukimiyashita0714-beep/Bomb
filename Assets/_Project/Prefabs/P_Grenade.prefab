@@ -95,7 +95,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b839389c33ac5b244ba6aaf4d217c84a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Battle::Bomb.Battle.Grenade
+  m_EditorClassIdentifier: Assembly-CSharp::Grenade
   _data: {fileID: 11400000, guid: 2682861d0c6557d4b9ab70018a6a7a12, type: 2}
 --- !u!114 &3902445128813132657
 MonoBehaviour:
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d3102285b7ab9241820dac67066225b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Battle::Bomb.Battle.GrenadeExplosionView
+  m_EditorClassIdentifier: Assembly-CSharp::GrenadeExplosionView
   _explosionVfxPrefab: {fileID: 3546503584072692249, guid: ba2a742fd7b4f0941a3b8e75a13af5c0, type: 3}
   _vfxBaseRadiusMeters: 5
   _vfxLifetimeSeconds: 4

@@ -1680,7 +1680,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e83a319604bacda438e5e697f04a6c11, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.UI::Bomb.UI.ResultUI
+  m_EditorClassIdentifier: Assembly-CSharp::ResultUI
   _animator: {fileID: 459646785}
   _setButton: {fileID: 1746093581}
 --- !u!1 &697033432
@@ -4208,7 +4208,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b37a133cd4ea754abac1b458b67ee8d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Hud::Bomb.Hud.ControlGuideUI
+  m_EditorClassIdentifier: Assembly-CSharp::ControlGuideUI
   _guideText: {fileID: 0}
   _keyboardGuide: '<b>Keyboard</b>
 
@@ -4609,7 +4609,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1e425c98af5bc643bf957a882662cac, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Hud::Bomb.Hud.ChargeGaugeUI
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeGaugeUI
   _thrower: {fileID: 1937825190}
   _background: {fileID: 1250628487}
   _fill: {fileID: 1485022980}
@@ -4708,7 +4708,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 459646786}
-        m_TargetAssemblyTypeName: Bomb.UI.ResultUI, Bomb.UI
+        m_TargetAssemblyTypeName: ResultUI, Assembly-CSharp
         m_MethodName: OnRestart
         m_Mode: 1
         m_Arguments:
@@ -4973,7 +4973,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdaa053d73f5cf548891761d6b53539b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerThrower
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerThrower
 --- !u!114 &1937825191 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5512837400911827301, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
@@ -4984,7 +4984,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ad516f638ce42d597c9e75c7f2223a0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Bomb.Player::Bomb.Player.PlayerDamageReceiver
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageReceiver
 --- !u!1 &1964398115
 GameObject:
   m_ObjectHideFlags: 0

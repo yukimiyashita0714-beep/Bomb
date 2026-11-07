@@ -2,63 +2,60 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
-namespace Bomb.UI
+public class ResultUI : MonoBehaviour
 {
-    public class ResultUI : MonoBehaviour
+    // ==========================================
+    // Serialize Fields
+    // ==========================================
+
+    [SerializeField] private Animator _animator;
+
+    [SerializeField, Tooltip("リザルト出た場合に最初に選択されるボタン")] 
+    private GameObject _setButton;
+
+    // ==========================================
+    // Public Methods
+    // ==========================================
+
+    /// <summary>
+    /// 表示非表示
+    /// </summary>
+    /// <param name="enabled"></param>
+    public void SetDisplay(bool enabled)
     {
-        // ==========================================
-        // Serialize Fields
-        // ==========================================
+        _animator.SetBool("Display", enabled);
 
-        [SerializeField] private Animator _animator;
+        SetButton(enabled);
+    }
 
-        [SerializeField, Tooltip("リザルト出た場合に最初に選択されるボタン")] 
-        private GameObject _setButton;
+    public void OnRestart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
-        // ==========================================
-        // Public Methods
-        // ==========================================
+    // ==========================================
+    // Private Methods
+    // ==========================================
 
-        /// <summary>
-        /// 表示非表示
-        /// </summary>
-        /// <param name="enabled"></param>
-        public void SetDisplay(bool enabled)
+    private void SetButton(bool enabled)
+    {
+        if (enabled)
         {
-            _animator.SetBool("Display", enabled);
-
-            SetButton(enabled);
+            EventSystem.current.SetSelectedGameObject(_setButton);
         }
-
-        public void OnRestart()
+        else
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            EventSystem.current.SetSelectedGameObject(null);
         }
+    }
 
-        // ==========================================
-        // Private Methods
-        // ==========================================
+    // ==========================================
+    // Debug
+    // ==========================================
 
-        private void SetButton(bool enabled)
-        {
-            if (enabled)
-            {
-                EventSystem.current.SetSelectedGameObject(_setButton);
-            }
-            else
-            {
-                EventSystem.current.SetSelectedGameObject(null);
-            }
-        }
-
-        // ==========================================
-        // Debug
-        // ==========================================
-
-        [ContextMenu("Result")]
-        private void ResultDebug()
-        {
-            SetDisplay(true);
-        }
+    [ContextMenu("Result")]
+    private void ResultDebug()
+    {
+        SetDisplay(true);
     }
 }
