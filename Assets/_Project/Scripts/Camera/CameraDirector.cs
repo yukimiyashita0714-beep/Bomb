@@ -1,3 +1,5 @@
+using Bomb.Battle;
+using Bomb.Core;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -7,24 +9,44 @@ public class CameraDirector : MonoBehaviour
     // Serialize Fields
     // ==========================================
 
-    [SerializeField] private CameraData _data;
-    [SerializeField] private CinemachineOrbitalFollow _orbitalFollow;
-    [SerializeField] private CinemachineInputAxisController _inputAxisController;
+    [SerializeField] private Animator _animator;
 
+    [SerializeField] private CameraData _data;
+
+    [SerializeField] private ExplosionEvent _explosionEvent;
+
+    [Header("MainCamera")]
+    [SerializeField] private CinemachineOrbitalFollow _mainOrbitalFollow;
+    [SerializeField] private CinemachineInputAxisController _mainInputAxisController;
     [SerializeField] private Transform _cameraTarget;
 
     // ==========================================
     // Unity Messages
     // ==========================================
 
+    private void OnEnable()
+    {
+        _explosionEvent.OnExplosion += Explosion;
+    }
+
     private void Update()
     {
         CameraDataUpdate();
     }
 
+    private void OnDisable()
+    {
+        _explosionEvent.OnExplosion -= Explosion;
+    }
+
     // ==========================================
     // Public Methods
     // ==========================================
+
+    public void Explosion()
+    {
+        _animator.SetTrigger("Explosion");
+    }
 
     // ==========================================
     // Private Methods
@@ -32,12 +54,25 @@ public class CameraDirector : MonoBehaviour
 
     private void CameraDataUpdate()
     {
-        _orbitalFollow.TargetOffset = _data.CameraPos;
-        _orbitalFollow.Radius = _data.CameraRadius;
+        _mainOrbitalFollow.TargetOffset = _data.CameraPos;
+        _mainOrbitalFollow.Radius = _data.CameraRadius;
 
         _cameraTarget.localPosition = _data.TargetPos;
 
-        _inputAxisController.Controllers[0].Input.Gain = _data.CameraGainX;
-        _inputAxisController.Controllers[1].Input.Gain = _data.CameraGainY;
+        _mainInputAxisController.Controllers[0].Input.Gain = _data.CameraGainX;
+        _mainInputAxisController.Controllers[1].Input.Gain = _data.CameraGainY;
+    }
+
+    // ==========================================
+    // Debug
+    // ==========================================
+
+    /// <summary>
+    /// Explosion
+    /// </summary>
+    [ContextMenu("Explosion")]
+    public void ExplosionDebug()
+    {
+        _animator.SetTrigger("Explosion");
     }
 }

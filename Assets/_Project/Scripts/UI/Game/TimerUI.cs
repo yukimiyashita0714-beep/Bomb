@@ -1,3 +1,4 @@
+using Bomb.Core;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -11,6 +12,8 @@ namespace Bomb.UI
         // Serialize Fields
         // ==========================================
 
+        [SerializeField] private ExplosionEvent _explosionEvent;
+
         [SerializeField, Tooltip("時間のテキスト")] TextMeshProUGUI _timerText;
 
         [SerializeField, Tooltip("制限時間")] private float _limitTime;
@@ -21,8 +24,10 @@ namespace Bomb.UI
 
         private Dictionary<float, Action> _timerEvents;
 
-        private float _limitTimer;
-        private float _prevLimitTimer;
+        private bool _timeProgression = true;
+
+        private float _limitTimer = 0;
+        private float _prevLimitTimer = 0;
 
         private bool _isTimeUp;
 
@@ -37,7 +42,7 @@ namespace Bomb.UI
         // Events
         // ==========================================
 
-        // 残り時間がその時間になったらEventを送る
+        /// <summary> 残り時間がその時間になったらEventを送る </summary>
         public event Action OnTenSecond;
         public event Action OnThirtySecond;
         public event Action OnOneMinute;
@@ -49,6 +54,11 @@ namespace Bomb.UI
         // ==========================================
         // Unity Messages
         // ==========================================
+
+        private void OnEnable()
+        {
+            _explosionEvent.OnExplosion += OnTimerStop;
+        }
 
         private void Start()
         {
@@ -70,9 +80,24 @@ namespace Bomb.UI
             PassageOfTime();
         }
 
+        private void OnDisable()
+        {
+            _explosionEvent.OnExplosion -= OnTimerStop;
+        }
+
         // ==========================================
         // Public Methods
         // ==========================================
+
+        public void OnTimerStart()
+        {
+            _timeProgression = true;
+        }
+
+        public void OnTimerStop()
+        {
+            _timeProgression = false;
+        }
 
         // ==========================================
         // Private Methods
@@ -96,7 +121,8 @@ namespace Bomb.UI
         private void PassageOfTime()
         {
             // 時間切れ後はイベントを送り直さないように止める
-            if (_isTimeUp)
+            // または、タイマーを止めているときは処理を止める
+            if (_isTimeUp || !_timeProgression)
             {
                 return;
             }

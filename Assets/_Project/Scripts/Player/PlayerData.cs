@@ -103,6 +103,11 @@ namespace Bomb.Player
         [Range(0.1f, 5f)]
         private float _maxChargeTime = 1.2f;
 
+        [Header("Interact")]
+        [SerializeField, Tooltip("インタラクト出現範囲")]
+        [Range(0f, 5f)]
+        private float _interactRadius = 2f;
+
         // ==========================================
         // Properties
         // ==========================================
@@ -163,6 +168,9 @@ namespace Bomb.Player
 
         /// <summary>チャージが最大になるまでの長押し時間 (秒)。</summary>
         public float MaxChargeTime => _maxChargeTime;
+
+        /// <summary> インタラクトの出現範囲 </summary>
+        public float InteractRadius => _interactRadius;
 
         // ==========================================
         // Public Methods
