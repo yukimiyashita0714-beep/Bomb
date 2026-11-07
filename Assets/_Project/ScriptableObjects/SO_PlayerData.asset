@@ -33,3 +33,4 @@ MonoBehaviour:
   _minChargeImpulse: 3
   _maxChargeImpulse: 5
   _maxChargeTime: 0.6
+  _interactRadius: 1
