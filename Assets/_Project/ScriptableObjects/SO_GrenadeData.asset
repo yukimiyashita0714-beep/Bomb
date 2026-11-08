@@ -15,8 +15,8 @@ MonoBehaviour:
   _fuseSeconds: 1
   _isDetonatedOnDestructibleHit: 1
   _explosionRadius: 5
-  _explosionForce: 14
-  _upwardsModifier: 1
+  _explosionForce: 18
+  _upwardsModifier: 2
   _affectedLayers:
     serializedVersion: 2
     m_Bits: 4294967295
