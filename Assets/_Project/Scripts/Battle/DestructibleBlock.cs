@@ -1,11 +1,12 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 /// <summary>
-/// 爆風が当たると当たり判定がなくなり、徐々に消えていくブロック。
+/// 爆風が当たると回りながら縮んで破片になり、地面に残る。一定時間たつと破片が元の場所へ戻って復活するブロック。
 /// グレネードは相手が何者かを知らずに <see cref="IDamageable"/> だけを見て当てるので、
 /// ここもそれを実装して「ダメージを受けた = 爆風が当たった」として扱う。
+/// 破片の間はレイヤーを Debris に変え、地面や壁には乗るが、プレイヤーやグレネードとは当たらないようにする
+/// (どのレイヤー同士が当たるかは Project Settings > Physics の Layer Collision Matrix で決めている)。
 /// </summary>
 [DisallowMultipleComponent]
 public class DestructibleBlock : MonoBehaviour, IDamageable
@@ -14,27 +15,52 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     // Serialize Fields
     // ==========================================
 
-    [SerializeField, Tooltip("消え方の設定。全ブロックで同じアセットを共有する")]
+    [SerializeField, Tooltip("壊れ方と復活の設定。全ブロックで同じアセットを共有する")]
     private DestructibleBlockData _data;
 
     // ==========================================
     // Private Fields
     // ==========================================
 
-    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    /// <summary>破片の間に使うレイヤーの名前。Project Settings > Tags and Layers に登録してある。</summary>
+    private const string DEBRIS_LAYER_NAME = "Debris";
+
+    /// <summary>レイヤーの番号をまだ調べていないことを表す値。</summary>
+    private const int UNRESOLVED_LAYER = -2;
+
+    /// <summary>復活の場所に誰かいるかを調べるとき、一度に拾う上限。</summary>
+    private const int MAX_RESPAWN_OVERLAP_COUNT = 16;
 
     /// <summary>
-    /// 色の上書きに使い回す入れ物。SetPropertyBlock は中身をコピーするので全ブロックで共有してよい。
-    /// マテリアルを直接書き換えると、ブロックごとにマテリアルの複製ができてしまう。
+    /// 復活の場所を調べる箱を少し小さくする割合。
+    /// 原寸だと、隣に並んでいるブロックにも触れてしまい、いつまでも復活できない。
     /// </summary>
-    private static MaterialPropertyBlock _propertyBlock;
+    private const float RESPAWN_CHECK_SHRINK_RATIO = 0.9f;
+
+    /// <summary>破片の重さの下限。0 に近いと物理が不安定になる。</summary>
+    private const float MIN_DEBRIS_MASS = 0.01f;
+
+    private static readonly Collider[] RespawnOverlapBuffer = new Collider[MAX_RESPAWN_OVERLAP_COUNT];
+
+    private static int _debrisLayer = UNRESOLVED_LAYER;
 
     private Rigidbody _rigidbody;
     private Collider[] _colliders;
-    private Renderer[] _renderers;
-    private Color[] _baseColors;
-    private Vector3 _initialScale;
+    private Transform[] _layerTargets;
+
+    // 復活したときに元へ戻すため、最初の状態を覚えておく。
+    private Vector3 _initialLocalPosition;
+    private Quaternion _initialLocalRotation;
+    private Vector3 _initialLocalScale;
+    private bool _wasKinematic;
+    private float _initialMass;
+    private int[] _originalLayers;
+
+    private float _brokenTime;
     private bool _isBreaking;
+
+    /// <summary>今回の破片の大きさ。壊れるたびにランダムに決め直す。</summary>
+    private float _debrisScaleRatio;
 
     /// <summary>Rigidbody に回転を任せられないときに、自分で回す軸と速さ。</summary>
     private Vector3 _spinAxis;
@@ -45,8 +71,28 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     // Properties
     // ==========================================
 
-    /// <summary>爆風が当たって消えている途中なら true。</summary>
+    /// <summary>爆風が当たってから、元の場所に戻って復活するまでの間は true。</summary>
     public bool IsBreaking => _isBreaking;
+
+    /// <summary>破片のレイヤー番号。登録されていなければ -1。</summary>
+    private static int DebrisLayer
+    {
+        get
+        {
+            if (_debrisLayer == UNRESOLVED_LAYER)
+            {
+                _debrisLayer = LayerMask.NameToLayer(DEBRIS_LAYER_NAME);
+
+                if (_debrisLayer < 0)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(DestructibleBlock)}] レイヤー \"{DEBRIS_LAYER_NAME}\" が無いので、破片がプレイヤーにも当たってしまう。");
+                }
+            }
+
+            return _debrisLayer;
+        }
+    }
 
     // ==========================================
     // Unity Messages
@@ -56,20 +102,23 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     {
         _rigidbody = GetComponent<Rigidbody>();
         _colliders = GetComponentsInChildren<Collider>(true);
-        _renderers = GetComponentsInChildren<Renderer>(true);
+        _layerTargets = GetComponentsInChildren<Transform>(true);
 
         if (_data == null)
         {
             Debug.LogError($"[{nameof(DestructibleBlock)}] DestructibleBlockData が未設定のため動作できない。", this);
             enabled = false;
+            return;
         }
+
+        SaveInitialState();
     }
 
     // ==========================================
     // Public Methods
     // ==========================================
 
-    /// <summary>爆風が当たったときに呼ばれる。量に関係なく、一度当たれば消える。</summary>
+    /// <summary>爆風が当たったときに呼ばれる。量に関係なく、一度当たれば壊れる。破片の間は何もしない。</summary>
     public void TakeDamage(float amount)
     {
         if (!enabled || _isBreaking)
@@ -84,14 +133,37 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     // Private Methods
     // ==========================================
 
+    private void SaveInitialState()
+    {
+        _initialLocalPosition = transform.localPosition;
+        _initialLocalRotation = transform.localRotation;
+        _initialLocalScale = transform.localScale;
+        _wasKinematic = _rigidbody != null && _rigidbody.isKinematic;
+        _initialMass = _rigidbody != null ? _rigidbody.mass : 0f;
+
+        _originalLayers = new int[_layerTargets.Length];
+
+        for (int i = 0; i < _layerTargets.Length; i++)
+        {
+            _originalLayers[i] = _layerTargets[i].gameObject.layer;
+        }
+    }
+
     private void Break()
     {
         _isBreaking = true;
+        _brokenTime = Time.time;
 
-        // 消えかけのブロックに当たって止まったり、次の爆風をさえぎったりしないよう、すぐ判定を消す。
-        for (int i = 0; i < _colliders.Length; i++)
+        // 全部同じ大きさだと作り物っぽく見えるので、破片ごとに大きさを変える。
+        _debrisScaleRatio = _data.GetRandomDebrisScaleRatio();
+
+        // 当たり判定は残したまま、プレイヤーやグレネードとは当たらないレイヤーに移す。
+        // こうすると、壊れた瞬間から通り抜けられるのに、破片は地面に落ちて残る。
+        int debrisLayer = DebrisLayer;
+
+        if (debrisLayer >= 0)
         {
-            _colliders[i].enabled = false;
+            SetLayer(debrisLayer);
         }
 
         if (_rigidbody != null && !_data.IsMovingWhileFading)
@@ -99,18 +171,12 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
             _rigidbody.isKinematic = true;
         }
 
-        // 半透明にしても影は濃いまま残るので、消え始めた時点で影を切る。
-        for (int i = 0; i < _renderers.Length; i++)
-        {
-            _renderers[i].shadowCastingMode = ShadowCastingMode.Off;
-        }
-
         StartSpin();
-        StartCoroutine(FadeOutRoutine());
+        StartCoroutine(BreakAndRespawnRoutine());
     }
 
     /// <summary>
-    /// ブロックごとに軸と速さを変えて回す。全部同じ向きに回ると、まとめて消えるときに作り物っぽく見える。
+    /// ブロックごとに軸と速さを変えて回す。全部同じ向きに回ると、まとめて壊れるときに作り物っぽく見える。
     /// </summary>
     private void StartSpin()
     {
@@ -132,7 +198,35 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         _rigidbody.angularVelocity = _spinAxis * spinRadiansPerSecond;
     }
 
-    private IEnumerator FadeOutRoutine()
+    private IEnumerator BreakAndRespawnRoutine()
+    {
+        yield return ShrinkRoutine();
+
+        BecomeDebris();
+
+        // 爆風が当たった瞬間から数える。縮むのにかかった時間もこの中に含まれる。
+        float respawnTime = _brokenTime + _data.RespawnDelaySeconds;
+
+        if (Time.time < respawnTime)
+        {
+            yield return new WaitForSeconds(respawnTime - Time.time);
+        }
+
+        // プレイヤーがいる場所に戻すと、ブロックの中に閉じ込めたり弾き飛ばしたりしてしまう。
+        // 場所が空くまで待つので、このループはプレイヤーがどけば必ず抜ける。
+        WaitForSeconds retryWait = new WaitForSeconds(_data.RespawnRetrySeconds);
+
+        while (IsRespawnBlocked())
+        {
+            yield return retryWait;
+        }
+
+        yield return ReturnRoutine();
+
+        Respawn();
+    }
+
+    private IEnumerator ShrinkRoutine()
     {
         // 待っている間も回し続け、壊れた瞬間から回って見えるようにする。
         float delayElapsedSeconds = 0f;
@@ -144,15 +238,7 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
             yield return null;
         }
 
-        bool isTransparentFade = _data.FadeMaterial != null;
-
-        if (isTransparentFade)
-        {
-            SwapToFadeMaterial();
-        }
-
-        _initialScale = transform.localScale;
-
+        Vector3 startScale = transform.localScale;
         float durationSeconds = _data.FadeDurationSeconds;
         float elapsedSeconds = 0f;
 
@@ -162,17 +248,10 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
             float progressRatio = Mathf.Clamp01(elapsedSeconds / durationSeconds);
 
             TickSpin();
-            transform.localScale = _initialScale * _data.GetShrinkScale(progressRatio);
-
-            if (isTransparentFade)
-            {
-                ApplyAlpha(1f - progressRatio);
-            }
+            transform.localScale = startScale * _data.GetShrinkScale(progressRatio, _debrisScaleRatio);
 
             yield return null;
         }
-
-        Destroy(gameObject);
     }
 
     private void TickSpin()
@@ -186,40 +265,181 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     }
 
     /// <summary>
-    /// 不透明のマテリアルは透明にできないので、消える直前に半透明のものへ差し替える。
-    /// 色は元のマテリアルから引き継ぐので、色違いのブロックも1つの半透明マテリアルで済む。
+    /// 縮み終わった破片を物理に任せ、地面に落ちて転がって止まるようにする。
+    /// 自前の回転はここで止める。物理で回っていた分は、そのまま転がりとして残る。
     /// </summary>
-    private void SwapToFadeMaterial()
+    private void BecomeDebris()
     {
-        _baseColors = new Color[_renderers.Length];
+        _isSpinningByTransform = false;
 
-        for (int i = 0; i < _renderers.Length; i++)
+        if (_rigidbody == null)
         {
-            Material original = _renderers[i].sharedMaterial;
+            return;
+        }
 
-            _baseColors[i] = original != null && original.HasProperty(BaseColorId)
-                ? original.GetColor(BaseColorId)
-                : Color.white;
+        // 元の重さのままだと、小さな破片がまだ壊れていないブロックを押しのけてしまう。
+        float ratio = _debrisScaleRatio;
+        _rigidbody.mass = Mathf.Max(MIN_DEBRIS_MASS, _initialMass * ratio * ratio * ratio);
 
-            _renderers[i].sharedMaterial = _data.FadeMaterial;
+        if (!_wasKinematic)
+        {
+            _rigidbody.isKinematic = false;
+            _rigidbody.WakeUp();
         }
     }
 
-    private void ApplyAlpha(float alpha)
+    /// <summary>破片を今の場所から元の位置・回転・大きさへ、滑らかに戻していく。</summary>
+    private IEnumerator ReturnRoutine()
     {
-        if (_propertyBlock == null)
+        // 戻る途中で何かにぶつかって止まらないよう、物理から外して当たり判定も切る。
+        if (_rigidbody != null)
         {
-            _propertyBlock = new MaterialPropertyBlock();
+            if (!_rigidbody.isKinematic)
+            {
+                _rigidbody.linearVelocity = Vector3.zero;
+                _rigidbody.angularVelocity = Vector3.zero;
+            }
+
+            _rigidbody.isKinematic = true;
         }
 
-        for (int i = 0; i < _renderers.Length; i++)
-        {
-            Color color = _baseColors[i];
-            color.a *= alpha;
+        SetCollidersEnabled(false);
 
-            _renderers[i].GetPropertyBlock(_propertyBlock);
-            _propertyBlock.SetColor(BaseColorId, color);
-            _renderers[i].SetPropertyBlock(_propertyBlock);
+        Vector3 startPosition = transform.localPosition;
+        Quaternion startRotation = transform.localRotation;
+        Vector3 startScale = transform.localScale;
+        float durationSeconds = _data.ReturnDurationSeconds;
+        float elapsedSeconds = 0f;
+
+        while (elapsedSeconds < durationSeconds)
+        {
+            elapsedSeconds += Time.deltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsedSeconds / durationSeconds));
+
+            transform.localPosition = Vector3.Lerp(startPosition, _initialLocalPosition, t);
+            transform.localRotation = Quaternion.Slerp(startRotation, _initialLocalRotation, t);
+            transform.localScale = Vector3.Lerp(startScale, _initialLocalScale, t);
+
+            yield return null;
+        }
+    }
+
+    private void Respawn()
+    {
+        transform.localPosition = _initialLocalPosition;
+        transform.localRotation = _initialLocalRotation;
+        transform.localScale = _initialLocalScale;
+
+        RestoreLayers();
+        SetCollidersEnabled(true);
+
+        if (_rigidbody != null)
+        {
+            _rigidbody.position = transform.position;
+            _rigidbody.rotation = transform.rotation;
+            _rigidbody.mass = _initialMass;
+            _rigidbody.isKinematic = _wasKinematic;
+
+            if (!_wasKinematic)
+            {
+                _rigidbody.linearVelocity = Vector3.zero;
+                _rigidbody.angularVelocity = Vector3.zero;
+
+                // 積み上がった壁は下のブロックが先に戻るとは限らない。
+                // 眠らせておけば、何かが触れるまで元の場所で止まっている。
+                _rigidbody.Sleep();
+            }
+        }
+
+        _isBreaking = false;
+    }
+
+    /// <summary>
+    /// 元の場所に、プレイヤーやグレネードなど動く物が入っていれば true。
+    /// 地形と、ほかのブロックと、破片は邪魔扱いしない。
+    /// 破片は動かさずに、元の位置に置いたときの箱を計算して調べる。
+    /// </summary>
+    private bool IsRespawnBlocked()
+    {
+        Matrix4x4 parentMatrix = transform.parent != null
+            ? transform.parent.localToWorldMatrix
+            : Matrix4x4.identity;
+        Matrix4x4 initialMatrix = parentMatrix * Matrix4x4.TRS(_initialLocalPosition, _initialLocalRotation, _initialLocalScale);
+
+        int debrisLayer = DebrisLayer;
+        int layerMask = debrisLayer >= 0 ? ~(1 << debrisLayer) : Physics.AllLayers;
+
+        for (int i = 0; i < _colliders.Length; i++)
+        {
+            if (!(_colliders[i] is BoxCollider box))
+            {
+                continue;
+            }
+
+            // 子に付いた箱は、自分から見た位置関係を保ったまま元の場所へ移して考える。
+            Matrix4x4 boxMatrix = initialMatrix * (transform.worldToLocalMatrix * box.transform.localToWorldMatrix);
+            Vector3 lossyScale = boxMatrix.lossyScale;
+            Vector3 absScale = new Vector3(Mathf.Abs(lossyScale.x), Mathf.Abs(lossyScale.y), Mathf.Abs(lossyScale.z));
+            Vector3 halfExtents = Vector3.Scale(box.size, absScale) * (0.5f * RESPAWN_CHECK_SHRINK_RATIO);
+
+            int hitCount = Physics.OverlapBoxNonAlloc(
+                boxMatrix.MultiplyPoint3x4(box.center),
+                halfExtents,
+                RespawnOverlapBuffer,
+                boxMatrix.rotation,
+                layerMask,
+                QueryTriggerInteraction.Ignore);
+
+            for (int j = 0; j < hitCount; j++)
+            {
+                if (IsBlockingRespawn(RespawnOverlapBuffer[j]))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsBlockingRespawn(Collider other)
+    {
+        if (other is CharacterController)
+        {
+            return true;
+        }
+
+        Rigidbody body = other.attachedRigidbody;
+
+        if (body == null)
+        {
+            return false;
+        }
+
+        return !body.TryGetComponent(out DestructibleBlock _);
+    }
+
+    private void SetCollidersEnabled(bool isEnabled)
+    {
+        for (int i = 0; i < _colliders.Length; i++)
+        {
+            _colliders[i].enabled = isEnabled;
+        }
+    }
+
+    private void SetLayer(int layer)
+    {
+        for (int i = 0; i < _layerTargets.Length; i++)
+        {
+            _layerTargets[i].gameObject.layer = layer;
+        }
+    }
+
+    private void RestoreLayers()
+    {
+        for (int i = 0; i < _layerTargets.Length; i++)
+        {
+            _layerTargets[i].gameObject.layer = _originalLayers[i];
         }
     }
 }

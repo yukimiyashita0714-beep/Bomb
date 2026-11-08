@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DestructibleBlockData
   _fadeDelaySeconds: 0
   _fadeDurationSeconds: 1
-  _fadeMaterial: {fileID: 2100000, guid: f354f45f76f7407ea2289049935c0875, type: 2}
   _shrinkCurve:
     serializedVersion: 2
     m_Curve:
@@ -39,6 +38,11 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _minDebrisScaleRatio: 0.2
+  _maxDebrisScaleRatio: 0.5
   _minSpinDegreesPerSecond: 360
   _maxSpinDegreesPerSecond: 900
+  _respawnDelaySeconds: 15
+  _respawnRetrySeconds: 0.5
+  _returnDurationSeconds: 0.6
   _isMovingWhileFading: 1

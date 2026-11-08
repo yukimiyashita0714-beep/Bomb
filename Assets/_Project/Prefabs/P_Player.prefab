@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4007211199498807896}
   - component: {fileID: 5512837400911827301}
   - component: {fileID: 8666636167521298838}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: P_Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -141,7 +141,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6850347792425939201}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CameraTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -172,7 +172,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6569844798539621500}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -206,7 +206,7 @@ GameObject:
   - component: {fileID: 2322778533651264781}
   - component: {fileID: 4097911575379625180}
   - component: {fileID: 8853438553819574014}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TrajectoryLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -354,7 +354,7 @@ MonoBehaviour:
   _groundY: 0.02
   _collisionLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294967039
   _ignoresMovingBodies: 1
   _showsLandingMarker: 1
   _landingMarkerMaterial: {fileID: 2100000, guid: 9ff4cfe519e5429ba0bc9f24638c1dfe, type: 2}
