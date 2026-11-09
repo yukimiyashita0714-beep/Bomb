@@ -45,7 +45,7 @@ public class DestructibleBlockData : ScriptableObject
     private float _maxSpinDegreesPerSecond = 900f;
 
     [Header("Respawn")]
-    [SerializeField, Tooltip("爆風が当たってから (爆風以外でずれたときは、ずれてから) 元の場所に復活するまでの時間 (秒)")]
+    [SerializeField, Tooltip("爆風が当たってから元の場所に復活するまでの時間 (秒)")]
     [Range(1f, 120f)]
     private float _respawnDelaySeconds = 15f;
 
@@ -56,19 +56,6 @@ public class DestructibleBlockData : ScriptableObject
     [SerializeField, Tooltip("破片が元の場所へ戻っていくのにかける時間 (秒)")]
     [Range(0.1f, 5f)]
     private float _returnDurationSeconds = 0.6f;
-
-    [Header("Displacement")]
-    [SerializeField, Tooltip("壊れていないブロックが、元の位置からこの距離 (m) 以上ずれたら「ずれた」とみなし、復活と同じ時間がたったら元の場所へ戻す")]
-    [Range(0.01f, 5f)]
-    private float _displacedDistanceMeters = 0.2f;
-
-    [SerializeField, Tooltip("壊れていないブロックが、元の向きからこの角度 (度) 以上傾いたら「ずれた」とみなす")]
-    [Range(1f, 180f)]
-    private float _displacedAngleDegrees = 15f;
-
-    [SerializeField, Tooltip("何かに当たって動いているブロックが、ずれたかどうかを調べる間隔 (秒)。短いほど正確だが重くなる")]
-    [Range(0.1f, 5f)]
-    private float _displacementCheckIntervalSeconds = 0.5f;
 
     [Header("Motion")]
     [SerializeField, Tooltip("ON なら爆風で飛ばされながら縮む。OFF なら縮み終わるまでその場で止まる")]
@@ -104,15 +91,6 @@ public class DestructibleBlockData : ScriptableObject
 
     /// <summary>破片が元の場所へ戻っていくのにかける時間 (秒)。</summary>
     public float ReturnDurationSeconds => _returnDurationSeconds;
-
-    /// <summary>元の位置からこの距離 (m) 以上ずれたら「ずれた」とみなす。</summary>
-    public float DisplacedDistanceMeters => _displacedDistanceMeters;
-
-    /// <summary>元の向きからこの角度 (度) 以上傾いたら「ずれた」とみなす。</summary>
-    public float DisplacedAngleDegrees => _displacedAngleDegrees;
-
-    /// <summary>動いているブロックがずれたかどうかを調べる間隔 (秒)。</summary>
-    public float DisplacementCheckIntervalSeconds => _displacementCheckIntervalSeconds;
 
     /// <summary>true なら爆風で飛ばされながら縮む。</summary>
     public bool IsMovingWhileFading => _isMovingWhileFading;
