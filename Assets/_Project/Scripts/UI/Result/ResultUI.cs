@@ -12,7 +12,7 @@ public class ResultUI : MonoBehaviour
 
     [SerializeField] private Animator _animator;
 
-    [SerializeField] private ExplosionEvent _explosionEvent;
+    [SerializeField] private GameEvent _explosionEvent;
 
     [SerializeField, Tooltip("リザルト出た場合に最初に選択されるボタン")]
     private GameObject _setButton;

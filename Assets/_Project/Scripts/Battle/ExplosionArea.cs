@@ -10,7 +10,7 @@ namespace Bomb.Battle
         // Serialize Fields
         // ==========================================
 
-        [SerializeField] private ExplosionEvent _explosionEvent;
+        [SerializeField] private GameEvent _explosionEvent;
 
         // ==========================================
         // Private Fields
@@ -40,7 +40,7 @@ namespace Bomb.Battle
                 return;
             }
 
-            _explosionEvent.Play(ExplosionEvent.EventKind.Explosion);
+            _explosionEvent.Play(GameEvent.EventKind.Explosion);
             _bombPlantCount = 0;
         }
 

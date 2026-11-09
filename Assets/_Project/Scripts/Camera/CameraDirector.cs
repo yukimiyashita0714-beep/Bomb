@@ -13,7 +13,7 @@ public class CameraDirector : MonoBehaviour
 
     [SerializeField] private CameraData _data;
 
-    [SerializeField] private ExplosionEvent _explosionEvent;
+    [SerializeField] private GameEvent _explosionEvent;
 
     [Header("MainCamera")]
     [SerializeField] private CinemachineOrbitalFollow _mainOrbitalFollow;

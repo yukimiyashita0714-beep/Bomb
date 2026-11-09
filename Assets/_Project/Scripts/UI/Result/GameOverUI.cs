@@ -68,6 +68,7 @@ public class GameOverUI : MonoBehaviour
         if (_timer != null)
         {
             _timer.OnTimeUp += Show;
+            _timer.OnBombTimeUp += Show;
         }
     }
 
@@ -76,6 +77,7 @@ public class GameOverUI : MonoBehaviour
         if (_timer != null)
         {
             _timer.OnTimeUp -= Show;
+            _timer.OnBombTimeUp -= Show;
         }
     }
 
