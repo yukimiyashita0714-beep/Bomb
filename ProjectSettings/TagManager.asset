@@ -14,7 +14,7 @@ TagManager:
   - Character
   - Grenade
   - Debris
-  - 
+  - Enemy
   - Ground
   - DestructibleObject
   - 

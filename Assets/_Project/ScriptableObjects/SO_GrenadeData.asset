@@ -22,7 +22,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _occluderLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294966783
   _isBlockedByRigidbodies: 0
   _isPushedByOtherGrenades: 0
   _collidesWithOtherGrenades: 0
