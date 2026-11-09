@@ -7,8 +7,6 @@ using UnityEngine;
 /// ここもそれを実装して「ダメージを受けた = 爆風が当たった」として扱う。
 /// 破片の間はレイヤーを Debris に変え、地面や壁には乗るが、プレイヤーやグレネードとは当たらないようにする
 /// (どのレイヤー同士が当たるかは Project Settings > Physics の Layer Collision Matrix で決めている)。
-/// 爆風以外 (破片やグレネードがぶつかった等) で元の場所からずれたブロックも、同じ時間がたつと元の場所へ戻る。
-/// ブロックは数千個あるので、毎フレーム全部は調べず、何かに当たって動いている間だけ一定間隔で調べる。
 /// </summary>
 [DisallowMultipleComponent]
 public class DestructibleBlock : MonoBehaviour, IDamageable
@@ -69,15 +67,6 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     private float _spinDegreesPerSecond;
     private bool _isSpinningByTransform;
 
-    // 爆風以外で動いたときの見張り。何かに当たったときだけ始め、止まるか戻し終えたら終わる。
-    private Coroutine _displacementRoutine;
-    private WaitForSeconds _displacementCheckWait;
-    private bool _isDisplaced;
-    private float _displacedTime;
-
-    /// <summary>ずれたブロックを元の場所へ戻している最中は true。当たり判定を切っている。</summary>
-    private bool _isReturningFromDisplacement;
-
     // ==========================================
     // Properties
     // ==========================================
@@ -125,23 +114,6 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         SaveInitialState();
     }
 
-    // NOTE: 引数の Collision を受け取らない形にしておくと、接触情報を作る手間が省ける。
-    private void OnCollisionEnter()
-    {
-        // 無効なコンポーネントにも衝突は届くので、自分で弾く。
-        if (!enabled || _isBreaking || _displacementRoutine != null)
-        {
-            return;
-        }
-
-        if (_rigidbody == null || _rigidbody.isKinematic)
-        {
-            return;
-        }
-
-        _displacementRoutine = StartCoroutine(WatchDisplacementRoutine());
-    }
-
     // ==========================================
     // Public Methods
     // ==========================================
@@ -149,8 +121,7 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     /// <summary>爆風が当たったときに呼ばれる。量に関係なく、一度当たれば壊れる。破片の間は何もしない。</summary>
     public void TakeDamage(float amount)
     {
-        // 戻っている途中は当たり判定を切っているので、普通は爆風に拾われない。念のためここでも弾く。
-        if (!enabled || _isBreaking || _isReturningFromDisplacement)
+        if (!enabled || _isBreaking)
         {
             return;
         }
@@ -180,10 +151,6 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
 
     private void Break()
     {
-        // ずれて戻るのを待っていた場合は、それをやめて破片の流れに切り替える。
-        // 復活までの時間は、ずれた時刻ではなく爆風が当たった時刻から数え直す。
-        StopWatchingDisplacement();
-
         _isBreaking = true;
         _brokenTime = Time.time;
 
@@ -359,157 +326,32 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
 
     private void Respawn()
     {
-        RestoreLayers();
-
-        if (_rigidbody != null)
-        {
-            _rigidbody.mass = _initialMass;
-        }
-
-        PlaceAtInitialState();
-
-        _isBreaking = false;
-    }
-
-    /// <summary>
-    /// 元の位置・回転・大きさに置き、当たり判定と物理を元に戻して眠らせる。
-    /// 破片からの復活と、ずれたブロックの戻しの両方で使う。
-    /// </summary>
-    private void PlaceAtInitialState()
-    {
         transform.localPosition = _initialLocalPosition;
         transform.localRotation = _initialLocalRotation;
         transform.localScale = _initialLocalScale;
 
+        RestoreLayers();
         SetCollidersEnabled(true);
 
-        if (_rigidbody == null)
+        if (_rigidbody != null)
         {
-            return;
-        }
+            _rigidbody.position = transform.position;
+            _rigidbody.rotation = transform.rotation;
+            _rigidbody.mass = _initialMass;
+            _rigidbody.isKinematic = _wasKinematic;
 
-        _rigidbody.position = transform.position;
-        _rigidbody.rotation = transform.rotation;
-        _rigidbody.isKinematic = _wasKinematic;
-
-        if (!_wasKinematic)
-        {
-            _rigidbody.linearVelocity = Vector3.zero;
-            _rigidbody.angularVelocity = Vector3.zero;
-
-            // 積み上がった壁は下のブロックが先に戻るとは限らない。
-            // 眠らせておけば、何かが触れるまで元の場所で止まっている。
-            _rigidbody.Sleep();
-        }
-    }
-
-    /// <summary>
-    /// 何かに当たって動き出したブロックを、一定間隔で調べる。
-    /// ずれずに止まれば見張りをやめる。ずれたらその時刻から数え、時間がたったら元の場所へ戻す。
-    /// 待っている間に元の場所付近で止まったら、戻すのを取り消す。
-    /// </summary>
-    private IEnumerator WatchDisplacementRoutine()
-    {
-        if (_displacementCheckWait == null)
-        {
-            _displacementCheckWait = new WaitForSeconds(_data.DisplacementCheckIntervalSeconds);
-        }
-
-        _isDisplaced = false;
-
-        while (true)
-        {
-            yield return _displacementCheckWait;
-
-            bool isDisplacedNow = IsDisplacedFromInitial();
-            bool isSleeping = _rigidbody.IsSleeping();
-
-            if (!_isDisplaced)
+            if (!_wasKinematic)
             {
-                if (isDisplacedNow)
-                {
-                    _isDisplaced = true;
-                    _displacedTime = Time.time;
-                }
-                else if (isSleeping)
-                {
-                    // ずれないまま止まった。次に何かが当たるまで見張らない。
-                    break;
-                }
+                _rigidbody.linearVelocity = Vector3.zero;
+                _rigidbody.angularVelocity = Vector3.zero;
 
-                continue;
+                // 積み上がった壁は下のブロックが先に戻るとは限らない。
+                // 眠らせておけば、何かが触れるまで元の場所で止まっている。
+                _rigidbody.Sleep();
             }
-
-            if (!isDisplacedNow && isSleeping)
-            {
-                // 押し戻されるなどして、元の場所付近で止まった。
-                _isDisplaced = false;
-                break;
-            }
-
-            if (Time.time < _displacedTime + _data.RespawnDelaySeconds)
-            {
-                continue;
-            }
-
-            // 破片の復活と同じく、元の場所にプレイヤーなどがいれば空くまで待つ。
-            WaitForSeconds retryWait = new WaitForSeconds(_data.RespawnRetrySeconds);
-
-            while (IsRespawnBlocked())
-            {
-                yield return retryWait;
-            }
-
-            _isReturningFromDisplacement = true;
-
-            // 大きさとレイヤーは変わっていないので、位置と回転だけが戻る。
-            yield return ReturnRoutine();
-
-            PlaceAtInitialState();
-
-            _isReturningFromDisplacement = false;
-            _isDisplaced = false;
-            break;
         }
 
-        _displacementRoutine = null;
-    }
-
-    /// <summary>ずれの見張りをやめる。戻している途中なら、切っていた当たり判定と物理を元に戻す。</summary>
-    private void StopWatchingDisplacement()
-    {
-        if (_displacementRoutine != null)
-        {
-            StopCoroutine(_displacementRoutine);
-            _displacementRoutine = null;
-        }
-
-        if (_isReturningFromDisplacement)
-        {
-            SetCollidersEnabled(true);
-
-            if (_rigidbody != null)
-            {
-                _rigidbody.isKinematic = _wasKinematic;
-            }
-
-            _isReturningFromDisplacement = false;
-        }
-
-        _isDisplaced = false;
-    }
-
-    /// <summary>元の位置から一定以上離れているか、元の向きから一定以上傾いていれば true。</summary>
-    private bool IsDisplacedFromInitial()
-    {
-        float distance = _data.DisplacedDistanceMeters;
-
-        if ((transform.localPosition - _initialLocalPosition).sqrMagnitude >= distance * distance)
-        {
-            return true;
-        }
-
-        return Quaternion.Angle(transform.localRotation, _initialLocalRotation) >= _data.DisplacedAngleDegrees;
+        _isBreaking = false;
     }
 
     /// <summary>
