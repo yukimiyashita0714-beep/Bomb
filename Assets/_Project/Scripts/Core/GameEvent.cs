@@ -3,12 +3,13 @@ using UnityEngine;
 
 namespace Bomb.Core
 {
-    public class ExplosionEvent : MonoBehaviour
+    public class GameEvent : MonoBehaviour
     {
         //ゲームの重要なイベントをまとめたいと考えている
 
         public enum EventKind
         {
+            Plant,
             Explosion,
         }
 
@@ -16,7 +17,10 @@ namespace Bomb.Core
         // Events
         // ==========================================
 
-        /// <summary> 爆発Event </summary>
+        /// <summary> 爆弾設置イベント </summary>
+        public event Action OnPlant;
+
+        /// <summary> 爆弾爆発イベント </summary>
         public event Action OnExplosion;
 
         // ==========================================
@@ -31,6 +35,12 @@ namespace Bomb.Core
         {
             switch (kind)
             {
+                case EventKind.Plant:
+
+                    OnPlant?.Invoke();
+
+                    break;
+
                 case EventKind.Explosion:
 
                     OnExplosion?.Invoke();

@@ -17,7 +17,7 @@ namespace Bomb.UI
 
         [SerializeField] private Animator _animator;
 
-        [SerializeField] private ExplosionEvent _explosionEvent;
+        [SerializeField] private GameEvent _explosionEvent;
 
         // ==========================================
         // Private Fields
