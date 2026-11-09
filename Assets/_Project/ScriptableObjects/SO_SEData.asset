@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SEData
   _entries:
   - _type: 1
+    _playMode: 1
     _clips:
     - _clip: {fileID: 8300000, guid: c35825fe202ec5143b796025923a9448, type: 3}
       _startSeconds: 0
-    _legacyClips: []
+      _delaySeconds: 0
+    - _clip: {fileID: 8300000, guid: 0858b4c72823b2141a157aa34a73f203, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0.5
     _volume: 0.7
     _pitchMin: 0.95
     _pitchMax: 1.05
