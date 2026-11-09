@@ -59,6 +59,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     private float _brokenTime;
     private bool _isBreaking;
 
+    /// <summary>メインターゲットの爆発で飛ばされたら true。もう壊れも復活もしない。</summary>
+    private bool _isLaunched;
+
     /// <summary>今回の破片の大きさ。壊れるたびにランダムに決め直す。</summary>
     private float _debrisScaleRatio;
 
@@ -73,6 +76,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
 
     /// <summary>爆風が当たってから、元の場所に戻って復活するまでの間は true。</summary>
     public bool IsBreaking => _isBreaking;
+
+    /// <summary>メインターゲットの爆発で飛ばされた後は true。元の場所には戻らない。</summary>
+    public bool IsLaunched => _isLaunched;
 
     /// <summary>破片のレイヤー番号。登録されていなければ -1。</summary>
     private static int DebrisLayer
@@ -121,12 +127,54 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     /// <summary>爆風が当たったときに呼ばれる。量に関係なく、一度当たれば壊れる。破片の間は何もしない。</summary>
     public void TakeDamage(float amount)
     {
-        if (!enabled || _isBreaking)
+        if (!enabled || _isBreaking || _isLaunched)
         {
             return;
         }
 
         Break();
+    }
+
+    /// <summary>
+    /// メインターゲットの爆発で飛ばす。グレネードの爆風とは別の処理で、縮みも復活もしない。
+    /// 破片と同じ Debris レイヤーに移すので、飛んだブロック同士や、まだ立っているブロック、
+    /// プレイヤーやグレネードとは当たらず、地面にだけ落ちる。
+    /// </summary>
+    /// <param name="velocity">飛ばす速度 (m/s)。重さに関係なくこの速さになる。</param>
+    /// <param name="angularVelocity">付ける回転の速さ (ラジアン/秒)。</param>
+    public void Launch(Vector3 velocity, Vector3 angularVelocity)
+    {
+        if (!enabled || _isLaunched)
+        {
+            return;
+        }
+
+        _isLaunched = true;
+
+        // グレネードで壊れている途中なら、縮む・元に戻る処理をここで止める。
+        StopAllCoroutines();
+        _isBreaking = false;
+        _isSpinningByTransform = false;
+
+        int debrisLayer = DebrisLayer;
+
+        if (debrisLayer >= 0)
+        {
+            SetLayer(debrisLayer);
+        }
+
+        // 元の場所へ戻る途中で当たり判定を切っていた場合に備えて、入れ直す。
+        SetCollidersEnabled(true);
+
+        if (_rigidbody == null)
+        {
+            return;
+        }
+
+        _rigidbody.isKinematic = false;
+        _rigidbody.WakeUp();
+        _rigidbody.AddForce(velocity, ForceMode.VelocityChange);
+        _rigidbody.AddTorque(angularVelocity, ForceMode.VelocityChange);
     }
 
     // ==========================================

@@ -750,9 +750,12 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 18
-  _explosionPower: 40
+  _explosionRadius: 30
+  _explosionPower: 45
   _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 30
+  _explosionMaxSpin: 15
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -2452,6 +2455,9 @@ MonoBehaviour:
   _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -4328,6 +4334,14 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3642253720939079543, guid: 43c669d6c80edee45a8944b2bc5aed97, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.006
+      objectReference: {fileID: 0}
+    - target: {fileID: 3642253720939079543, guid: 43c669d6c80edee45a8944b2bc5aed97, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3861179377645331824, guid: 43c669d6c80edee45a8944b2bc5aed97, type: 3}
       propertyPath: m_Name
       value: P_Enemy_Turret
@@ -5460,6 +5474,9 @@ MonoBehaviour:
   _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -6137,6 +6154,9 @@ MonoBehaviour:
   _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
