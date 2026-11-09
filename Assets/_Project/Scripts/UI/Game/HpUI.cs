@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,6 +26,8 @@ public class HpUI : MonoBehaviour
     private float _recoveryCooltimer;
     private float _recoveryTimer;
 
+    private bool _isDepleted;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -32,6 +35,9 @@ public class HpUI : MonoBehaviour
     // ==========================================
     // Events
     // ==========================================
+
+    /// <summary>HP が 0 になった瞬間に一度だけ送る。ゲームオーバーのきっかけに使う。</summary>
+    public event Action OnHpDepleted;
 
     // ==========================================
     // Unity Messages
@@ -92,6 +98,12 @@ public class HpUI : MonoBehaviour
         if (_hp <= 0)
         {
             _hp = 0;
+        }
+
+        if (_hp <= 0 && !_isDepleted)
+        {
+            _isDepleted = true;
+            OnHpDepleted?.Invoke();
         }
 
         //再生までのクールタイムリセット

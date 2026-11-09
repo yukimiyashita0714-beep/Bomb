@@ -9,4 +9,6 @@ public enum SEType
 {
     None = 0,
     Explosion = 1,
+    EnemyWarning = 2,
+    EnemyAttack = 3,
 }
