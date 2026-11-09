@@ -4,6 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// 砲台型の敵 (P_Enemy_Turret) と、それが使う弾・煙・マテリアル・データを、メニュー1回で作るエディタ拡張。
+/// 倒れたときの煙には、機械が壊れて電気がはじける火花も足す (Bomb/Setup/Enemy Death Sparks 単体でも足せる)。
 /// プレハブの YAML を手で書くと参照の付け間違いが起きやすいので、API で組み立てる。
 /// あわせて Enemy レイヤーを作り、グレネードの爆風が敵を壁として扱わないよう SO_GrenadeData から外す。
 /// データやマテリアルは既にあれば作り直さない (調整した値を消さないため)。敵のプレハブだけは確認してから作り直す。
@@ -15,6 +16,7 @@ public static class EnemySetupMenu
     // ==========================================
 
     private const string MENU_PATH = "Bomb/Setup/Enemy";
+    private const string SPARKS_MENU_PATH = "Bomb/Setup/Enemy Death Sparks";
 
     private const string ENEMY_LAYER_NAME = "Enemy";
 
@@ -27,6 +29,9 @@ public static class EnemySetupMenu
 
     private const string FADE_TEMPLATE_PATH = "Assets/_Project/Materials/M_Target_Fade.mat";
     private const string SMOKE_MATERIAL_PATH = "Assets/_Project/Materials/M_Vfx_Explosion_Smoke.mat";
+
+    /// <summary>加算合成のパーティクル用マテリアル。白なので、色はパーティクル側で付ける。</summary>
+    private const string SPARK_MATERIAL_PATH = "Assets/_Project/Materials/M_Vfx_Explosion_Fire.mat";
     private const string FADE_MATERIAL_PATH = "Assets/_Project/Materials/M_Enemy_Fade.mat";
     private const string BULLET_MATERIAL_PATH = "Assets/_Project/Materials/M_Enemy_Bullet.mat";
     private const string WARNING_LINE_MATERIAL_PATH = "Assets/_Project/Materials/M_Enemy_WarningLine.mat";
@@ -34,6 +39,17 @@ public static class EnemySetupMenu
     private const string ENEMY_PREFAB_PATH = "Assets/_Project/Prefabs/P_Enemy_Turret.prefab";
     private const string BULLET_PREFAB_PATH = "Assets/_Project/Prefabs/P_Enemy_Bullet.prefab";
     private const string SMOKE_PREFAB_PATH = "Assets/_Project/Prefabs/Vfx_Enemy_Smoke.prefab";
+
+    private const string ELECTRIC_SPARKS_NAME = "ElectricSparks";
+    private const string ELECTRIC_FLASH_NAME = "ElectricFlash";
+    private const string SPARK_LIGHT_NAME = "SparkLight";
+
+    /// <summary>火花がバチバチ続く時間 (秒)。煙が消えきる前に止まるようにする。</summary>
+    private const float SPARK_DURATION = 2.5f;
+
+    /// <summary>はじけ直す間隔 (秒) と回数。間隔ごとに確率で鳴るので、不規則にバチッと光る。</summary>
+    private const float SPARK_REPEAT_INTERVAL = 0.18f;
+    private const int SPARK_REPEAT_COUNT = 12;
 
     private const string URP_UNLIT_SHADER = "Universal Render Pipeline/Unlit";
     private const string LINE_SHADER = "Sprites/Default";
@@ -47,6 +63,9 @@ public static class EnemySetupMenu
     private static readonly Color BulletColor = new Color(1f, 0.25f, 0.15f, 1f);
     private static readonly Color WarningLineColor = new Color(1f, 0.15f, 0.1f, 0.4f);
     private static readonly Color SmokeColor = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+    private static readonly Color SparkColorA = new Color(0.45f, 0.8f, 1f, 1f);
+    private static readonly Color SparkColorB = new Color(0.9f, 0.97f, 1f, 1f);
+    private static readonly Color ElectricFlashColor = new Color(0.5f, 0.75f, 1f, 0.9f);
 
     // ==========================================
     // Private Methods
@@ -89,6 +108,11 @@ public static class EnemySetupMenu
         Material lineMaterial = LoadOrCreateMaterial(WARNING_LINE_MATERIAL_PATH, LINE_SHADER, Color.white);
 
         GameObject smokePrefab = LoadOrCreateSmokePrefab();
+
+        if (smokePrefab != null)
+        {
+            AddElectricSparks();
+        }
         EnemyBullet bulletPrefab = LoadOrCreateBulletPrefab(bulletMaterial);
 
         if (data == null || fadeMaterial == null || bulletMaterial == null || lineMaterial == null
@@ -112,6 +136,25 @@ public static class EnemySetupMenu
             "・音は SO_SEData に EnemyWarning / EnemyAttack を登録すると鳴る\n" +
             "・弾が後ろから出るときは、プレハブの Model を Y 軸 180 度回す",
             "OK");
+    }
+
+    [MenuItem(SPARKS_MENU_PATH)]
+    private static void SetupDeathSparks()
+    {
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(SMOKE_PREFAB_PATH) == null)
+        {
+            ShowError($"{SMOKE_PREFAB_PATH} が無い。先に Bomb/Setup/Enemy を実行する。");
+            return;
+        }
+
+        if (!AddElectricSparks())
+        {
+            ShowError("火花を足せなかった。Console のエラーを確認する。");
+            return;
+        }
+
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Enemy Setup", "Vfx_Enemy_Smoke に電気の火花を足した。", "OK");
     }
 
     // ------------------------------------------
@@ -318,6 +361,178 @@ public static class EnemySetupMenu
         finally
         {
             Object.DestroyImmediate(root);
+        }
+    }
+
+    /// <summary>
+    /// 煙のプレハブに、電気の火花・青い光・火花の明かりを子として足す。
+    /// 前に足したものは消してから作り直すので、何度実行しても同じ結果になる。
+    /// </summary>
+    private static bool AddElectricSparks()
+    {
+        Material sparkMaterial = AssetDatabase.LoadAssetAtPath<Material>(SPARK_MATERIAL_PATH);
+
+        if (sparkMaterial == null)
+        {
+            Debug.LogError($"[{nameof(EnemySetupMenu)}] {SPARK_MATERIAL_PATH} が見つからない。");
+            return false;
+        }
+
+        GameObject root = PrefabUtility.LoadPrefabContents(SMOKE_PREFAB_PATH);
+
+        if (root == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            RemoveChild(root, ELECTRIC_SPARKS_NAME);
+            RemoveChild(root, ELECTRIC_FLASH_NAME);
+            RemoveChild(root, SPARK_LIGHT_NAME);
+
+            Light sparkLight = CreateSparkLight(root.transform);
+            CreateElectricSparks(root.transform, sparkMaterial, sparkLight);
+            CreateElectricFlash(root.transform, sparkMaterial);
+
+            PrefabUtility.SaveAsPrefabAsset(root, SMOKE_PREFAB_PATH);
+            return true;
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
+    /// <summary>
+    /// 火花が周りを照らすときの明かりの見本。パーティクルの Lights モジュールがこれを複製して使う。
+    /// 見本そのものは光らせないので無効にしておく。
+    /// </summary>
+    private static Light CreateSparkLight(Transform parent)
+    {
+        GameObject lightObject = new GameObject(SPARK_LIGHT_NAME);
+        lightObject.transform.SetParent(parent, false);
+
+        Light light = lightObject.AddComponent<Light>();
+        light.type = LightType.Point;
+        light.color = SparkColorA;
+        light.range = 2.5f;
+        light.intensity = 3f;
+        light.shadows = LightShadows.None;
+
+        lightObject.SetActive(false);
+        return light;
+    }
+
+    /// <summary>細く伸びた火花が不規則にはじけ飛ぶ。速く短く飛ばして、電気がショートした感じにする。</summary>
+    private static void CreateElectricSparks(Transform parent, Material material, Light sparkLight)
+    {
+        ParticleSystem particle = CreateChildSystem(parent, ELECTRIC_SPARKS_NAME);
+
+        ParticleSystem.MainModule main = particle.main;
+        main.duration = SPARK_DURATION;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.1f, 0.35f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.08f);
+        main.startColor = new ParticleSystem.MinMaxGradient(SparkColorA, SparkColorB);
+        main.gravityModifier = 1.5f;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = true;
+        main.maxParticles = 200;
+
+        ParticleSystem.Burst repeat = new ParticleSystem.Burst(0.15f, 4, 12, SPARK_REPEAT_COUNT, SPARK_REPEAT_INTERVAL);
+        repeat.probability = 0.65f;
+
+        ParticleSystem.EmissionModule emission = particle.emission;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 25), repeat });
+
+        ParticleSystem.ShapeModule shape = particle.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.3f;
+
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime = particle.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        colorOverLifetime.color = CreateFadeOutGradient();
+
+        ParticleSystem.LightsModule lights = particle.lights;
+        lights.enabled = true;
+        lights.light = sparkLight;
+        lights.ratio = 0.15f;
+        lights.maxLights = 4;
+        lights.useParticleColor = true;
+        lights.sizeAffectsRange = false;
+
+        ParticleSystemRenderer particleRenderer = particle.GetComponent<ParticleSystemRenderer>();
+        particleRenderer.renderMode = ParticleSystemRenderMode.Stretch;
+        particleRenderer.velocityScale = 0.04f;
+        particleRenderer.lengthScale = 2f;
+        particleRenderer.sharedMaterial = material;
+    }
+
+    /// <summary>火花と同じ間隔で、中心が一瞬だけ青白く光る。バチッという瞬間を強く見せる。</summary>
+    private static void CreateElectricFlash(Transform parent, Material material)
+    {
+        ParticleSystem particle = CreateChildSystem(parent, ELECTRIC_FLASH_NAME);
+
+        ParticleSystem.MainModule main = particle.main;
+        main.duration = SPARK_DURATION;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.06f, 0.12f);
+        main.startSpeed = 0f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.5f, 1.2f);
+        main.startColor = ElectricFlashColor;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = true;
+        main.maxParticles = 20;
+
+        ParticleSystem.Burst repeat = new ParticleSystem.Burst(0.15f, 1, 1, SPARK_REPEAT_COUNT, SPARK_REPEAT_INTERVAL);
+        repeat.probability = 0.5f;
+
+        ParticleSystem.EmissionModule emission = particle.emission;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 2), repeat });
+
+        ParticleSystem.ShapeModule shape = particle.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.25f;
+
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime = particle.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        colorOverLifetime.color = CreateFadeOutGradient();
+
+        ParticleSystemRenderer particleRenderer = particle.GetComponent<ParticleSystemRenderer>();
+        particleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
+        particleRenderer.sharedMaterial = material;
+    }
+
+    private static ParticleSystem CreateChildSystem(Transform parent, string childName)
+    {
+        GameObject child = new GameObject(childName);
+        child.transform.SetParent(parent, false);
+
+        ParticleSystem particle = child.AddComponent<ParticleSystem>();
+        particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particle;
+    }
+
+    private static Gradient CreateFadeOutGradient()
+    {
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
+        return gradient;
+    }
+
+    private static void RemoveChild(GameObject root, string childName)
+    {
+        Transform child = root.transform.Find(childName);
+
+        if (child != null)
+        {
+            Object.DestroyImmediate(child.gameObject);
         }
     }
 
