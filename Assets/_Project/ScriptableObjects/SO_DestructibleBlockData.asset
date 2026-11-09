@@ -45,4 +45,7 @@ MonoBehaviour:
   _respawnDelaySeconds: 15
   _respawnRetrySeconds: 0.5
   _returnDurationSeconds: 0.6
+  _displacedDistanceMeters: 0.2
+  _displacedAngleDegrees: 15
+  _displacementCheckIntervalSeconds: 0.5
   _isMovingWhileFading: 1
