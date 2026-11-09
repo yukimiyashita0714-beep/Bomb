@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3318182218909358987}
   - component: {fileID: 18697505869398218}
   - component: {fileID: 3902445128813132657}
+  - component: {fileID: 9041281038727834263}
   m_Layer: 7
   m_Name: P_Grenade
   m_TagString: Untagged
@@ -113,6 +114,19 @@ MonoBehaviour:
   _vfxBaseRadiusMeters: 5
   _vfxLifetimeSeconds: 4
   _hidesBodyOnExplode: 1
+--- !u!114 &9041281038727834263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8626708492992328768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ec78281ad8b459408a0daf1da98e703, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrenadeSound
+  _explosionSe: 1
 --- !u!1001 &8627127471094743973
 PrefabInstance:
   m_ObjectHideFlags: 0

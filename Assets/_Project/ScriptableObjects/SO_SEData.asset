@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5431ed36fd3c6b3429620ab2dbb9a5cc, type: 3}
+  m_Name: SO_SEData
+  m_EditorClassIdentifier: Assembly-CSharp::SEData
+  _entries:
+  - _type: 1
+    _clips:
+    - _clip: {fileID: 8300000, guid: c35825fe202ec5143b796025923a9448, type: 3}
+      _startSeconds: 0
+    _legacyClips: []
+    _volume: 0.7
+    _pitchMin: 0.95
+    _pitchMax: 1.05
+    _maxSimultaneous: 4
+    _outputOverride: {fileID: 0}
