@@ -749,6 +749,13 @@ MonoBehaviour:
   _animator: {fileID: 530331192}
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &530331192
 Animator:
   serializedVersion: 7
@@ -2441,6 +2448,13 @@ MonoBehaviour:
   _animator: {fileID: 863469153}
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &863469153
 Animator:
   serializedVersion: 7
@@ -2756,6 +2770,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1036117475}
   - component: {fileID: 1036117476}
+  - component: {fileID: 1036117477}
   m_Layer: 5
   m_Name: Timer
   m_TagString: Untagged
@@ -2797,8 +2812,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3577f5adcee5171478b69da57541d7b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimerUI
+  _animator: {fileID: 1036117477}
+  _explosionEvent: {fileID: 2058929121}
   _timerText: {fileID: 1823773922}
   _limitTime: 60
+  _bombLimitTime: 40
+  _gameOverDelay: 2
+--- !u!95 &1036117477
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1036117474}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8648207f5b285944391e6f9892ece868, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1060571684
 GameObject:
   m_ObjectHideFlags: 0
@@ -5415,6 +5456,13 @@ MonoBehaviour:
   _animator: {fileID: 1867174370}
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &1867174370
 Animator:
   serializedVersion: 7
@@ -6085,6 +6133,13 @@ MonoBehaviour:
   _animator: {fileID: 1995619912}
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &1995619912
 Animator:
   serializedVersion: 7
