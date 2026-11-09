@@ -27,3 +27,31 @@ MonoBehaviour:
     _pitchMax: 1.05
     _maxSimultaneous: 4
     _outputOverride: {fileID: 0}
+  - _type: 4
+    _playMode: 1
+    _clips:
+    - _clip: {fileID: 8300000, guid: 9c51f7c7940a8bb4caa87f0f2ef46b23, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0
+    - _clip: {fileID: 8300000, guid: 1af7070d6e0c6734b873288802a7fabe, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0.2
+    _volume: 0.7
+    _pitchMin: 0.95
+    _pitchMax: 1.05
+    _maxSimultaneous: 4
+    _outputOverride: {fileID: 0}
+  - _type: 5
+    _playMode: 1
+    _clips:
+    - _clip: {fileID: 8300000, guid: f943106ba8285134f9ebd8c8f7204af9, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0
+    - _clip: {fileID: 8300000, guid: 3578bddceb16cb544ad4f163e301f374, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0.2
+    _volume: 0.7
+    _pitchMin: 0.95
+    _pitchMax: 1.05
+    _maxSimultaneous: 4
+    _outputOverride: {fileID: 0}
