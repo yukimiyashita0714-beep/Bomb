@@ -115,6 +115,8 @@ namespace Bomb.Battle
 
             _explosionArea.AddBombPlantCount();
 
+            SEEvents.PlayOneShot(SEType.MainTargetBombPlant, transform.position);
+
             //もしメイン爆弾なら設置した後のフェーズに入る
             if (_mainBomb)
             {
@@ -137,6 +139,7 @@ namespace Bomb.Battle
 
         public void AnimatorExplosion()
         {
+            SEEvents.PlayOneShot(SEType.MainTargetBombExplosion);
             AddExplosionForce();
         }
     }

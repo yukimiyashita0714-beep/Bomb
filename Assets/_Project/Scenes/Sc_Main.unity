@@ -750,12 +750,12 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 40
+  _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
   _explosionLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 2048
 --- !u!95 &530331192
 Animator:
   serializedVersion: 7
@@ -2449,12 +2449,12 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 40
+  _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
   _explosionLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 2048
 --- !u!95 &863469153
 Animator:
   serializedVersion: 7
@@ -5457,12 +5457,12 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 40
+  _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
   _explosionLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 2048
 --- !u!95 &1867174370
 Animator:
   serializedVersion: 7
@@ -6134,12 +6134,12 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 40
+  _explosionRadius: 18
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
   _explosionLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 2048
 --- !u!95 &1995619912
 Animator:
   serializedVersion: 7
