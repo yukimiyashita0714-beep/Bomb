@@ -12,17 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a222b1fd4ac43474284399af03ea133e, type: 3}
   m_Name: SO_PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
-  _walkSpeed: 5
-  _dashSpeed: 40
-  _dashDuration: 0.12
+  _walkSpeed: 10
   _maxHp: 30
   _hpRecoveryCooltime: 2.5
   _hpRecoveryValue: 1
   _hpRecoveryInterval: 0.25
-  _maxStamina: 99
-  _dashStaminaCost: 33
-  _staminaRecoveryDelay: 0.8
-  _staminaRecoveryPerSecond: 25
   _turnSpeedDegrees: 720
   _gravity: -20
   _jumpHeight: 1.2
