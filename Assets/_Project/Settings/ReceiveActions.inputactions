@@ -17,16 +17,6 @@
                     "priority": 0
                 },
                 {
-                    "name": "Dash",
-                    "type": "Button",
-                    "id": "9f9f3c10-483a-4934-9d9b-18bb3af59bff",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Press(behavior=2)",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
                     "name": "Jump",
                     "type": "Button",
                     "id": "c3a1e7d2-5b4f-4e8a-9d6c-2f1b8a7e4d90",
@@ -111,28 +101,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "669dc656-4ae7-4b4c-be21-b1d90f4fd32a",
-                    "path": "<Keyboard>/shift",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "161ef08a-7e10-4885-a6b6-a2c269f5fc29",
-                    "path": "<Gamepad>/leftStickPress",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Dash",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

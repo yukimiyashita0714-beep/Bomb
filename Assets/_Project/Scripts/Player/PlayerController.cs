@@ -1,12 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// CharacterController を使ったプレイヤーの水平移動・ダッシュ・ジャンプ・向き変更を扱う。
+/// CharacterController を使ったプレイヤーの水平移動・ジャンプ・向き変更を扱う。
 /// 速度などの数値は <see cref="PlayerData"/> から読む。
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputReceiver))]
-[RequireComponent(typeof(PlayerStamina))]
 [DisallowMultipleComponent]
 public class PlayerController : MonoBehaviour
 {
@@ -34,13 +33,9 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController _characterController;
     private PlayerInputReceiver _inputReceiver;
-    private PlayerStamina _stamina;
 
     private float _verticalVelocity;
     private float _currentSpeed;
-
-    private float _dashTimer;
-    private Vector3 _dashDirection;
 
     // ==========================================
     // Properties
@@ -48,9 +43,6 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>現在の水平移動速度 (m/s)。アニメーションのブレンドなどに使う。</summary>
     public float CurrentSpeed => _currentSpeed;
-
-    /// <summary>一瞬のダッシュで移動しているとき true。</summary>
-    public bool IsDashing => _dashTimer > 0f;
 
     /// <summary>接地しているとき true。</summary>
     public bool IsGrounded => _characterController.isGrounded;
@@ -63,13 +55,6 @@ public class PlayerController : MonoBehaviour
     {
         _characterController = GetComponent<CharacterController>();
         _inputReceiver = GetComponent<PlayerInputReceiver>();
-        _stamina = GetComponent<PlayerStamina>();
-
-        // RequireComponent は既に置いてあるプレハブには自動で付かないので、無い場合を知らせておく。
-        if (_stamina == null)
-        {
-            Debug.LogWarning($"[{nameof(PlayerController)}] PlayerStamina が無いのでダッシュできない。", this);
-        }
 
         if (_data == null)
         {
@@ -82,10 +67,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = CalculateMoveDirection(_inputReceiver.Move);
 
-        TickDashTimer();
-        TryStartDash(moveDirection);
-
-        Vector3 velocity = CalculateHorizontalVelocity(moveDirection);
+        Vector3 velocity = moveDirection * _data.WalkSpeed;
         _currentSpeed = velocity.magnitude;
 
         FaceCameraYaw(moveDirection);
@@ -145,49 +127,6 @@ public class PlayerController : MonoBehaviour
         Vector3 right = Vector3.Cross(Vector3.up, forward);
 
         return (forward * input.y + right * input.x).normalized;
-    }
-
-    private void TickDashTimer()
-    {
-        _dashTimer = Mathf.Max(0f, _dashTimer - Time.deltaTime);
-    }
-
-    private void TryStartDash(Vector3 moveDirection)
-    {
-        // スタミナ不足やダッシュ中に押した分を残すと、後で勝手に飛び出すので毎フレーム消す。
-        if (!_inputReceiver.ConsumeDashRequest())
-        {
-            return;
-        }
-
-        // ダッシュ中に重ねて押しても延長しない。延長できると連打で距離が伸び放題になる。
-        if (_dashTimer > 0f)
-        {
-            return;
-        }
-
-        if (_stamina == null || !_stamina.TryConsume(_data.DashStaminaCost))
-        {
-            return;
-        }
-
-        // 入力が無いときは正面へ出す。止まった状態から押しても何も起きないと押し損に感じるため。
-        _dashDirection = moveDirection.sqrMagnitude >= INPUT_THRESHOLD_SQR
-            ? moveDirection
-            : Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-
-        _dashTimer = _data.DashDuration;
-    }
-
-    private Vector3 CalculateHorizontalVelocity(Vector3 moveDirection)
-    {
-        // ダッシュ中は押した瞬間の向きに固定する。途中で曲がれると回避に使ったときに狙いがブレる。
-        if (_dashTimer > 0f)
-        {
-            return _dashDirection * _data.DashSpeed;
-        }
-
-        return moveDirection * _data.WalkSpeed;
     }
 
     /// <summary>

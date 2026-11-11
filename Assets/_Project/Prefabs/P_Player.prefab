@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 107390997530308502}
   - component: {fileID: 4007211199498807896}
   - component: {fileID: 5512837400911827301}
-  - component: {fileID: 8666636167521298838}
   m_Layer: 6
   m_Name: P_Player
   m_TagString: Untagged
@@ -119,19 +118,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageReceiver
   _damageMultiplier: 1
---- !u!114 &8666636167521298838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 696694294117523230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 152490139b90c95489029a8bc464de7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStamina
-  _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
 --- !u!1 &2517524684850762829
 GameObject:
   m_ObjectHideFlags: 0

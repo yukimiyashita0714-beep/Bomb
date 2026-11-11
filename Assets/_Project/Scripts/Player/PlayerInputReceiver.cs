@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// プレイヤー操作（移動・ダッシュ・ジャンプ）の入力を受け取り、読み取り専用プロパティとして公開する。
+/// プレイヤー操作（移動・ジャンプ・インタラクト）の入力を受け取り、読み取り専用プロパティとして公開する。
 /// 入力の取得だけを担当し、移動の判断は呼び出し側が行う。
 /// </summary>
 [DisallowMultipleComponent]
@@ -22,7 +22,6 @@ public class PlayerInputReceiver : MonoBehaviour
     private ReceiveActions _action;
 
     private Vector2 _move;
-    private bool _isDashRequested;
     private bool _isJumpRequested;
     private bool _isInteractRequested;
 
@@ -55,7 +54,6 @@ public class PlayerInputReceiver : MonoBehaviour
 
         // NOTE: 無効化中は離した通知が来ないため、押しっぱなしの値が残らないよう戻す
         _move = Vector2.zero;
-        _isDashRequested = false;
         _isJumpRequested = false;
     }
 
@@ -67,17 +65,6 @@ public class PlayerInputReceiver : MonoBehaviour
     // ==========================================
     // Public Methods
     // ==========================================
-
-    /// <summary>
-    /// ダッシュ入力が押されていれば true を返し、記録を消す。
-    /// ダッシュは押した瞬間に一度だけ出すので、ジャンプと同じく受け取ったら消す形にしている。
-    /// </summary>
-    public bool ConsumeDashRequest()
-    {
-        bool isRequested = _isDashRequested;
-        _isDashRequested = false;
-        return isRequested;
-    }
 
     /// <summary>
     /// ジャンプ入力が押されていれば true を返し、記録を消す。
@@ -110,7 +97,6 @@ public class PlayerInputReceiver : MonoBehaviour
         ReceiveActions.PlayerActions player = _action.Player;
 
         BindValue(player.Move, OnMove);
-        BindButton(player.Dash, OnDash);
         BindButton(player.Jump, OnJump);
         BindButton(player.Interact, OnInteract);
 
@@ -150,15 +136,6 @@ public class PlayerInputReceiver : MonoBehaviour
     private void OnMove(InputAction.CallbackContext context)
     {
         _move = context.canceled ? Vector2.zero : context.ReadValue<Vector2>();
-    }
-
-    private void OnDash(InputAction.CallbackContext context)
-    {
-        // Dash は Press(Press And Release) なので離したときも performed が来る。押したときだけ記録する。
-        if (context.ReadValueAsButton())
-        {
-            _isDashRequested = true;
-        }
     }
 
     private void OnJump(InputAction.CallbackContext context)

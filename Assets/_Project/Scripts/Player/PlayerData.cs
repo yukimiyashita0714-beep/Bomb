@@ -16,14 +16,6 @@ public class PlayerData : ScriptableObject
     [Range(0f, 20f)]
     private float _walkSpeed = 4f;
 
-    [SerializeField, Tooltip("ダッシュ中の水平移動速度 (m/s)。押した瞬間から Dash Duration の間だけこの速さになる")]
-    [Range(0f, 40f)]
-    private float _dashSpeed = 8f;
-
-    [SerializeField, Tooltip("1回のダッシュが続く時間 (秒)")]
-    [Range(0.05f, 1f)]
-    private float _dashDuration = 0.2f;
-
     [Header("Hp")]
     [SerializeField, Tooltip("最大体力")]
     [Min(1f)]
@@ -113,12 +105,6 @@ public class PlayerData : ScriptableObject
     /// <summary>通常時の水平移動速度 (m/s)。</summary>
     public float WalkSpeed => _walkSpeed;
 
-    /// <summary>ダッシュ時の水平移動速度 (m/s)。</summary>
-    public float DashSpeed => _dashSpeed;
-
-    /// <summary>1回のダッシュが続く時間 (秒)。</summary>
-    public float DashDuration => _dashDuration;
-
     /// <summary> 最大体力 </summary>
     public float MaxHp => _maxHp;
 
@@ -190,11 +176,6 @@ public class PlayerData : ScriptableObject
         if (_maxChargeImpulse < _minChargeImpulse)
         {
             _maxChargeImpulse = _minChargeImpulse;
-        }
-
-        if (_dashSpeed < _walkSpeed)
-        {
-            _dashSpeed = _walkSpeed;
         }
 
         // 消費量が最大値を超えると、満タンでも一度もダッシュできなくなる。
