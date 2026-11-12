@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32cb040ec64cdb049af1344f18ee7a4b, type: 3}
   m_Name: SO_CameraData
   m_EditorClassIdentifier: Assembly-CSharp::CameraData
-  _cameraGainX: 30
-  _cameraGainY: -30
+  _cameraGainX: 20
+  _cameraGainY: -20
   _cameraPos: {x: -0.7, y: 0.6, z: 0}
   _targetPos: {x: 0.6, y: 0.8, z: 0}
   _cameraRadius: 3

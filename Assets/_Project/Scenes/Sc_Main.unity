@@ -2301,11 +2301,11 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 1
-  _explosionRadius: 18
-  _explosionPower: 40
+  _explosionRadius: 70
+  _explosionPower: 45
   _explosionAttenuationPower: 0.5
-  _explosionOutwardPower: 8
-  _explosionMaxSpin: 10
+  _explosionOutwardPower: 30
+  _explosionMaxSpin: 15
   _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
@@ -2844,7 +2844,7 @@ Transform:
   m_GameObject: {fileID: 1224408587}
   serializedVersion: 2
   m_LocalRotation: {x: 0.071497425, y: -0, z: -0, w: 0.9974408}
-  m_LocalPosition: {x: 1.5, y: 2.0852578, z: -27.979553}
+  m_LocalPosition: {x: 47.5, y: 28.685257, z: 79.72044}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4558,7 +4558,7 @@ Transform:
   m_GameObject: {fileID: 1621635027}
   serializedVersion: 2
   m_LocalRotation: {x: 0.0714974, y: 0, z: 0, w: 0.9974408}
-  m_LocalPosition: {x: 1.5, y: 2.0852578, z: -27.979553}
+  m_LocalPosition: {x: 47.5, y: 28.685257, z: 79.72044}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5179,11 +5179,11 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 18
+  _explosionRadius: 30
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
-  _explosionOutwardPower: 8
-  _explosionMaxSpin: 10
+  _explosionOutwardPower: 30
+  _explosionMaxSpin: 15
   _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
@@ -5531,7 +5531,7 @@ Transform:
   m_GameObject: {fileID: 1952552100}
   serializedVersion: 2
   m_LocalRotation: {x: 0.071497396, y: 0, z: 0, w: 0.9974408}
-  m_LocalPosition: {x: 1, y: 1.3565723, z: -28.474442}
+  m_LocalPosition: {x: 47, y: 27.956573, z: 79.225555}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5858,11 +5858,11 @@ MonoBehaviour:
   _explosionEvent: {fileID: 2058929121}
   _explosionArea: {fileID: 1060571687}
   _mainBomb: 0
-  _explosionRadius: 18
+  _explosionRadius: 40
   _explosionPower: 40
   _explosionAttenuationPower: 0.5
-  _explosionOutwardPower: 8
-  _explosionMaxSpin: 10
+  _explosionOutwardPower: 28
+  _explosionMaxSpin: 15
   _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
@@ -5955,15 +5955,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8055337187762937421, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1
+      value: 47
       objectReference: {fileID: 0}
     - target: {fileID: 8055337187762937421, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 27.6
       objectReference: {fileID: 0}
     - target: {fileID: 8055337187762937421, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -26
+      value: 81.7
       objectReference: {fileID: 0}
     - target: {fileID: 8055337187762937421, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
       propertyPath: m_LocalRotation.w
