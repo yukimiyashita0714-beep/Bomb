@@ -13,7 +13,7 @@ namespace Bomb.Battle
 
         [SerializeField] private Animator _animator;
 
-        [SerializeField] private GameEvent _explosionEvent;
+        [SerializeField] private BombEvent _bombEvent;
         [SerializeField] private ExplosionArea _explosionArea;
 
         [SerializeField, Tooltip("目的の爆弾")]
@@ -80,12 +80,24 @@ namespace Bomb.Battle
 
         private void OnEnable()
         {
-            _explosionEvent.OnExplosion += Explosion;
+            if (_bombEvent != null)
+            {
+                Debug.LogWarning("BombEventをアタッチして～");
+                return;
+            }
+
+            _bombEvent.OnExplosion += Explosion;
         }
 
         private void OnDisable()
         {
-            _explosionEvent.OnExplosion -= Explosion;
+            if (_bombEvent != null)
+            {
+                Debug.LogWarning("BombEventをアタッチして～");
+                return;
+            }
+
+            _bombEvent.OnExplosion -= Explosion;
         }
 
 
@@ -237,10 +249,20 @@ namespace Bomb.Battle
 
             _explosionArea.AddBombPlantCount();
 
+            SEEvents.PlayOneShot(SEType.MainTargetBombPlant, transform.position);
+
             //もしメイン爆弾なら設置した後のフェーズに入る
             if (_mainBomb)
             {
-                _explosionEvent.Play(GameEvent.EventKind.Plant);
+                if (_bombEvent != null)
+                {
+                    Debug.LogWarning("BombEventをアタッチして～");
+                    return;
+                }
+
+                _bombEvent.Play(BombEvent.EventKind.Plant);
+
+                SEEvents.PlayOneShot(SEType.Alarm);
             }
         }
 
@@ -259,6 +281,8 @@ namespace Bomb.Battle
 
         public void AnimatorExplosion()
         {
+            SEEvents.PlayOneShot(SEType.MainTargetBombExplosion);
+
             AddExplosionForce();
         }
     }

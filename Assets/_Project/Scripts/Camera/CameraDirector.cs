@@ -13,7 +13,7 @@ public class CameraDirector : MonoBehaviour
 
     [SerializeField] private CameraData _data;
 
-    [SerializeField] private GameEvent _explosionEvent;
+    [SerializeField] private BombEvent _bombEvent;
 
     [Header("MainCamera")]
     [SerializeField] private CinemachineOrbitalFollow _mainOrbitalFollow;
@@ -26,7 +26,13 @@ public class CameraDirector : MonoBehaviour
 
     private void OnEnable()
     {
-        _explosionEvent.OnExplosion += Explosion;
+        if (_bombEvent != null)
+        {
+            Debug.LogWarning("BombEventをアタッチして～");
+            return;
+        }
+
+        _bombEvent.OnExplosion += Explosion;
     }
 
     private void Update()
@@ -36,7 +42,13 @@ public class CameraDirector : MonoBehaviour
 
     private void OnDisable()
     {
-        _explosionEvent.OnExplosion -= Explosion;
+        if (_bombEvent != null)
+        {
+            Debug.LogWarning("BombEventをアタッチして～");
+            return;
+        }
+
+        _bombEvent.OnExplosion -= Explosion;
     }
 
     // ==========================================

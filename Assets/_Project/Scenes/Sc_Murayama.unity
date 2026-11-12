@@ -702,12 +702,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
   _animator: {fileID: 142560909}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _explosionArea: {fileID: 1154465325}
   _mainBomb: 1
   _explosionRadius: 16
   _explosionPower: 86
   _explosionAttenuationPower: 0.2
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -724,12 +727,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
   _animator: {fileID: 142560910}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _explosionArea: {fileID: 1154465325}
   _mainBomb: 0
   _explosionRadius: 16
   _explosionPower: 86
   _explosionAttenuationPower: 0.2
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -746,12 +752,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
   _animator: {fileID: 142560911}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _explosionArea: {fileID: 1154465325}
   _mainBomb: 0
   _explosionRadius: 16
   _explosionPower: 86
   _explosionAttenuationPower: 0.2
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -768,12 +777,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
   _animator: {fileID: 142560912}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _explosionArea: {fileID: 1154465325}
   _mainBomb: 0
   _explosionRadius: 16
   _explosionPower: 86
   _explosionAttenuationPower: 0.2
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
   _explosionLayerMask:
     serializedVersion: 2
     m_Bits: 2048
@@ -831,7 +843,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimerUI
   _animator: {fileID: 177980766}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _timerText: {fileID: 1666350945}
   _limitTime: 120
   _bombLimitTime: 5
@@ -1384,7 +1396,7 @@ GameObject:
   - component: {fileID: 485961963}
   - component: {fileID: 485961964}
   m_Layer: 0
-  m_Name: ExplosionEvent
+  m_Name: BombEvent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1414,9 +1426,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 485961962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0397cf31038b9d44da28f8e798282f43, type: 3}
+  m_Script: {fileID: 11500000, guid: 6db5983130db0114487573995358f34e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Core.ExplosionEvent
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Core.BombEvent
 --- !u!1 &495336828
 GameObject:
   m_ObjectHideFlags: 0
@@ -3012,7 +3024,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b675a43281a55c241a04890fc9fa9096, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.ExplosionArea
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
 --- !u!65 &1154465326
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4171,7 +4183,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraDirector
   _animator: {fileID: 1497820741}
   _data: {fileID: 11400000, guid: 1287478e53f1cf947924c3da37ff844d, type: 2}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _mainOrbitalFollow: {fileID: 139494856}
   _mainInputAxisController: {fileID: 139494849}
   _cameraTarget: {fileID: 1609593026}
@@ -4994,7 +5006,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1630222693}
-  - component: {fileID: 1630222694}
   m_Layer: 5
   m_Name: Stamina
   m_TagString: Untagged
@@ -5023,23 +5034,6 @@ RectTransform:
   m_AnchoredPosition: {x: 369.99997, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1630222694
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1630222692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa81fa7cbeb58e14492d723fee1551b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StaminaUI
-  _stamina: {fileID: 1937825191}
-  _data: {fileID: 11400000, guid: 3ba719a4f318b5d4ba21cfe7b91b28fe, type: 2}
-  _staminaValue: {fileID: 441111941}
-  _readyColor: {r: 1, g: 0.85, b: 0.2, a: 1}
-  _shortageColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
 --- !u!1 &1642688965
 GameObject:
   m_ObjectHideFlags: 0
@@ -5750,17 +5744,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdaa053d73f5cf548891761d6b53539b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerThrower
---- !u!114 &1937825191 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8666636167521298838, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
-  m_PrefabInstance: {fileID: 1937825188}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 455438192}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 152490139b90c95489029a8bc464de7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStamina
 --- !u!114 &1937825192 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5512837400911827301, guid: db7f38b6f2eaaaa48a37b6926c9eeefe, type: 3}
@@ -5932,7 +5915,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResultUI
   _animator: {fileID: 1985502327}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
   _setButton: {fileID: 1102538464}
   _titleName: Sc_Title
   _setButtonDelay: 3.5
@@ -6220,7 +6203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.UI.GameUI
   _animator: {fileID: 2051271638}
-  _explosionEvent: {fileID: 485961964}
+  _bombEvent: {fileID: 485961964}
 --- !u!114 &2051271635
 MonoBehaviour:
   m_ObjectHideFlags: 0

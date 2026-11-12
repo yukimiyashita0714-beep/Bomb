@@ -17,7 +17,7 @@ namespace Bomb.UI
 
         [SerializeField] private Animator _animator;
 
-        [SerializeField] private GameEvent _explosionEvent;
+        [SerializeField] private BombEvent _bombEvent;
 
         // ==========================================
         // Private Fields
@@ -37,12 +37,24 @@ namespace Bomb.UI
 
         private void OnEnable()
         {
-            _explosionEvent.OnExplosion += GameUIDisplayDisable;
+            if (_bombEvent != null)
+            {
+                Debug.LogWarning("BombEventをアタッチして～");
+                return;
+            }
+
+            _bombEvent.OnExplosion += GameUIDisplayDisable;
         }
 
         private void OnDisable()
         {
-            _explosionEvent.OnExplosion -= GameUIDisplayDisable;
+            if (_bombEvent != null)
+            {
+                Debug.LogWarning("BombEventをアタッチして～");
+                return;
+            }
+
+            _bombEvent.OnExplosion -= GameUIDisplayDisable;
         }
 
         // ==========================================

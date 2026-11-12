@@ -13,4 +13,5 @@ public enum SEType
     EnemyAttack = 3,
     MainTargetBombPlant = 4,
     MainTargetBombExplosion = 5,
+    Alarm = 6,
 }

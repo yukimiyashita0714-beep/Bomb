@@ -33,7 +33,7 @@ public class PauseMenuUI : MonoBehaviour
     private GameOverUI _gameOverUI;
 
     [SerializeField, Tooltip("爆破後のリザルト中は開かないようにするため。未設定なら気にしない")]
-    private GameEvent _gameEvent;
+    private BombEvent _bombEvent;
 
     [SerializeField, Tooltip("ポーズ中に止めておきたい追加のコンポーネント（カメラの入力など）")]
     private Behaviour[] _disableWhilePaused;
@@ -84,9 +84,9 @@ public class PauseMenuUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_gameEvent != null)
+        if (_bombEvent != null)
         {
-            _gameEvent.OnExplosion += HandleExplosion;
+            _bombEvent.OnExplosion += HandleExplosion;
         }
     }
 
@@ -109,9 +109,9 @@ public class PauseMenuUI : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_gameEvent != null)
+        if (_bombEvent != null)
         {
-            _gameEvent.OnExplosion -= HandleExplosion;
+            _bombEvent.OnExplosion -= HandleExplosion;
         }
     }
 

@@ -36,7 +36,7 @@ MonoBehaviour:
     - _clip: {fileID: 8300000, guid: 1af7070d6e0c6734b873288802a7fabe, type: 3}
       _startSeconds: 0
       _delaySeconds: 0.2
-    _volume: 0.7
+    _volume: 0.4
     _pitchMin: 0.95
     _pitchMax: 1.05
     _maxSimultaneous: 4
@@ -53,5 +53,25 @@ MonoBehaviour:
     _volume: 0.7
     _pitchMin: 0.95
     _pitchMax: 1.05
+    _maxSimultaneous: 4
+    _outputOverride: {fileID: 0}
+  - _type: 6
+    _playMode: 1
+    _clips:
+    - _clip: {fileID: 8300000, guid: 2c5a28ca566f7a84aa78509fba8e3511, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0
+    - _clip: {fileID: 8300000, guid: 2c5a28ca566f7a84aa78509fba8e3511, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 1
+    - _clip: {fileID: 8300000, guid: 2c5a28ca566f7a84aa78509fba8e3511, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 2
+    - _clip: {fileID: 8300000, guid: 2c5a28ca566f7a84aa78509fba8e3511, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 3
+    _volume: 0.8
+    _pitchMin: 1
+    _pitchMax: 1
     _maxSimultaneous: 4
     _outputOverride: {fileID: 0}

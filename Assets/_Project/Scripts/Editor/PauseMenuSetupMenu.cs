@@ -86,7 +86,7 @@ public static class PauseMenuSetupMenu
         serialized.FindProperty("_gameOverUI").objectReferenceValue =
             Object.FindFirstObjectByType<GameOverUI>(FindObjectsInactive.Include);
         serialized.FindProperty("_gameEvent").objectReferenceValue =
-            Object.FindFirstObjectByType<GameEvent>(FindObjectsInactive.Include);
+            Object.FindFirstObjectByType<BombEvent>(FindObjectsInactive.Include);
         SetBehaviourArray(serialized.FindProperty("_disableWhilePaused"), FindCameraInputs());
         serialized.ApplyModifiedPropertiesWithoutUndo();
 
