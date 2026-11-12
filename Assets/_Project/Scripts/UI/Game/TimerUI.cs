@@ -12,7 +12,7 @@ public class TimerUI : MonoBehaviour
     // ==========================================
 
     [SerializeField] private Animator _animator;
-    [SerializeField] private GameEvent _explosionEvent;
+    [SerializeField] private BombEvent _bombEvent;
 
     [SerializeField, Tooltip("時間のテキスト")] 
     TextMeshProUGUI _timerText;
@@ -82,12 +82,24 @@ public class TimerUI : MonoBehaviour
 
     private void OnEnable()
     {
-        _explosionEvent.OnPlant += OnPlantBomb;
+        if (_bombEvent != null)
+        {
+            Debug.LogWarning("BombEventをアタッチして～");
+            return;
+        }
+
+        _bombEvent.OnPlant += OnPlantBomb;
     }
 
     private void OnDisable()
     {
-        _explosionEvent.OnPlant -= OnPlantBomb;
+        if (_bombEvent != null)
+        {
+            Debug.LogWarning("BombEventをアタッチして～");
+            return;
+        }
+
+        _bombEvent.OnPlant -= OnPlantBomb;
     }
 
     private void Start()
@@ -233,7 +245,7 @@ public class TimerUI : MonoBehaviour
 
     private IEnumerator BombExplosion()
     {
-        _explosionEvent.Play(GameEvent.EventKind.Explosion);
+        _bombEvent.Play(BombEvent.EventKind.Explosion);
 
         yield return new WaitForSeconds(_gameOverDelay);
 

@@ -12,7 +12,7 @@ public class ResultUI : MonoBehaviour
 
     [SerializeField] private Animator _animator;
 
-    [SerializeField] private GameEvent _explosionEvent;
+    [SerializeField] private BombEvent _bombEvent;
 
     [SerializeField, Tooltip("リザルト出た場合に最初に選択されるボタン")]
     private GameObject _setButton;
@@ -30,12 +30,24 @@ public class ResultUI : MonoBehaviour
 
     private void OnEnable()
     {
-        _explosionEvent.OnExplosion += Result;
+        if (_bombEvent != null)
+        {
+            Debug.LogWarning("BombEventをアタッチして～");
+            return;
+        }
+
+        _bombEvent.OnExplosion += Result;
     }
 
     private void OnDisable()
     {
-        _explosionEvent.OnExplosion -= Result;
+        if (_bombEvent != null)
+        {
+            Debug.LogWarning("BombEventをアタッチして～");
+            return;
+        }
+
+        _bombEvent.OnExplosion -= Result;
     }
 
     // ==========================================

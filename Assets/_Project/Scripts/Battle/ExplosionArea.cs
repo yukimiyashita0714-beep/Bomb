@@ -10,7 +10,7 @@ namespace Bomb.Battle
         // Serialize Fields
         // ==========================================
 
-        [SerializeField] private GameEvent _explosionEvent;
+        [SerializeField] private BombEvent _bombEvent;
 
         // ==========================================
         // Private Fields
@@ -40,7 +40,13 @@ namespace Bomb.Battle
                 return;
             }
 
-            _explosionEvent.Play(GameEvent.EventKind.Explosion);
+            if (_bombEvent != null)
+            {
+                Debug.LogWarning("BombEventをアタッチして～");
+                return;
+            }
+
+            _bombEvent.Play(BombEvent.EventKind.Explosion);
             _bombPlantCount = 0;
         }
 

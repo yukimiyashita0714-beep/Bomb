@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Bomb.Core
 {
-    public class GameEvent : MonoBehaviour
+    public class BombEvent : MonoBehaviour
     {
         //ゲームの重要なイベントをまとめたいと考えている
 
