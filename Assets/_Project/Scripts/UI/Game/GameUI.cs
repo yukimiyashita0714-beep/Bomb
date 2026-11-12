@@ -37,7 +37,7 @@ namespace Bomb.UI
 
         private void OnEnable()
         {
-            if (_bombEvent != null)
+            if (_bombEvent == null)
             {
                 Debug.LogWarning("BombEventをアタッチして～");
                 return;
@@ -48,7 +48,7 @@ namespace Bomb.UI
 
         private void OnDisable()
         {
-            if (_bombEvent != null)
+            if (_bombEvent == null)
             {
                 Debug.LogWarning("BombEventをアタッチして～");
                 return;

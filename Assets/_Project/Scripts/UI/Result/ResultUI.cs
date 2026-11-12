@@ -30,7 +30,7 @@ public class ResultUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_bombEvent != null)
+        if (_bombEvent == null)
         {
             Debug.LogWarning("BombEventをアタッチして～");
             return;
@@ -41,7 +41,7 @@ public class ResultUI : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_bombEvent != null)
+        if (_bombEvent == null)
         {
             Debug.LogWarning("BombEventをアタッチして～");
             return;
