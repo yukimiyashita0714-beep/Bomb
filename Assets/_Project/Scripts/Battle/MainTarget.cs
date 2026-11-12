@@ -80,7 +80,7 @@ namespace Bomb.Battle
 
         private void OnEnable()
         {
-            if (_bombEvent != null)
+            if (_bombEvent == null)
             {
                 Debug.LogWarning("BombEventをアタッチして～");
                 return;
@@ -91,7 +91,7 @@ namespace Bomb.Battle
 
         private void OnDisable()
         {
-            if (_bombEvent != null)
+            if (_bombEvent == null)
             {
                 Debug.LogWarning("BombEventをアタッチして～");
                 return;
@@ -254,7 +254,7 @@ namespace Bomb.Battle
             //もしメイン爆弾なら設置した後のフェーズに入る
             if (_mainBomb)
             {
-                if (_bombEvent != null)
+                if (_bombEvent == null)
                 {
                     Debug.LogWarning("BombEventをアタッチして～");
                     return;

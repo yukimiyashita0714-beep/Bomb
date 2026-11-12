@@ -16,7 +16,8 @@ public class CameraDirector : MonoBehaviour
     [SerializeField] private BombEvent _bombEvent;
 
     [Header("MainCamera")]
-    [SerializeField] private CinemachineOrbitalFollow _mainOrbitalFollow;
+    [SerializeField] private CinemachinePanTilt _mainPanTilt;
+    [SerializeField] private CinemachinePositionComposer _mainComposer;
     [SerializeField] private CinemachineInputAxisController _mainInputAxisController;
     [SerializeField] private Transform _cameraTarget;
 
@@ -26,7 +27,7 @@ public class CameraDirector : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_bombEvent != null)
+        if (_bombEvent == null)
         {
             Debug.LogWarning("BombEventをアタッチして～");
             return;
@@ -42,7 +43,7 @@ public class CameraDirector : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_bombEvent != null)
+        if (_bombEvent == null)
         {
             Debug.LogWarning("BombEventをアタッチして～");
             return;
@@ -66,8 +67,8 @@ public class CameraDirector : MonoBehaviour
 
     private void CameraDataUpdate()
     {
-        _mainOrbitalFollow.TargetOffset = _data.CameraPos;
-        _mainOrbitalFollow.Radius = _data.CameraRadius;
+        _cameraTarget.localPosition = _data.CameraPos;
+        _mainComposer.CameraDistance = _data.CameraRadius;
 
         _cameraTarget.localPosition = _data.TargetPos;
 

@@ -40,7 +40,7 @@ namespace Bomb.Battle
                 return;
             }
 
-            if (_bombEvent != null)
+            if (_bombEvent == null)
             {
                 Debug.LogWarning("BombEventをアタッチして～");
                 return;
