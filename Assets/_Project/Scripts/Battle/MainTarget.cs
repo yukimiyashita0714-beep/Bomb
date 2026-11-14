@@ -70,6 +70,8 @@ namespace Bomb.Battle
         // Properties
         // ==========================================
 
+        public bool MainBomb => _mainBomb;
+
         public bool IsInteractable => !_isBombPlanted;
 
         public InteractKind InteractKind => InteractKind.BombPlant;
