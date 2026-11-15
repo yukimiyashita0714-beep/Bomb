@@ -941493,6 +941493,7 @@ GameObject:
   - component: {fileID: 1012962307}
   - component: {fileID: 1012962306}
   - component: {fileID: 1012962305}
+  - component: {fileID: 1012962308}
   m_Layer: 0
   m_Name: MainTarget (4)
   m_TagString: Untagged
@@ -941561,7 +941562,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ea8511c0a60b50247bd7cfa7a299963c, type: 2}
+  - {fileID: 2100000, guid: 0619402e59faac243b0f1fe8b7fffe48, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -941593,6 +941594,31 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1012962303}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1012962308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012962303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49140066adb351e40a7f2d66113463ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
+  _explosionArea: {fileID: 0}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1012992775
 GameObject:
   m_ObjectHideFlags: 0
@@ -1199154,8 +1199180,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3577f5adcee5171478b69da57541d7b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimerUI
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
   _timerText: {fileID: 1737273126}
   _limitTime: 60
+  _bombLimitTime: 0
+  _gameOverDelay: 0
 --- !u!1 &1291830765
 GameObject:
   m_ObjectHideFlags: 0
@@ -1994666,6 +1994696,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 545406549}
     m_Modifications:
+    - target: {fileID: 273610254724131482, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0619402e59faac243b0f1fe8b7fffe48, type: 2}
     - target: {fileID: 837545871826426937, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 52.37
@@ -1994674,6 +1994708,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 61.86
       objectReference: {fileID: 0}
+    - target: {fileID: 1106159194013031962, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0619402e59faac243b0f1fe8b7fffe48, type: 2}
     - target: {fileID: 1587005014496788315, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
       propertyPath: m_LocalScale.x
       value: 33.298527
@@ -1994758,6 +1994796,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 8.2094
       objectReference: {fileID: 0}
+    - target: {fileID: 2401096851012046033, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0619402e59faac243b0f1fe8b7fffe48, type: 2}
     - target: {fileID: 4458004378853801969, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
       propertyPath: m_Name
       value: P_TestMap
@@ -1994923,13 +1994965,178 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5915358987525563607, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
       insertIndex: 55
       addedObject: {fileID: 2098942602}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1509510267170202376, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6833682171969642316}
+    - targetCorrespondingSourceObject: {fileID: 6774470807574775982, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6833682171969642315}
+    - targetCorrespondingSourceObject: {fileID: 8626244467669950017, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6833682171969642314}
+    - targetCorrespondingSourceObject: {fileID: 5623065926804696831, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6833682171969642313}
+    - targetCorrespondingSourceObject: {fileID: 2391686506663921175, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6833682171969642312}
   m_SourcePrefab: {fileID: 100100000, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
 --- !u!4 &6833682171969642306 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2189479017383449226, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
   m_PrefabInstance: {fileID: 6833682171969642305}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6833682171969642307 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2391686506663921175, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 6833682171969642305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6833682171969642308 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5623065926804696831, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 6833682171969642305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6833682171969642309 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8626244467669950017, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 6833682171969642305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6833682171969642310 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6774470807574775982, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 6833682171969642305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6833682171969642311 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1509510267170202376, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 6833682171969642305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6833682171969642312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6833682171969642307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49140066adb351e40a7f2d66113463ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
+  _explosionArea: {fileID: 0}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &6833682171969642313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6833682171969642308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49140066adb351e40a7f2d66113463ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
+  _explosionArea: {fileID: 0}
+  _mainBomb: 1
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &6833682171969642314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6833682171969642309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49140066adb351e40a7f2d66113463ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
+  _explosionArea: {fileID: 0}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &6833682171969642315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6833682171969642310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49140066adb351e40a7f2d66113463ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
+  _explosionArea: {fileID: 0}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &6833682171969642316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6833682171969642311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49140066adb351e40a7f2d66113463ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.Battle.MainTarget
+  _animator: {fileID: 0}
+  _bombEvent: {fileID: 0}
+  _explosionArea: {fileID: 0}
+  _mainBomb: 0
+  _explosionRadius: 40
+  _explosionPower: 40
+  _explosionAttenuationPower: 0.5
+  _explosionOutwardPower: 8
+  _explosionMaxSpin: 10
+  _explosionWaveSeconds: 1
+  _explosionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
