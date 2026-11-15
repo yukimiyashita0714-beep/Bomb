@@ -11,6 +11,7 @@ namespace Bomb.Core
         {
             Plant,
             Explosion,
+            Escape,
         }
 
         // ==========================================
@@ -20,8 +21,11 @@ namespace Bomb.Core
         /// <summary> 爆弾設置イベント </summary>
         public event Action OnPlant;
 
-        /// <summary> 爆弾爆発イベント </summary>
+        /// <summary> 爆弾爆発イベント (出口で起爆したときも、時間切れのときも送る) </summary>
         public event Action OnExplosion;
+
+        /// <summary> 脱出成功イベント (出口で起爆したときだけ、爆発の直前に送る) </summary>
+        public event Action OnEscape;
 
         // ==========================================
         // Public Methods
@@ -44,6 +48,12 @@ namespace Bomb.Core
                 case EventKind.Explosion:
 
                     OnExplosion?.Invoke();
+
+                    break;
+
+                case EventKind.Escape:
+
+                    OnEscape?.Invoke();
 
                     break;
             }

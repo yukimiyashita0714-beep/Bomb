@@ -44,6 +44,9 @@ public class TimerUI : MonoBehaviour
 
     private bool _isPlantBomb = false;
 
+    /// <summary>爆発したら true。出口で起爆した後に時間切れ (失敗) が来ないよう、時間を止める。</summary>
+    private bool _isExploded = false;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -89,6 +92,7 @@ public class TimerUI : MonoBehaviour
         }
 
         _bombEvent.OnPlant += OnPlantBomb;
+        _bombEvent.OnExplosion += HandleExplosion;
     }
 
     private void OnDisable()
@@ -100,6 +104,7 @@ public class TimerUI : MonoBehaviour
         }
 
         _bombEvent.OnPlant -= OnPlantBomb;
+        _bombEvent.OnExplosion -= HandleExplosion;
     }
 
     private void Start()
@@ -130,6 +135,11 @@ public class TimerUI : MonoBehaviour
     private void Update()
     {
         Display();
+
+        if (_isExploded)
+        {
+            return;
+        }
 
         if (_isPlantBomb)
         {
@@ -243,6 +253,10 @@ public class TimerUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 出口に着く前に時間切れになった。爆発に巻き込まれて失敗。
+    /// 爆発を見せてから、少し待って OnBombTimeUp (ゲームオーバー) を送る。
+    /// </summary>
     private IEnumerator BombExplosion()
     {
         _bombEvent.Play(BombEvent.EventKind.Explosion);
@@ -250,6 +264,11 @@ public class TimerUI : MonoBehaviour
         yield return new WaitForSeconds(_gameOverDelay);
 
         OnBombTimeUp?.Invoke();
+    }
+
+    private void HandleExplosion()
+    {
+        _isExploded = true;
     }
 
     // ==========================================

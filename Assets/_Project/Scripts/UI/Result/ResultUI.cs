@@ -36,7 +36,7 @@ public class ResultUI : MonoBehaviour
             return;
         }
 
-        _bombEvent.OnExplosion += Result;
+        _bombEvent.OnEscape += Result;
     }
 
     private void OnDisable()
@@ -47,7 +47,7 @@ public class ResultUI : MonoBehaviour
             return;
         }
 
-        _bombEvent.OnExplosion -= Result;
+        _bombEvent.OnEscape -= Result;
     }
 
     // ==========================================
