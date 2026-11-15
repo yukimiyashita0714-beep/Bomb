@@ -144,6 +144,7 @@ public class PauseMenuUI : MonoBehaviour
         SetCursorLocked(false);
         SetVisible(true);
         SelectFirstButton();
+        BgmEvents.SetDucked(true);
 
         OnPaused?.Invoke();
     }
@@ -166,6 +167,7 @@ public class PauseMenuUI : MonoBehaviour
         }
 
         _resumeRoutine = StartCoroutine(ResumeRoutine());
+        BgmEvents.SetDucked(false);
 
         OnResumed?.Invoke();
     }

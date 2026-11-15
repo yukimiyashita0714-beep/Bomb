@@ -59,6 +59,9 @@ public class GameOverUI : MonoBehaviour
     // Private Fields
     // ==========================================
 
+    /// <summary>ゲームオーバーで BGM を下げきるまでの時間 (秒)。</summary>
+    private const float GAME_OVER_BGM_FADE_SECONDS = 0.5f;
+
     private bool _isShown;
 
     // ==========================================
@@ -129,6 +132,7 @@ public class GameOverUI : MonoBehaviour
 
         _isShown = true;
         StopPlayerInput();
+        BgmEvents.Stop(GAME_OVER_BGM_FADE_SECONDS);
 
         if (_pauseOnShow)
         {
