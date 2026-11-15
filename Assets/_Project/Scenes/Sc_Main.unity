@@ -2204,6 +2204,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 757816732}
   m_CullTransparentMesh: 1
+--- !u!1 &759558862
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 759558863}
+  - component: {fileID: 759558864}
+  m_Layer: 0
+  m_Name: EscapeWaveSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &759558863
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759558862}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1542775780}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &759558864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759558862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04c08c2b93cc2ac4b8b5dd0c87b350bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeWaveSpawner
+  _data: {fileID: 11400000, guid: 4411d84618f3c374291585aba1beb1a8, type: 2}
+  _bombEvent: {fileID: 2058929123}
+  _spawnParent: {fileID: 1832635629}
+  _appearSeconds: 0.4
+  _appearEffectPrefab: {fileID: 0}
+  _appearEffectLifetimeSeconds: 2
 --- !u!1 &818207964
 GameObject:
   m_ObjectHideFlags: 0
@@ -3677,6 +3727,7 @@ Transform:
   - {fileID: 2058929122}
   - {fileID: 1582294151}
   - {fileID: 438562353}
+  - {fileID: 759558863}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1543269258
@@ -5839,6 +5890,7 @@ GameObject:
   - component: {fileID: 2087756203}
   - component: {fileID: 2087756202}
   - component: {fileID: 2087756201}
+  - component: {fileID: 2087756206}
   m_Layer: 0
   m_Name: MainCinemachineCamera
   m_TagString: Untagged
@@ -6049,6 +6101,20 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
+--- !u!114 &2087756206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2087756199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ab15baf953e542498228f771455a51b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GamepadLookSensitivity
+  _axisController: {fileID: 0}
+  _gamepadMultiplier: 1.2
 --- !u!1001 &1842946635548509438
 PrefabInstance:
   m_ObjectHideFlags: 0
