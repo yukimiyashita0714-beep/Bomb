@@ -55,6 +55,9 @@ public class GameOverUI : MonoBehaviour
     [SerializeField, Tooltip("HP が 0 になったときに出す文字")]
     private string _hpDepletedMessage = "DOWN!";
 
+    [SerializeField, Tooltip("爆弾を付けた後、出口に着く前に爆発したときに出す文字")]
+    private string _caughtInBlastMessage = "CAUGHT IN THE BLAST!";
+
     // ==========================================
     // Private Fields
     // ==========================================
@@ -80,6 +83,11 @@ public class GameOverUI : MonoBehaviour
         SetVisible(0f, false);
 
         // 敵の攻撃を足す前に置いた画面でも動くよう、未設定なら探して補う。
+        if (_timer == null)
+        {
+            _timer = FindAnyObjectByType<TimerUI>();
+        }
+
         if (_hpUI == null)
         {
             _hpUI = FindAnyObjectByType<HpUI>();
@@ -97,6 +105,7 @@ public class GameOverUI : MonoBehaviour
         if (_timer != null)
         {
             _timer.OnTimeUp += HandleTimeUp;
+            _timer.OnBombTimeUp += HandleBombTimeUp;
         }
 
         if (_hpUI != null)
@@ -110,6 +119,7 @@ public class GameOverUI : MonoBehaviour
         if (_timer != null)
         {
             _timer.OnTimeUp -= HandleTimeUp;
+            _timer.OnBombTimeUp -= HandleBombTimeUp;
         }
 
         if (_hpUI != null)
@@ -166,6 +176,12 @@ public class GameOverUI : MonoBehaviour
     private void HandleHpDepleted()
     {
         ShowWithReason(_hpDepletedMessage);
+    }
+
+    /// <summary>爆弾を付けた後、出口で起爆する前に時間切れになった (爆発に巻き込まれた)。</summary>
+    private void HandleBombTimeUp()
+    {
+        ShowWithReason(_caughtInBlastMessage);
     }
 
     /// <summary>先に起きた方の理由だけを出す。両方同時に起きても後から書き換えない。</summary>
