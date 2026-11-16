@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: SO_PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   _walkSpeed: 10
+  _acceleration: 40
+  _deceleration: 60
   _maxHp: 30
   _hpRecoveryCooltime: 2.5
   _hpRecoveryValue: 1

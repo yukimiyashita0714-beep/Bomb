@@ -85,7 +85,8 @@ public static class PauseMenuSetupMenu
         serialized.FindProperty("_firstSelectedButton").objectReferenceValue = resumeButton.gameObject;
         serialized.FindProperty("_gameOverUI").objectReferenceValue =
             Object.FindFirstObjectByType<GameOverUI>(FindObjectsInactive.Include);
-        serialized.FindProperty("_gameEvent").objectReferenceValue =
+        // PauseMenuUI 側のフィールド名は _bombEvent。名前が違うと null が返ってメニューが途中で止まる。
+        serialized.FindProperty("_bombEvent").objectReferenceValue =
             Object.FindFirstObjectByType<BombEvent>(FindObjectsInactive.Include);
         SetBehaviourArray(serialized.FindProperty("_disableWhilePaused"), FindCameraInputs());
         serialized.ApplyModifiedPropertiesWithoutUndo();
