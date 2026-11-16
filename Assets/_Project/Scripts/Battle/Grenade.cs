@@ -24,13 +24,17 @@ public class Grenade : MonoBehaviour
     // Private Fields
     // ==========================================
 
-    /// <summary>OverlapSphere が一度に拾う上限。毎回配列を確保しないため使い回す。</summary>
-    private const int MAX_OVERLAP_COUNT = 64;
+    /// <summary>
+    /// OverlapSphere の受け皿の最初の大きさ。毎回配列を確保しないため使い回す。
+    /// 迷路の壁はブロックが密に並ぶので、爆風の範囲に数百個入ることがある。足りなければ倍に広げる。
+    /// </summary>
+    private const int INITIAL_OVERLAP_COUNT = 512;
 
     /// <summary>遮蔽判定の Raycast が一度に拾う上限。</summary>
     private const int MAX_OCCLUSION_HIT_COUNT = 16;
 
-    private static readonly Collider[] OverlapBuffer = new Collider[MAX_OVERLAP_COUNT];
+    // NOTE: 以前は 64 個で打ち切っていたため、当たった壁のブロックが拾われずに壊れないことがあった。
+    private static Collider[] _overlapBuffer = new Collider[INITIAL_OVERLAP_COUNT];
 
     private static readonly RaycastHit[] OcclusionBuffer = new RaycastHit[MAX_OCCLUSION_HIT_COUNT];
 
@@ -47,6 +51,9 @@ public class Grenade : MonoBehaviour
     private Collider[] _colliders;
     private float _fuseTimer;
     private bool _hasExploded;
+
+    /// <summary>直接ぶつかって起爆したブロックの Collider。爆風の判定に関係なく必ず壊す。</summary>
+    private Collider _directHitCollider;
 
     // ==========================================
     // Properties
@@ -149,6 +156,7 @@ public class Grenade : MonoBehaviour
             return;
         }
 
+        _directHitCollider = collision.collider;
         Detonate();
     }
 
@@ -187,18 +195,13 @@ public class Grenade : MonoBehaviour
         Vector3 center = transform.position;
         float radius = _data.ExplosionRadius;
 
-        int hitCount = Physics.OverlapSphereNonAlloc(
-            center,
-            radius,
-            OverlapBuffer,
-            _data.AffectedLayers,
-            QueryTriggerInteraction.Ignore);
+        int hitCount = OverlapExplosion(center, radius);
 
         DamagedBuffer.Clear();
 
         for (int i = 0; i < hitCount; i++)
         {
-            Collider hit = OverlapBuffer[i];
+            Collider hit = _overlapBuffer[i];
             Rigidbody body = hit.attachedRigidbody;
 
             // 自分自身は爆風の対象にしない。
@@ -235,11 +238,42 @@ public class Grenade : MonoBehaviour
                 ForceMode.Impulse);
         }
 
+        // ぶつかった相手は目の前にあるので、遮蔽の判定がどうなっても必ず壊す。
+        // すでに上でダメージを入れていれば DamagedBuffer が二重に入れるのを防ぐ。
+        if (_directHitCollider != null)
+        {
+            ApplyDamage(_directHitCollider, center);
+        }
+
         DamagedBuffer.Clear();
 
         OnExploded?.Invoke(center, radius);
 
         Destroy(gameObject, _data.DestroyDelay);
+    }
+
+    /// <summary>
+    /// 爆風の範囲にある Collider を <see cref="_overlapBuffer"/> に集めて、その数を返す。
+    /// 受け皿がいっぱいになったら取りこぼしがあるかもしれないので、倍に広げて取り直す。
+    /// </summary>
+    private int OverlapExplosion(Vector3 center, float radius)
+    {
+        while (true)
+        {
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                center,
+                radius,
+                _overlapBuffer,
+                _data.AffectedLayers,
+                QueryTriggerInteraction.Ignore);
+
+            if (hitCount < _overlapBuffer.Length)
+            {
+                return hitCount;
+            }
+
+            _overlapBuffer = new Collider[_overlapBuffer.Length * 2];
+        }
     }
 
     /// <summary>
