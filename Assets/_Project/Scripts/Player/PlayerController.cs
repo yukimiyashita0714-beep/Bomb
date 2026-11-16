@@ -37,6 +37,9 @@ public class PlayerController : MonoBehaviour
     private float _verticalVelocity;
     private float _currentSpeed;
 
+    /// <summary>今の水平方向の速度。入力の速度へ少しずつ近づけて、動き出しと止まり方を滑らかにする。</summary>
+    private Vector3 _horizontalVelocity;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -67,7 +70,9 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = CalculateMoveDirection(_inputReceiver.Move);
 
-        Vector3 velocity = moveDirection * _data.WalkSpeed;
+        UpdateHorizontalVelocity(moveDirection * _data.WalkSpeed);
+
+        Vector3 velocity = _horizontalVelocity;
         _currentSpeed = velocity.magnitude;
 
         FaceCameraYaw(moveDirection);
@@ -145,6 +150,24 @@ public class PlayerController : MonoBehaviour
         // 補間を挟まないのは、振り向き中に投げたときだけ狙いがズレるのを避けるため。
         // カメラ側が既に減衰を持っているので、見た目はこれで十分滑らかになる。
         transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+    }
+
+    /// <summary>
+    /// 水平方向の速度を目標の速度へ近づける。入力があるときは加速、無いときは減速の値で近づける。
+    /// 値が 0 のときは今までどおり即座に目標の速度にする。
+    /// </summary>
+    private void UpdateHorizontalVelocity(Vector3 targetVelocity)
+    {
+        bool isAccelerating = targetVelocity.sqrMagnitude > 0f;
+        float rate = isAccelerating ? _data.Acceleration : _data.Deceleration;
+
+        if (rate <= 0f)
+        {
+            _horizontalVelocity = targetVelocity;
+            return;
+        }
+
+        _horizontalVelocity = Vector3.MoveTowards(_horizontalVelocity, targetVelocity, rate * Time.deltaTime);
     }
 
     private void RotateTowards(Vector3 direction)

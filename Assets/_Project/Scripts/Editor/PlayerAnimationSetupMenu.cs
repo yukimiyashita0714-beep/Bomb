@@ -49,6 +49,15 @@ public static class PlayerAnimationSetupMenu
     /// <summary>アニメーションを切り替えるときに重ねる時間 (秒)。</summary>
     private const float TRANSITION_SECONDS = 0.05f;
 
+    /// <summary>待機から走りへ切り替えるときに重ねる時間 (秒)。短いと動き出しがカクッとする。</summary>
+    private const float START_RUN_TRANSITION_SECONDS = 0.2f;
+
+    /// <summary>走りから待機へ切り替えるときに重ねる時間 (秒)。</summary>
+    private const float STOP_RUN_TRANSITION_SECONDS = 0.15f;
+
+    private const string IDLE_STATE_NAME = "Idle";
+    private const string RUN_STATE_NAME = "Run";
+
     /// <summary>足元を決める部品の名前に含まれる言葉。</summary>
     private const string FOOT_PART_KEYWORD = "boot";
 
@@ -187,10 +196,10 @@ public static class PlayerAnimationSetupMenu
 
         AnimatorStateMachine machine = controller.layers[0].stateMachine;
 
-        AnimatorState idle = machine.AddState("Idle", new Vector3(300f, 0f, 0f));
+        AnimatorState idle = machine.AddState(IDLE_STATE_NAME, new Vector3(300f, 0f, 0f));
         idle.motion = LoadClip(IDLE_PATH);
 
-        AnimatorState run = machine.AddState("Run", new Vector3(300f, 120f, 0f));
+        AnimatorState run = machine.AddState(RUN_STATE_NAME, new Vector3(300f, 120f, 0f));
         run.motion = LoadClip(RUN_PATH);
 
         AnimatorState kamae = machine.AddState("Kamae", new Vector3(600f, 0f, 0f));
@@ -202,9 +211,11 @@ public static class PlayerAnimationSetupMenu
         machine.defaultState = idle;
 
         AnimatorStateTransition idleToRun = AddTransition(idle, run);
+        idleToRun.duration = START_RUN_TRANSITION_SECONDS;
         idleToRun.AddCondition(AnimatorConditionMode.Greater, RUN_SPEED_THRESHOLD, SPEED_PARAMETER);
 
         AnimatorStateTransition runToIdle = AddTransition(run, idle);
+        runToIdle.duration = STOP_RUN_TRANSITION_SECONDS;
         runToIdle.AddCondition(AnimatorConditionMode.Less, RUN_SPEED_THRESHOLD, SPEED_PARAMETER);
 
         // 走っていても待機していても、チャージを始めたら構える。
@@ -242,12 +253,30 @@ public static class PlayerAnimationSetupMenu
             {
                 if (!transition.hasExitTime)
                 {
-                    transition.duration = TRANSITION_SECONDS;
+                    transition.duration = GetTransitionSeconds(child.state, transition);
                 }
             }
         }
 
         EditorUtility.SetDirty(controller);
+    }
+
+    /// <summary>待機と走りの間だけ長めに重ね、それ以外 (構え・投げ) は入力にすぐ反応させる。</summary>
+    private static float GetTransitionSeconds(AnimatorState from, AnimatorStateTransition transition)
+    {
+        string toName = transition.destinationState != null ? transition.destinationState.name : string.Empty;
+
+        if (from.name == IDLE_STATE_NAME && toName == RUN_STATE_NAME)
+        {
+            return START_RUN_TRANSITION_SECONDS;
+        }
+
+        if (from.name == RUN_STATE_NAME && toName == IDLE_STATE_NAME)
+        {
+            return STOP_RUN_TRANSITION_SECONDS;
+        }
+
+        return TRANSITION_SECONDS;
     }
 
     private static bool HasParameter(AnimatorController controller, string parameterName)

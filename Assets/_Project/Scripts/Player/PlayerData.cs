@@ -16,6 +16,15 @@ public class PlayerData : ScriptableObject
     [Range(0f, 20f)]
     private float _walkSpeed = 4f;
 
+    // NOTE: 0 → 最高速までの時間は 最高速 ÷ 加速 で決まる。歩く速さ 10 なら、40 で 0.25 秒。
+    [SerializeField, Tooltip("動き出しの加速 (m/s^2)。小さいほどゆっくり走り出す。0 で即座に最高速")]
+    [Min(0f)]
+    private float _acceleration = 40f;
+
+    [SerializeField, Tooltip("止まるときの減速 (m/s^2)。小さいほど滑ってから止まる。0 で即座に止まる")]
+    [Min(0f)]
+    private float _deceleration = 60f;
+
     [Header("Hp")]
     [SerializeField, Tooltip("最大体力")]
     [Min(1f)]
@@ -104,6 +113,12 @@ public class PlayerData : ScriptableObject
 
     /// <summary>通常時の水平移動速度 (m/s)。</summary>
     public float WalkSpeed => _walkSpeed;
+
+    /// <summary>動き出しの加速 (m/s^2)。0 なら即座に最高速。</summary>
+    public float Acceleration => _acceleration;
+
+    /// <summary>止まるときの減速 (m/s^2)。0 なら即座に止まる。</summary>
+    public float Deceleration => _deceleration;
 
     /// <summary> 最大体力 </summary>
     public float MaxHp => _maxHp;
