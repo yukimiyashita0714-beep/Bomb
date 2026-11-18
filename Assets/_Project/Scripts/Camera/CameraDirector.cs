@@ -1,5 +1,6 @@
 using Bomb.Battle;
 using Bomb.Core;
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -33,7 +34,13 @@ public class CameraDirector : MonoBehaviour
             return;
         }
 
+        _bombEvent.OnPlant += Plant;
         _bombEvent.OnExplosion += Explosion;
+    }
+
+    private void Start()
+    {
+        _animator.SetTrigger("MainTarget");
     }
 
     private void Update()
@@ -49,12 +56,18 @@ public class CameraDirector : MonoBehaviour
             return;
         }
 
+        _bombEvent.OnPlant -= Plant;
         _bombEvent.OnExplosion -= Explosion;
     }
 
     // ==========================================
     // Public Methods
     // ==========================================
+
+    public void Plant()
+    {
+        _animator.SetTrigger("Plant");
+    }
 
     public void Explosion()
     {
@@ -74,6 +87,15 @@ public class CameraDirector : MonoBehaviour
 
         _mainInputAxisController.Controllers[0].Input.Gain = _data.CameraGainX;
         _mainInputAxisController.Controllers[1].Input.Gain = _data.CameraGainY;
+    }
+
+    // ==========================================
+    // Animator Method
+    // ==========================================
+
+    public void ChangeTimeScale(int timeScale)
+    {
+        Time.timeScale = timeScale;
     }
 
     // ==========================================

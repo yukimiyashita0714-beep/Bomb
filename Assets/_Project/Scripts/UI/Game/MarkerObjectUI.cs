@@ -1,6 +1,4 @@
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Timeline;
 
 public class MarkerObjectUI : MonoBehaviour
 {
@@ -15,6 +13,9 @@ public class MarkerObjectUI : MonoBehaviour
     // ==========================================
 
     [SerializeField] Animator _animator;
+
+    [SerializeField, Tooltip("UIを表示する端の余白")]
+    private float _UIRadio;
 
     // ==========================================
     // Private Fields
@@ -70,21 +71,46 @@ public class MarkerObjectUI : MonoBehaviour
     {
         var canvas = GetComponentInParent<Canvas>();
 
+        RectTransform canvasRect = canvas.transform as RectTransform;
+
+        // 対象のワールド座標をスクリーン座標に変換
         Vector3 screenPos = _mainCamera.WorldToScreenPoint(_targetObject.position);
 
-        var isVisible = 0 < screenPos.z;
+        // カメラの後ろにいる場合は反転
+        if (screenPos.z < 0)
+        {
+            screenPos *= -1;
+        }
 
-        _animator.SetBool("Visible", isVisible);
-
-        RectTransform canvasRect =
-            canvas.transform as RectTransform;
-
+        // スクリーン座標をCanvas内のローカル座標に変換
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvasRect,
             screenPos,
             null,
             out Vector2 localPoint
         );
+
+        // Canvasの範囲を取得
+        Rect canvasBounds = canvasRect.rect;
+
+        float halfWidth = canvasBounds.width / 2f - _UIRadio;
+        float halfHeight = canvasBounds.height / 2f - _UIRadio;
+
+        // 中心から対象への方向
+        Vector2 direction = localPoint.normalized;
+
+        // 画面端に収まる倍率を計算
+        float xRatio = halfWidth / Mathf.Abs(direction.x);
+        float yRatio = halfHeight / Mathf.Abs(direction.y);
+
+        float distance = Mathf.Min(xRatio, yRatio);
+
+        // 画面内ならそのまま、画面外なら端に固定
+        if (Mathf.Abs(localPoint.x) > halfWidth ||
+            Mathf.Abs(localPoint.y) > halfHeight)
+        {
+            localPoint = direction * distance;
+        }
 
         _rectTransform.anchoredPosition = localPoint;
     }

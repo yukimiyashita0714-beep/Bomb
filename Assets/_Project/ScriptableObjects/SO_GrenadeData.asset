@@ -26,6 +26,6 @@ MonoBehaviour:
   _isBlockedByRigidbodies: 0
   _isPushedByOtherGrenades: 0
   _collidesWithOtherGrenades: 0
-  _maxDamage: 8
+  _maxDamage: 5
   _edgeDamageRatio: 0.3
   _destroyDelay: 0
