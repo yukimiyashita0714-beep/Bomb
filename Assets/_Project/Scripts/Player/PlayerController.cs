@@ -70,7 +70,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = CalculateMoveDirection(_inputReceiver.Move);
 
-        UpdateHorizontalVelocity(moveDirection * _data.WalkSpeed);
+        UpdateHorizontalVelocity(moveDirection * GetDirectionalSpeed(_inputReceiver.Move));
 
         Vector3 velocity = _horizontalVelocity;
         _currentSpeed = velocity.magnitude;
@@ -150,6 +150,35 @@ public class PlayerController : MonoBehaviour
         // 補間を挟まないのは、振り向き中に投げたときだけ狙いがズレるのを避けるため。
         // カメラ側が既に減衰を持っているので、見た目はこれで十分滑らかになる。
         transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+    }
+
+    /// <summary>
+    /// 入力の向き (前・後ろ・横) に応じた速さを返す。
+    /// 斜めの入力は、前(後ろ)と横の速さを楕円でつなぎ、向きを少し変えただけで速さが跳ねないようにする。
+    /// 体は常にカメラの方を向いているので、入力の上下がそのまま前後、左右が横になる。
+    /// </summary>
+    private float GetDirectionalSpeed(Vector2 input)
+    {
+        if (input.sqrMagnitude < INPUT_THRESHOLD_SQR)
+        {
+            return 0f;
+        }
+
+        Vector2 direction = input.normalized;
+        float frontBackSpeed = direction.y >= 0f ? _data.ForwardSpeed : _data.BackwardSpeed;
+        float strafeSpeed = _data.StrafeSpeed;
+
+        // どちらかが 0 だと楕円が作れないので、その向きの成分だけで決める。
+        if (frontBackSpeed <= 0f || strafeSpeed <= 0f)
+        {
+            return Mathf.Abs(direction.y) >= Mathf.Abs(direction.x) ? frontBackSpeed : strafeSpeed;
+        }
+
+        // 半径が (横の速さ, 前後の速さ) の楕円の上で、入力の向きに伸ばした点までの長さ。
+        float x = direction.x / strafeSpeed;
+        float y = direction.y / frontBackSpeed;
+
+        return 1f / Mathf.Sqrt(x * x + y * y);
     }
 
     /// <summary>
