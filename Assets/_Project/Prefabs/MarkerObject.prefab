@@ -126,6 +126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MarkerObjectUI
   _animator: {fileID: 9035318813394602203}
+  _UIRadio: 25
 --- !u!95 &9035318813394602203
 Animator:
   serializedVersion: 7

@@ -19,7 +19,7 @@ MonoBehaviour:
     _scale: 60
   _spawnIntervalSeconds: 1.5
   _horizontalDistance: 8
-  _height: 5
+  _height: 3
   _placementAttempts: 12
   _clearanceRadius: 0.6
   _obstacleLayers:
