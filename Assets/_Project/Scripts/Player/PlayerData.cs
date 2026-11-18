@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// プレイヤーの調整値をまとめた設定アセット。
@@ -12,14 +13,24 @@ public class PlayerData : ScriptableObject
     // ==========================================
 
     [Header("Movement")]
-    [SerializeField, Tooltip("通常時の水平移動速度 (m/s)")]
+    // NOTE: 斜めに入力したときは、前(後ろ)と横の速さの間をなめらかにつなぐ。
+    [SerializeField, Tooltip("前に進む速さ (m/s)")]
     [Range(0f, 20f)]
-    private float _walkSpeed = 4f;
+    [FormerlySerializedAs("_walkSpeed")]
+    private float _forwardSpeed = 10f;
 
-    // NOTE: 0 → 最高速までの時間は 最高速 ÷ 加速 で決まる。歩く速さ 10 なら、40 で 0.25 秒。
+    [SerializeField, Tooltip("横に進む速さ (m/s)。後ろより速く、前より遅くする")]
+    [Range(0f, 20f)]
+    private float _strafeSpeed = 7f;
+
+    [SerializeField, Tooltip("後ろに下がる速さ (m/s)")]
+    [Range(0f, 20f)]
+    private float _backwardSpeed = 5f;
+
+    // NOTE: 0 → 最高速までの時間は 最高速 ÷ 加速 で決まる。前の速さ 10 なら、25 で 0.4 秒。
     [SerializeField, Tooltip("動き出しの加速 (m/s^2)。小さいほどゆっくり走り出す。0 で即座に最高速")]
     [Min(0f)]
-    private float _acceleration = 40f;
+    private float _acceleration = 25f;
 
     [SerializeField, Tooltip("止まるときの減速 (m/s^2)。小さいほど滑ってから止まる。0 で即座に止まる")]
     [Min(0f)]
@@ -111,8 +122,17 @@ public class PlayerData : ScriptableObject
     // Properties
     // ==========================================
 
-    /// <summary>通常時の水平移動速度 (m/s)。</summary>
-    public float WalkSpeed => _walkSpeed;
+    /// <summary>前に進む速さ (m/s)。</summary>
+    public float ForwardSpeed => _forwardSpeed;
+
+    /// <summary>横に進む速さ (m/s)。</summary>
+    public float StrafeSpeed => _strafeSpeed;
+
+    /// <summary>後ろに下がる速さ (m/s)。</summary>
+    public float BackwardSpeed => _backwardSpeed;
+
+    /// <summary>一番速い移動速度 (m/s)。前に進む速さと同じ。</summary>
+    public float WalkSpeed => _forwardSpeed;
 
     /// <summary>動き出しの加速 (m/s^2)。0 なら即座に最高速。</summary>
     public float Acceleration => _acceleration;

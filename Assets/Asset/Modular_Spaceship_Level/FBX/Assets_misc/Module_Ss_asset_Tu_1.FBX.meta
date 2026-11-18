@@ -1,0 +1,160 @@
+fileFormatVersion: 2
+guid: 59bfcca28e096514186a5a60069b9f3f
+timeCreated: 1527056676
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Module_Ss_asset_Tu_A
+    100004: Module_Ss_asset_Tu_B
+    100006: Module_Ss_asset_Tu_C
+    100008: Module_Ss_asset_Tu_D
+    100010: Module_Ss_asset_Tu_E
+    100012: Module_Ss_asset_Tu_F
+    100014: Module_Ss_asset_Tu_E001
+    100016: Object280
+    100018: Object281
+    100020: Object282
+    100022: Module_Ss_asset_Tu_X
+    100024: Module_Ss_asset_Tu_X2
+    100026: Module_Ss_asset_Tu_X3
+    100028: Module_Ss_asset_Tu_Y
+    400000: //RootNode
+    400002: Module_Ss_asset_Tu_A
+    400004: Module_Ss_asset_Tu_B
+    400006: Module_Ss_asset_Tu_C
+    400008: Module_Ss_asset_Tu_D
+    400010: Module_Ss_asset_Tu_E
+    400012: Module_Ss_asset_Tu_F
+    400014: Module_Ss_asset_Tu_E001
+    400016: Object280
+    400018: Object281
+    400020: Object282
+    400022: Module_Ss_asset_Tu_X
+    400024: Module_Ss_asset_Tu_X2
+    400026: Module_Ss_asset_Tu_X3
+    400028: Module_Ss_asset_Tu_Y
+    2300000: Module_Ss_asset_Tu_A
+    2300002: Module_Ss_asset_Tu_B
+    2300004: Module_Ss_asset_Tu_C
+    2300006: Module_Ss_asset_Tu_D
+    2300008: Module_Ss_asset_Tu_E
+    2300010: Module_Ss_asset_Tu_F
+    2300012: Module_Ss_asset_Tu_E001
+    2300014: Object280
+    2300016: Object281
+    2300018: Object282
+    2300020: Module_Ss_asset_Tu_X
+    2300022: Module_Ss_asset_Tu_X2
+    2300024: Module_Ss_asset_Tu_X3
+    2300026: Module_Ss_asset_Tu_Y
+    3300000: Module_Ss_asset_Tu_A
+    3300002: Module_Ss_asset_Tu_B
+    3300004: Module_Ss_asset_Tu_C
+    3300006: Module_Ss_asset_Tu_D
+    3300008: Module_Ss_asset_Tu_E
+    3300010: Module_Ss_asset_Tu_F
+    3300012: Module_Ss_asset_Tu_E001
+    3300014: Object280
+    3300016: Object281
+    3300018: Object282
+    3300020: Module_Ss_asset_Tu_X
+    3300022: Module_Ss_asset_Tu_X2
+    3300024: Module_Ss_asset_Tu_X3
+    3300026: Module_Ss_asset_Tu_Y
+    4300000: Module_Ss_asset_Tu_B
+    4300002: Module_Ss_asset_Tu_E
+    4300004: Module_Ss_asset_Tu_D
+    4300006: Module_Ss_asset_Tu_C
+    4300008: Module_Ss_asset_Tu_A
+    4300010: Module_Ss_asset_Tu_F
+    4300012: Module_Ss_asset_Tu_E001
+    4300014: Object280
+    4300016: Object281
+    4300018: Object282
+    4300020: Module_Ss_asset_Tu_X3
+    4300022: Module_Ss_asset_Tu_X2
+    4300024: Module_Ss_asset_Tu_X
+    4300026: Module_Ss_asset_Tu_Y
+    6400000: Module_Ss_asset_Tu_A
+    6400002: Module_Ss_asset_Tu_B
+    6400004: Module_Ss_asset_Tu_C
+    6400006: Module_Ss_asset_Tu_D
+    6400008: Module_Ss_asset_Tu_E
+    6400010: Module_Ss_asset_Tu_E001
+    6400012: Module_Ss_asset_Tu_X
+    6400014: Module_Ss_asset_Tu_X2
+    6400016: Module_Ss_asset_Tu_X3
+    6400018: Module_Ss_asset_Tu_Y
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 1
+    importBlendShapes: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 1
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
