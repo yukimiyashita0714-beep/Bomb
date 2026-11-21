@@ -23,6 +23,8 @@ namespace Bomb.UI
 
         private List<InteractKind> _interactKindList;
 
+        private bool _controllerDevice = false;
+
         // ==========================================
         // Unity Messages
         // ==========================================
@@ -36,12 +38,16 @@ namespace Bomb.UI
         {
             _interactPlayerController.OnInteractEnable += AddInteract;
             _interactPlayerController.OnInteractDisable += RemoveInteract;
+
+            InputDeviceWatcher.OnDeviceChanged += HandleDeviceChanged;
         }
 
         private void OnDisable()
         {
             _interactPlayerController.OnInteractEnable -= AddInteract;
             _interactPlayerController.OnInteractDisable -= RemoveInteract;
+
+            InputDeviceWatcher.OnDeviceChanged -= HandleDeviceChanged;
         }
 
         // ==========================================
@@ -70,6 +76,11 @@ namespace Bomb.UI
         // ==========================================
         // Private Methods
         // ==========================================
+
+        private void HandleDeviceChanged(bool device)
+        {
+            _controllerDevice = device;
+        }
 
         /// <summary>
         /// インタラクトの表示更新
@@ -105,25 +116,39 @@ namespace Bomb.UI
                         break;
                 }
 
-                switch (count)
+                if (_controllerDevice)
                 {
-                    case 0:
+                    switch (count)
+                    {
+                        case 0:
 
-                        text += "\nE button";
+                            text += "\nE button";
 
-                        break;
+                            break;
 
-                    case 1:
+                        case 1:
 
-                        text += "\nQ button";
+                            text += "\nQ button";
 
-                        break;
+                            break;
 
-                    case 2:
+                        case 2:
 
-                        text += "\nX button";
+                            text += "\nX button";
 
-                        break;
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (count)
+                    {
+                        case 0:
+
+                            text += "\nY Button";
+
+                            break;
+                    }
                 }
 
                 text += "\n\n";
