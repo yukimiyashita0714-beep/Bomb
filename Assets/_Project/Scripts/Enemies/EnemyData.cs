@@ -40,6 +40,10 @@ public class EnemyData : ScriptableObject
     [Range(0.1f, 5f)]
     private float _fireIntervalSeconds = 1f;
 
+    [SerializeField, Tooltip("予告線の最大の長さ (m)。プレイヤーの先まで伸ばし、壁があればそこで止める")]
+    [Range(1f, 100f)]
+    private float _warningLineMaxLength = 30f;
+
     [Header("Bullet")]
     [SerializeField, Tooltip("弾の速さ (m/s)")]
     [Range(1f, 100f)]
@@ -93,6 +97,9 @@ public class EnemyData : ScriptableObject
 
     /// <summary>発射間隔 (秒)。</summary>
     public float FireIntervalSeconds => _fireIntervalSeconds;
+
+    /// <summary>予告線の最大の長さ (m)。</summary>
+    public float WarningLineMaxLength => _warningLineMaxLength;
 
     /// <summary>弾の速さ (m/s)。</summary>
     public float BulletSpeed => _bulletSpeed;

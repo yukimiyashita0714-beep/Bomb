@@ -42,6 +42,12 @@ public class EnemyTurret : MonoBehaviour
         Dead,
     }
 
+    /// <summary>予告線がプレイヤーを突き抜けるときに調べ直す回数の上限。プレイヤーのコライダーが複数あっても抜けられるように。</summary>
+    private const int WARNING_LINE_MAX_PASS_THROUGH = 4;
+
+    /// <summary>突き抜けたあと、同じコライダーにまた当たらないよう少し先から調べ直す距離 (m)。</summary>
+    private const float WARNING_LINE_SKIN = 0.01f;
+
     private EnemyHealth _health;
     private Transform _target;
     private Collider _targetCollider;
@@ -108,6 +114,7 @@ public class EnemyTurret : MonoBehaviour
         if (_health != null)
         {
             _health.OnDied += HandleDied;
+            _health.OnRevived += HandleRevived;
         }
     }
 
@@ -116,6 +123,7 @@ public class EnemyTurret : MonoBehaviour
         if (_health != null)
         {
             _health.OnDied -= HandleDied;
+            _health.OnRevived -= HandleRevived;
         }
 
         SetWarningLineVisible(false);
@@ -329,8 +337,50 @@ public class EnemyTurret : MonoBehaviour
             return;
         }
 
-        _warningLine.SetPosition(0, _muzzle.position);
-        _warningLine.SetPosition(1, _lastAimPoint);
+        Vector3 origin = _muzzle.position;
+        _warningLine.SetPosition(0, origin);
+        _warningLine.SetPosition(1, GetWarningLineEnd(origin));
+    }
+
+    /// <summary>
+    /// プレイヤーの方へ伸ばし、プレイヤーは突き抜けて、弾が当たる壁で止めた終点を返す。
+    /// 壁が無ければ最大の長さで止める。
+    /// </summary>
+    private Vector3 GetWarningLineEnd(Vector3 origin)
+    {
+        Vector3 offset = _lastAimPoint - origin;
+        Vector3 direction = offset.sqrMagnitude > Mathf.Epsilon ? offset.normalized : transform.forward;
+
+        float maxLength = _data.WarningLineMaxLength;
+        int mask = _data.BulletHitLayers & ~(1 << gameObject.layer);
+
+        Vector3 start = origin;
+        float remaining = maxLength;
+
+        // プレイヤーに当たったら、その少し先からもう一度調べる。RaycastAll を使わず確保を出さないため。
+        for (int i = 0; i < WARNING_LINE_MAX_PASS_THROUGH; i++)
+        {
+            if (!Physics.Raycast(start, direction, out RaycastHit hit, remaining, mask, QueryTriggerInteraction.Ignore))
+            {
+                break;
+            }
+
+            if (_target == null || !hit.collider.transform.IsChildOf(_target))
+            {
+                return hit.point;
+            }
+
+            float advance = hit.distance + WARNING_LINE_SKIN;
+            start += direction * advance;
+            remaining -= advance;
+
+            if (remaining <= 0f)
+            {
+                break;
+            }
+        }
+
+        return origin + direction * maxLength;
     }
 
     private void SetWarningLineVisible(bool isVisible)
@@ -353,5 +403,12 @@ public class EnemyTurret : MonoBehaviour
     private void HandleDied()
     {
         ChangeState(State.Dead);
+    }
+
+    /// <summary>復活したら、見つける前の状態からやり直す。</summary>
+    private void HandleRevived()
+    {
+        _lostSightTimer = 0f;
+        ChangeState(State.Idle);
     }
 }

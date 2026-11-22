@@ -41,6 +41,14 @@ public class EnemyDeathView : MonoBehaviour
     /// <summary>差し替えたマテリアル。自分で作ったものなので、消えるときに自分で片付ける。</summary>
     private readonly List<Material> _fadeInstances = new List<Material>();
 
+    /// <summary>透かす対象のモデルと、その元のマテリアル・透明用マテリアル。復活と2回目以降の死亡で使い回す。</summary>
+    private readonly List<Renderer> _fadeRenderers = new List<Renderer>();
+    private readonly List<Material[]> _originalMaterials = new List<Material[]>();
+    private readonly List<Material[]> _fadeMaterials = new List<Material[]>();
+
+    private GameObject _smokeInstance;
+    private Coroutine _fadeRoutine;
+
     // ==========================================
     // Unity Messages
     // ==========================================
@@ -53,11 +61,13 @@ public class EnemyDeathView : MonoBehaviour
     private void OnEnable()
     {
         _health.OnDied += HandleDied;
+        _health.OnRevived += HandleRevived;
     }
 
     private void OnDisable()
     {
         _health.OnDied -= HandleDied;
+        _health.OnRevived -= HandleRevived;
     }
 
     private void OnDestroy()
@@ -76,10 +86,7 @@ public class EnemyDeathView : MonoBehaviour
 
     private void HandleDied()
     {
-        if (_smokePrefab != null)
-        {
-            Instantiate(_smokePrefab, transform.position + _smokeOffset, Quaternion.identity, transform);
-        }
+        PlaySmoke();
 
         if (_fadeMaterial == null || _data == null)
         {
@@ -87,11 +94,67 @@ public class EnemyDeathView : MonoBehaviour
             return;
         }
 
-        SwapToFadeMaterials();
-        StartCoroutine(FadeRoutine());
+        // 透明用マテリアルは最初の1回だけ作り、復活後にまた倒れたときは使い回す。
+        if (_fadeRenderers.Count == 0)
+        {
+            CreateFadeMaterials();
+        }
+
+        ApplyMaterials(_fadeMaterials);
+        SetAlpha(1f);
+        _fadeRoutine = StartCoroutine(FadeRoutine());
     }
 
-    private void SwapToFadeMaterials()
+    /// <summary>元の見た目に戻す。煙は消して、次に倒れたときに使い回す。</summary>
+    private void HandleRevived()
+    {
+        if (_fadeRoutine != null)
+        {
+            StopCoroutine(_fadeRoutine);
+            _fadeRoutine = null;
+        }
+
+        ApplyMaterials(_originalMaterials);
+
+        if (_smokeInstance != null)
+        {
+            _smokeInstance.SetActive(false);
+        }
+    }
+
+    private void PlaySmoke()
+    {
+        if (_smokePrefab == null)
+        {
+            return;
+        }
+
+        Vector3 position = transform.position + _smokeOffset;
+
+        if (_smokeInstance == null)
+        {
+            _smokeInstance = Instantiate(_smokePrefab, position, Quaternion.identity, transform);
+            return;
+        }
+
+        // 一度消してから出し直すと、パーティクルが最初から再生される。
+        _smokeInstance.transform.SetPositionAndRotation(position, Quaternion.identity);
+        _smokeInstance.SetActive(false);
+        _smokeInstance.SetActive(true);
+    }
+
+    private void ApplyMaterials(List<Material[]> materials)
+    {
+        for (int i = 0; i < _fadeRenderers.Count; i++)
+        {
+            if (_fadeRenderers[i] != null)
+            {
+                _fadeRenderers[i].sharedMaterials = materials[i];
+            }
+        }
+    }
+
+    private void CreateFadeMaterials()
     {
         Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
 
@@ -114,7 +177,9 @@ public class EnemyDeathView : MonoBehaviour
                 _fadeInstances.Add(replaced[j]);
             }
 
-            target.sharedMaterials = replaced;
+            _fadeRenderers.Add(target);
+            _originalMaterials.Add(sources);
+            _fadeMaterials.Add(replaced);
         }
     }
 
