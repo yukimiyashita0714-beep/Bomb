@@ -43,6 +43,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     /// <summary>倒れた瞬間に一度だけ発火する。</summary>
     public event Action OnDied;
 
+    /// <summary>倒れた状態から復活した瞬間に発火する。</summary>
+    public event Action OnRevived;
+
     // ==========================================
     // Unity Messages
     // ==========================================
@@ -79,6 +82,19 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         {
             Die();
         }
+    }
+
+    /// <summary>倒れていれば体力を戻して復活させる。生きていれば何もしない。</summary>
+    public void Revive()
+    {
+        if (!_isDead || _data == null)
+        {
+            return;
+        }
+
+        _isDead = false;
+        _remainingHitCount = _data.MaxHitCount;
+        OnRevived?.Invoke();
     }
 
     // ==========================================
