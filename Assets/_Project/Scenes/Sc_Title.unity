@@ -999,6 +999,7 @@ GameObject:
   - component: {fileID: 1244271048}
   - component: {fileID: 1244271047}
   - component: {fileID: 1244271046}
+  - component: {fileID: 1244271049}
   m_Layer: 5
   m_Name: QuitButton
   m_TagString: Untagged
@@ -1047,7 +1048,7 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_NormalColor: {r: 0.7058824, g: 0.72156864, b: 0.76862746, a: 1}
     m_HighlightedColor: {r: 1, g: 0.55, b: 0.15, a: 1}
     m_PressedColor: {r: 0.8, g: 0.44000003, b: 0.120000005, a: 0.8}
     m_SelectedColor: {r: 1, g: 0.55, b: 0.15, a: 1}
@@ -1120,6 +1121,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244271044}
   m_CullTransparentMesh: 1
+--- !u!114 &1244271049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244271044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d625bfaf68113f647a9d7bf6857057fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.UI.SelectableScaler
+  _selectedScale: 1.08
+  _scaleSpeed: 15
 --- !u!1 &1261479145
 GameObject:
   m_ObjectHideFlags: 0
@@ -2168,6 +2183,7 @@ GameObject:
   - component: {fileID: 1895491588}
   - component: {fileID: 1895491587}
   - component: {fileID: 1895491586}
+  - component: {fileID: 1895491590}
   m_Layer: 5
   m_Name: StartButton
   m_TagString: Untagged
@@ -2196,7 +2212,7 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_NormalColor: {r: 0.7058824, g: 0.72156864, b: 0.76862746, a: 1}
     m_HighlightedColor: {r: 1, g: 0.55, b: 0.15, a: 1}
     m_PressedColor: {r: 0.8, g: 0.44000003, b: 0.120000005, a: 0.8}
     m_SelectedColor: {r: 1, g: 0.55, b: 0.15, a: 1}
@@ -2289,6 +2305,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 420, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1895491590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1895491585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d625bfaf68113f647a9d7bf6857057fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bomb.UI.SelectableScaler
+  _selectedScale: 1.08
+  _scaleSpeed: 15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
