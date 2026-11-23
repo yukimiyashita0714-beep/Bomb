@@ -39,7 +39,9 @@ namespace Bomb.UI
             _interactPlayerController.OnInteractEnable += AddInteract;
             _interactPlayerController.OnInteractDisable += RemoveInteract;
 
+            _controllerDevice = InputDeviceWatcher.IsGamepad;
             InputDeviceWatcher.OnDeviceChanged += HandleDeviceChanged;
+            InteractListUpdate();
         }
 
         private void OnDisable()
@@ -80,6 +82,7 @@ namespace Bomb.UI
         private void HandleDeviceChanged(bool device)
         {
             _controllerDevice = device;
+            InteractListUpdate();
         }
 
         /// <summary>
@@ -116,7 +119,7 @@ namespace Bomb.UI
                         break;
                 }
 
-                if (_controllerDevice)
+                if (!_controllerDevice)
                 {
                     switch (count)
                     {
