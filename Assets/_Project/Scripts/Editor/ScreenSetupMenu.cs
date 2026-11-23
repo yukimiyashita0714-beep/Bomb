@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Bomb.UI;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Events;
@@ -41,6 +42,10 @@ public static class ScreenSetupMenu
     private static readonly Color TITLE_BACK_COLOR = new Color(0.10f, 0.11f, 0.16f, 1f);
     private static readonly Color GAME_OVER_BACK_COLOR = new Color(0f, 0f, 0f, 0.75f);
     private static readonly Color ACCENT_COLOR = new Color(1f, 0.55f, 0.15f, 1f);
+
+    /// <summary>選ばれていないボタンの色（#B4B8C4）。選択中のアクセント色と差をつけるため少し暗くする。</summary>
+    private static readonly Color BUTTON_NORMAL_COLOR = new Color32(0xB4, 0xB8, 0xC4, 0xFF);
+
     private static readonly Color DANGER_COLOR = new Color(0.95f, 0.25f, 0.25f, 1f);
 
     // ==========================================
@@ -318,11 +323,14 @@ public static class ScreenSetupMenu
         // 選択中のボタンが分かるよう、選ばれたらアクセント色にする
         Button button = buttonObject.GetComponent<Button>();
         ColorBlock colors = button.colors;
-        colors.normalColor = Color.white;
+        colors.normalColor = BUTTON_NORMAL_COLOR;
         colors.highlightedColor = ACCENT_COLOR;
         colors.selectedColor = ACCENT_COLOR;
         colors.pressedColor = ACCENT_COLOR * 0.8f;
         button.colors = colors;
+
+        // 選択中のボタンを少し大きくする
+        buttonObject.AddComponent<SelectableScaler>();
 
         return button;
     }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Bomb.Core;
+using Bomb.UI;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Events;
@@ -42,6 +43,9 @@ public static class PauseMenuSetupMenu
 
     private static readonly Color BackColor = new Color(0f, 0f, 0f, 0.6f);
     private static readonly Color AccentColor = new Color(1f, 0.55f, 0.15f, 1f);
+
+    /// <summary>選ばれていないボタンの色（#B4B8C4）。ScreenSetupMenu とそろえる。</summary>
+    private static readonly Color ButtonNormalColor = new Color32(0xB4, 0xB8, 0xC4, 0xFF);
     private static readonly Color LabelColor = new Color(0.10f, 0.11f, 0.16f, 1f);
 
     // ==========================================
@@ -259,11 +263,14 @@ public static class PauseMenuSetupMenu
         // 選択中のボタンが分かるよう、選ばれたらアクセント色にする
         Button button = buttonObject.GetComponent<Button>();
         ColorBlock colors = button.colors;
-        colors.normalColor = Color.white;
+        colors.normalColor = ButtonNormalColor;
         colors.highlightedColor = AccentColor;
         colors.selectedColor = AccentColor;
         colors.pressedColor = AccentColor * 0.8f;
         button.colors = colors;
+
+        // 選択中のボタンを少し大きくする
+        buttonObject.AddComponent<SelectableScaler>();
 
         return button;
     }
