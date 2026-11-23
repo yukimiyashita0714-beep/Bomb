@@ -69,8 +69,9 @@ namespace Bomb.Core
 
             _isInitialized = true;
 
-            // 最終的にコントローラー専用にするので、つながっていればコントローラーから始める。
-            _isGamepad = Gamepad.current != null;
+            // キーボードから始め、コントローラーを操作した時点で切り替える。
+            // キーボードがつながっておらずコントローラーだけのときは、最初からコントローラーにする。
+            _isGamepad = Keyboard.current == null && Gamepad.current != null;
 
             InputSystem.onActionChange += HandleActionChange;
         }

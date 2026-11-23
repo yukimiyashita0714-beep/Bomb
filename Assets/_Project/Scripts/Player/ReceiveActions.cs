@@ -226,7 +226,7 @@ public partial class @ReceiveActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""aa5d5097-a8cb-4792-b8f4-6bc1ccc1f46a"",
-                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""path"": ""<Gamepad>/buttonWest"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
