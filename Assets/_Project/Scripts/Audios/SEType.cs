@@ -14,5 +14,4 @@ public enum SEType
     MainTargetBombPlant = 4,
     MainTargetBombExplosion = 5,
     Alarm = 6,
-    PlayerDamage = 7,
 }
