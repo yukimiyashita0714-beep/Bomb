@@ -393,6 +393,12 @@ public class Grenade : MonoBehaviour
     /// <summary>ぶつかった相手が、信管を待たずに即爆発する対象なら true。</summary>
     private bool IsDetonatedByContact(Collider hit)
     {
+        // 爆風の対象外 (外壁など) は普通の壁と同じく跳ね返るだけにする。
+        if (!IsAffectedLayer(hit))
+        {
+            return false;
+        }
+
         // Collider が子オブジェクトに付いている相手もいるので、親までさかのぼって探す。
         if (_data.IsDetonatedOnDestructibleHit)
         {
@@ -419,6 +425,12 @@ public class Grenade : MonoBehaviour
         return false;
     }
 
+    /// <summary>相手の Layer が爆風の対象 (AffectedLayers) に入っていれば true。</summary>
+    private bool IsAffectedLayer(Collider hit)
+    {
+        return (_data.AffectedLayers.value & (1 << hit.gameObject.layer)) != 0;
+    }
+
     private static bool IsGrenade(Rigidbody body)
     {
         return body != null && body.TryGetComponent(out Grenade _);
@@ -442,6 +454,12 @@ public class Grenade : MonoBehaviour
 
     private void ApplyDamage(Collider hit, Vector3 center)
     {
+        // 直撃の経路は OverlapSphere を通らないので、ここでも対象外の Layer (外壁など) を弾く。
+        if (!IsAffectedLayer(hit))
+        {
+            return;
+        }
+
         // Collider が子オブジェクトに付いている相手もいるので、親までさかのぼって探す。
         IDamageable damageable = hit.GetComponentInParent<IDamageable>();
 
