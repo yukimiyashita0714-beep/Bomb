@@ -116,6 +116,27 @@ public class PlayerData : ScriptableObject
     [Range(0.1f, 5f)]
     private float _maxChargeTime = 1.2f;
 
+    // NOTE: 初速を k 倍・重力を k² 倍にすると、線の形はそのままで k 倍の速さでなぞる。
+    // 初速だけ上げると飛距離が速さの2乗で伸びて、チャージで狙う感覚が壊れるためこうしている。
+    [Header("Throw - Flight")]
+    [SerializeField, Tooltip("飛ぶ速さの倍率。弾道の形 (飛距離) は変えずに速さだけ上げる。1 で従来どおり")]
+    [Range(1f, 4f)]
+    private float _flightSpeedScale = 1.5f;
+
+    [SerializeField, Tooltip("チャージ最大のときの投げ上げ角度 (度)。チャージ 0 は「投げ上げる角度」を使う")]
+    [Range(0f, 80f)]
+    private float _maxChargeThrowAngleDegrees = 5f;
+
+    [SerializeField, Tooltip("チャージ最大のときの重力の倍率。小さいほどまっすぐ飛ぶ。チャージ 0 は 1 (普通の放物線)")]
+    [Range(0f, 1f)]
+    private float _maxChargeGravityScale = 0.2f;
+
+    [SerializeField, Tooltip("チャージ量 (横 0〜1) → まっすぐ度 (縦 0〜1)。0 で普通の放物線、1 でチャージ最大の角度と重力")]
+    private AnimationCurve _straightnessCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+    [SerializeField, Tooltip("最初に何かに当たったら、まっすぐにする分の重力の弱めをやめる (速さの倍率の分は残す)。OFF だと跳ねたあともふわふわ浮いて転がる")]
+    private bool _restoresGravityOnFirstHit = true;
+
     [Header("インタラクト")]
     [SerializeField, Tooltip("インタラクトの発生範囲")]
     [Range(0f, 5f)]
@@ -194,6 +215,9 @@ public class PlayerData : ScriptableObject
     /// <summary>チャージが最大になるまでの長押し時間 (秒)。</summary>
     public float MaxChargeTime => _maxChargeTime;
 
+    /// <summary>飛ぶ速さの倍率。初速に掛け、重力にはその2乗を掛ける。</summary>
+    public float FlightSpeedScale => _flightSpeedScale;
+
     /// <summary> インタラクトの発生範囲 </summary>
     public float InteractRadius => _interactRadius;
 
@@ -205,6 +229,39 @@ public class PlayerData : ScriptableObject
     public float GetChargedImpulse(float chargeRatio)
     {
         return Mathf.Lerp(_minChargeImpulse, _maxChargeImpulse, Mathf.Clamp01(chargeRatio));
+    }
+
+    /// <summary>チャージ量 (0〜1) に対応する、まっすぐ度 (0 で放物線、1 で一番まっすぐ) を返す。</summary>
+    public float GetStraightness(float chargeRatio)
+    {
+        if (_straightnessCurve == null || _straightnessCurve.length == 0)
+        {
+            return Mathf.Clamp01(chargeRatio);
+        }
+
+        return Mathf.Clamp01(_straightnessCurve.Evaluate(Mathf.Clamp01(chargeRatio)));
+    }
+
+    /// <summary>まっすぐ度 (0〜1) に対応する投げ上げ角度 (度) を返す。</summary>
+    public float GetThrowAngleDegrees(float straightness)
+    {
+        return Mathf.Lerp(_throwAngleDegrees, _maxChargeThrowAngleDegrees, Mathf.Clamp01(straightness));
+    }
+
+    /// <summary>
+    /// まっすぐ度 (0〜1) に対応する、飛んでいる間の重力の倍率を返す。
+    /// 速さの倍率の2乗も掛け込んであるので、そのまま Physics.gravity に掛ければよい。
+    /// </summary>
+    public float GetFlightGravityScale(float straightness)
+    {
+        float straightScale = Mathf.Lerp(1f, _maxChargeGravityScale, Mathf.Clamp01(straightness));
+        return straightScale * _flightSpeedScale * _flightSpeedScale;
+    }
+
+    /// <summary>最初に当たったあとの重力の倍率。速さの倍率の分だけ残し、まっすぐにする分は外す。</summary>
+    public float GetGravityScaleAfterHit(float flightGravityScale)
+    {
+        return _restoresGravityOnFirstHit ? _flightSpeedScale * _flightSpeedScale : flightGravityScale;
     }
 
     // ==========================================

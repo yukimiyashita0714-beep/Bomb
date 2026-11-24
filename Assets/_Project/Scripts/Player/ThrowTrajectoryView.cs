@@ -144,7 +144,7 @@ public class ThrowTrajectoryView : MonoBehaviour
         int count = ProjectilePath.Sample(
             _thrower.ThrowOrigin,
             _thrower.PendingVelocity,
-            Physics.gravity,
+            Physics.gravity * _thrower.PendingGravityScale,
             _groundY,
             _timeStep,
             _points);
