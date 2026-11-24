@@ -18,6 +18,7 @@ MonoBehaviour:
   _acceleration: 25
   _deceleration: 60
   _maxHp: 30
+  _isAutoRegenEnabled: 0
   _hpRecoveryCooltime: 2.5
   _hpRecoveryValue: 1
   _hpRecoveryInterval: 0.25
@@ -35,4 +36,32 @@ MonoBehaviour:
   _minChargeImpulse: 3
   _maxChargeImpulse: 5
   _maxChargeTime: 0.6
+  _flightSpeedScale: 1.5
+  _maxChargeThrowAngleDegrees: 5
+  _maxChargeGravityScale: 0.2
+  _straightnessCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _restoresGravityOnFirstHit: 1
   _interactRadius: 1

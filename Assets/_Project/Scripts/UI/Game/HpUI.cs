@@ -123,6 +123,12 @@ public class HpUI : MonoBehaviour
 
     private void HpRecovery()
     {
+        //自動回復オフなら何もしない (毎フレーム見るのでプレイ中の切り替えも反映される)
+        if (!_data.IsAutoRegenEnabled)
+        {
+            return;
+        }
+
         //クールタイム
         if (0 < _recoveryCooltimer)
         {
