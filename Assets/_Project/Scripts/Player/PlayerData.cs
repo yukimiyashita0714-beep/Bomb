@@ -41,6 +41,9 @@ public class PlayerData : ScriptableObject
     [Min(1f)]
     private float _maxHp;
 
+    [SerializeField, Tooltip("オンでHPが自動で回復する。オフなら回復しない")]
+    private bool _isAutoRegenEnabled = true;
+
     [SerializeField, Tooltip("体力回復までの時間")]
     [Min(0f)]
     private float _hpRecoveryCooltime;
@@ -142,6 +145,9 @@ public class PlayerData : ScriptableObject
 
     /// <summary> 最大体力 </summary>
     public float MaxHp => _maxHp;
+
+    /// <summary> HP の自動回復が有効か </summary>
+    public bool IsAutoRegenEnabled => _isAutoRegenEnabled;
 
     /// <summary> 体力回復までの時間 </summary>
     public float HpRecoveryCooltime => _hpRecoveryCooltime;

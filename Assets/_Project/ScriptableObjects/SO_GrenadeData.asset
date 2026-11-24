@@ -19,10 +19,10 @@ MonoBehaviour:
   _upwardsModifier: 2
   _affectedLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294963199
   _occluderLayers:
     serializedVersion: 2
-    m_Bits: 3575
+    m_Bits: 7671
   _isBlockedByRigidbodies: 0
   _isPushedByOtherGrenades: 0
   _collidesWithOtherGrenades: 0
