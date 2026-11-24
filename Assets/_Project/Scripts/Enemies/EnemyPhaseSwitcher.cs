@@ -1,13 +1,16 @@
 using Bomb.Core;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// マップに置いた敵を、爆弾を付ける前と後で切り替える。
 /// 「BeforeEnemies」の下の敵は最初からいて、爆弾を付けた瞬間 (BombEvent.OnPlant) に倒れている敵だけ復活する。
 /// 「AfterEnemies」の下の敵は最初は隠しておき、爆弾を付けた瞬間に出す。
 /// 生きている敵には触らず、作り直しもしないので、Instantiate / Destroy は起きない。
+/// シーンに付け忘れても、BeforeEnemies / AfterEnemies があれば実行時に自動で付ける。
 /// </summary>
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(-1000)]
 public class EnemyPhaseSwitcher : MonoBehaviour
 {
     // ==========================================
@@ -28,12 +31,13 @@ public class EnemyPhaseSwitcher : MonoBehaviour
     // Private Fields
     // ==========================================
 
-    private const string BEFORE_ROOT_NAME = "BeforeEnemies";
-    private const string AFTER_ROOT_NAME = "AfterEnemies";
+    public const string BEFORE_ROOT_NAME = "BeforeEnemies";
+    public const string AFTER_ROOT_NAME = "AfterEnemies";
 
     /// <summary>復活させる対象。開始時に一度だけ集めておく。</summary>
     private EnemyHealth[] _beforeEnemies = new EnemyHealth[0];
 
+    private bool _isSubscribed;
     private bool _hasPlanted;
 
     // ==========================================
@@ -42,20 +46,7 @@ public class EnemyPhaseSwitcher : MonoBehaviour
 
     private void Awake()
     {
-        if (_bombEvent == null)
-        {
-            _bombEvent = FindAnyObjectByType<BombEvent>();
-        }
-
-        if (_beforeRoot == null)
-        {
-            _beforeRoot = FindInScene(BEFORE_ROOT_NAME);
-        }
-
-        if (_afterRoot == null)
-        {
-            _afterRoot = FindInScene(AFTER_ROOT_NAME);
-        }
+        ResolveReferences();
 
         if (_beforeRoot != null)
         {
@@ -74,10 +65,140 @@ public class EnemyPhaseSwitcher : MonoBehaviour
         {
             Debug.LogWarning($"[{nameof(EnemyPhaseSwitcher)}] {AFTER_ROOT_NAME} が見つからないため、後から出す敵が無い。", this);
         }
+
+        Debug.Log($"[{nameof(EnemyPhaseSwitcher)}] 準備完了 Before:{GetPath(_beforeRoot)} (敵{_beforeEnemies.Length}体) / After:{GetPath(_afterRoot)}", this);
     }
 
     private void OnEnable()
     {
+        Subscribe();
+    }
+
+    private void Start()
+    {
+        // 自動で付けた場合など、OnEnable の時点で BombEvent が無かったときのやり直し。
+        Subscribe();
+    }
+
+    private void OnDisable()
+    {
+        if (_bombEvent == null || !_isSubscribed)
+        {
+            return;
+        }
+
+        _bombEvent.OnPlant -= HandlePlant;
+        _isSubscribed = false;
+    }
+
+    // ==========================================
+    // Public Methods
+    // ==========================================
+
+    /// <summary>エディタ拡張から参照を埋めるために使う。</summary>
+    public void SetReferences(BombEvent bombEvent, Transform beforeRoot, Transform afterRoot)
+    {
+        _bombEvent = bombEvent;
+        _beforeRoot = beforeRoot;
+        _afterRoot = afterRoot;
+    }
+
+    /// <summary>
+    /// 名前で敵の親を探す。大文字小文字・空白・「_」「-」の違いは無視する。
+    /// 非アクティブなものも含めて探す。
+    /// </summary>
+    public static Transform FindRootInScene(Scene scene, string objectName)
+    {
+        if (!scene.IsValid() || !scene.isLoaded)
+        {
+            return null;
+        }
+
+        string key = Normalize(objectName);
+        GameObject[] roots = scene.GetRootGameObjects();
+
+        for (int i = 0; i < roots.Length; i++)
+        {
+            Transform found = FindChildRecursive(roots[i].transform, key);
+
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    // ==========================================
+    // Private Methods
+    // ==========================================
+
+    /// <summary>シーンに付け忘れていても動くように、読み込み直後に自動で付ける。</summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void RegisterAutoAttach()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
+    private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (FindAnyObjectByType<EnemyPhaseSwitcher>(FindObjectsInactive.Include) != null)
+        {
+            return;
+        }
+
+        Transform before = FindRootInScene(scene, BEFORE_ROOT_NAME);
+        Transform after = FindRootInScene(scene, AFTER_ROOT_NAME);
+
+        if (before == null && after == null)
+        {
+            return;
+        }
+
+        BombEvent bombEvent = FindAnyObjectByType<BombEvent>(FindObjectsInactive.Include);
+        GameObject host = bombEvent != null ? bombEvent.gameObject : new GameObject(nameof(EnemyPhaseSwitcher));
+
+        if (bombEvent == null)
+        {
+            SceneManager.MoveGameObjectToScene(host, scene);
+        }
+
+        Debug.LogWarning($"[{nameof(EnemyPhaseSwitcher)}] シーン {scene.name} に付いていないため自動で付けた。メニュー Bomb/Setup/Enemy Phase Switcher で付けて保存しておくとよい。", host);
+        host.AddComponent<EnemyPhaseSwitcher>();
+    }
+
+    private void ResolveReferences()
+    {
+        if (_bombEvent == null)
+        {
+            _bombEvent = FindAnyObjectByType<BombEvent>(FindObjectsInactive.Include);
+        }
+
+        if (_beforeRoot == null)
+        {
+            _beforeRoot = FindRootInScene(gameObject.scene, BEFORE_ROOT_NAME);
+        }
+
+        if (_afterRoot == null)
+        {
+            _afterRoot = FindRootInScene(gameObject.scene, AFTER_ROOT_NAME);
+        }
+    }
+
+    private void Subscribe()
+    {
+        if (_isSubscribed)
+        {
+            return;
+        }
+
+        if (_bombEvent == null)
+        {
+            _bombEvent = FindAnyObjectByType<BombEvent>(FindObjectsInactive.Include);
+        }
+
         if (_bombEvent == null)
         {
             Debug.LogWarning($"[{nameof(EnemyPhaseSwitcher)}] BombEvent が見つからないため、敵が切り替わらない。", this);
@@ -85,21 +206,8 @@ public class EnemyPhaseSwitcher : MonoBehaviour
         }
 
         _bombEvent.OnPlant += HandlePlant;
+        _isSubscribed = true;
     }
-
-    private void OnDisable()
-    {
-        if (_bombEvent == null)
-        {
-            return;
-        }
-
-        _bombEvent.OnPlant -= HandlePlant;
-    }
-
-    // ==========================================
-    // Private Methods
-    // ==========================================
 
     private void HandlePlant()
     {
@@ -111,11 +219,14 @@ public class EnemyPhaseSwitcher : MonoBehaviour
 
         _hasPlanted = true;
 
+        int revivedCount = 0;
+
         for (int i = 0; i < _beforeEnemies.Length; i++)
         {
-            if (_beforeEnemies[i] != null)
+            if (_beforeEnemies[i] != null && _beforeEnemies[i].IsDead)
             {
                 _beforeEnemies[i].Revive();
+                revivedCount++;
             }
         }
 
@@ -123,36 +234,20 @@ public class EnemyPhaseSwitcher : MonoBehaviour
         {
             _afterRoot.gameObject.SetActive(true);
         }
+
+        Debug.Log($"[{nameof(EnemyPhaseSwitcher)}] 爆弾設置: Before の敵を{revivedCount}体復活、After を出した。", this);
     }
 
-    /// <summary>非アクティブなものも含めて、シーンから名前で探す。開始時に一度だけ使う。</summary>
-    private Transform FindInScene(string objectName)
+    private static Transform FindChildRecursive(Transform parent, string key)
     {
-        GameObject[] roots = gameObject.scene.GetRootGameObjects();
-
-        for (int i = 0; i < roots.Length; i++)
-        {
-            Transform found = FindChildRecursive(roots[i].transform, objectName);
-
-            if (found != null)
-            {
-                return found;
-            }
-        }
-
-        return null;
-    }
-
-    private static Transform FindChildRecursive(Transform parent, string objectName)
-    {
-        if (parent.name == objectName)
+        if (Normalize(parent.name) == key)
         {
             return parent;
         }
 
         for (int i = 0; i < parent.childCount; i++)
         {
-            Transform found = FindChildRecursive(parent.GetChild(i), objectName);
+            Transform found = FindChildRecursive(parent.GetChild(i), key);
 
             if (found != null)
             {
@@ -161,5 +256,28 @@ public class EnemyPhaseSwitcher : MonoBehaviour
         }
 
         return null;
+    }
+
+    /// <summary>名前のゆれ (大文字小文字・空白・「_」「-」) を無視して比べるための形にする。</summary>
+    private static string Normalize(string value)
+    {
+        return value.Replace(" ", "").Replace("_", "").Replace("-", "").ToLowerInvariant();
+    }
+
+    private static string GetPath(Transform target)
+    {
+        if (target == null)
+        {
+            return "(なし)";
+        }
+
+        string path = target.name;
+
+        for (Transform t = target.parent; t != null; t = t.parent)
+        {
+            path = t.name + "/" + path;
+        }
+
+        return path;
     }
 }
