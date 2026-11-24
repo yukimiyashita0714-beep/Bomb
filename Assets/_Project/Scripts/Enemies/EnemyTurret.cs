@@ -3,8 +3,8 @@ using UnityEngine;
 
 /// <summary>
 /// その場から動かない砲台型の敵。
-/// 範囲内でプレイヤーが見えたら「向く → 予告線と警告音 → 撃ち続ける」の順に進み、見失ったら最初に戻る。
-/// 予告は撃ち始める前の1回だけ。毎回出すと発射間隔が予告の長さに引っぱられるため。
+/// 範囲内でプレイヤーが見えたら「向く → 予告線と警告音で狙う → 1発撃つ → 少し待つ → また狙う」を繰り返し、見失ったら最初に戻る。
+/// 予告の最後の少しだけ狙いを固定し、プレイヤーが線を見て避けられるようにする。
 /// 音と見た目の演出はイベントで外へ出し、ここは判断と発射だけを持つ。
 /// </summary>
 [RequireComponent(typeof(EnemyHealth))]
@@ -38,7 +38,7 @@ public class EnemyTurret : MonoBehaviour
         Idle,
         Turning,
         Warning,
-        Firing,
+        Cooldown,
         Dead,
     }
 
@@ -57,6 +57,8 @@ public class EnemyTurret : MonoBehaviour
     private float _lostSightTimer;
     private Quaternion _turnStartRotation;
     private Vector3 _lastAimPoint;
+    private Vector3 _shotAimPoint;
+    private bool _isAimLocked;
     private bool _isTargetVisible;
 
     // ==========================================
@@ -152,8 +154,8 @@ public class EnemyTurret : MonoBehaviour
                 TickWarning();
                 break;
 
-            case State.Firing:
-                TickFiring();
+            case State.Cooldown:
+                TickCooldown();
                 break;
         }
     }
@@ -217,37 +219,55 @@ public class EnemyTurret : MonoBehaviour
 
         if (_stateTimer >= _data.TurnSeconds)
         {
-            ChangeState(State.Warning);
-            SetWarningLineVisible(true);
-            OnWarningStarted?.Invoke();
+            StartWarning();
         }
+    }
+
+    /// <summary>1発ぶんの狙いを始める。予告線を出して警告音を鳴らす。</summary>
+    private void StartWarning()
+    {
+        ChangeState(State.Warning);
+        _isAimLocked = false;
+        _shotAimPoint = _lastAimPoint;
+        SetWarningLineVisible(true);
+        OnWarningStarted?.Invoke();
     }
 
     private void TickWarning()
     {
         _stateTimer += Time.deltaTime;
 
-        FaceTarget();
+        // 最後の少しは狙いを固定する。固定中は向きも線も動かさない。
+        if (!_isAimLocked && _stateTimer >= _data.WarningSeconds - _data.AimLockSeconds)
+        {
+            _isAimLocked = true;
+        }
+
+        if (!_isAimLocked)
+        {
+            _shotAimPoint = _lastAimPoint;
+            FaceTarget();
+        }
+
         UpdateWarningLine();
 
         if (_stateTimer >= _data.WarningSeconds)
         {
             SetWarningLineVisible(false);
             Fire();
-            ChangeState(State.Firing);
+            ChangeState(State.Cooldown);
         }
     }
 
-    private void TickFiring()
+    private void TickCooldown()
     {
         _stateTimer += Time.deltaTime;
 
         FaceTarget();
 
-        if (_stateTimer >= _data.FireIntervalSeconds)
+        if (_stateTimer >= _data.ShotCooldownSeconds)
         {
-            Fire();
-            _stateTimer = 0f;
+            StartWarning();
         }
     }
 
@@ -317,7 +337,7 @@ public class EnemyTurret : MonoBehaviour
     private void Fire()
     {
         Vector3 origin = _muzzle.position;
-        Vector3 direction = _lastAimPoint - origin;
+        Vector3 direction = _shotAimPoint - origin;
 
         if (direction.sqrMagnitude <= Mathf.Epsilon)
         {
@@ -348,7 +368,7 @@ public class EnemyTurret : MonoBehaviour
     /// </summary>
     private Vector3 GetWarningLineEnd(Vector3 origin)
     {
-        Vector3 offset = _lastAimPoint - origin;
+        Vector3 offset = _shotAimPoint - origin;
         Vector3 direction = offset.sqrMagnitude > Mathf.Epsilon ? offset.normalized : transform.forward;
 
         float maxLength = _data.WarningLineMaxLength;

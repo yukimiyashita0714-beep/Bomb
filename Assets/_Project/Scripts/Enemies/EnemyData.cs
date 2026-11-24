@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 砲台型の敵の調整値。種類を増やすときはこのアセットを複製して数値を変える。
@@ -32,13 +33,18 @@ public class EnemyData : ScriptableObject
     [Range(0.1f, 5f)]
     private float _turnSeconds = 1f;
 
-    [SerializeField, Tooltip("予告線と警告音を出してから1発目を撃つまでの時間 (秒)")]
+    [SerializeField, Tooltip("予告線と警告音を出してから撃つまでの時間 (秒)。1発ごとに毎回この長さだけ狙う")]
     [Range(0.1f, 5f)]
     private float _warningSeconds = 1f;
 
-    [SerializeField, Tooltip("撃ち始めてからの発射間隔 (秒)")]
-    [Range(0.1f, 5f)]
-    private float _fireIntervalSeconds = 1f;
+    [SerializeField, Tooltip("撃ってから次の予告線を出すまでの待ち時間 (秒)。1発ごとの間隔は これ + 予告時間 になる")]
+    [FormerlySerializedAs("_fireIntervalSeconds")]
+    [Range(0f, 5f)]
+    private float _shotCooldownSeconds = 1f;
+
+    [SerializeField, Tooltip("予告時間の最後のこの秒数だけ狙いを固定する (秒)。0 なら撃つ瞬間まで追い続ける。プレイヤーが避ける猶予になる")]
+    [Range(0f, 2f)]
+    private float _aimLockSeconds = 0.2f;
 
     [SerializeField, Tooltip("予告線の最大の長さ (m)。プレイヤーの先まで伸ばし、壁があればそこで止める")]
     [Range(1f, 100f)]
@@ -92,11 +98,14 @@ public class EnemyData : ScriptableObject
     /// <summary>プレイヤーの方を向き終わるまでの時間 (秒)。</summary>
     public float TurnSeconds => _turnSeconds;
 
-    /// <summary>予告してから1発目を撃つまでの時間 (秒)。</summary>
+    /// <summary>予告してから撃つまでの時間 (秒)。</summary>
     public float WarningSeconds => _warningSeconds;
 
-    /// <summary>発射間隔 (秒)。</summary>
-    public float FireIntervalSeconds => _fireIntervalSeconds;
+    /// <summary>撃ってから次の予告までの待ち時間 (秒)。</summary>
+    public float ShotCooldownSeconds => _shotCooldownSeconds;
+
+    /// <summary>撃つ直前に狙いを固定する時間 (秒)。予告時間より長くはならない。</summary>
+    public float AimLockSeconds => Mathf.Min(_aimLockSeconds, _warningSeconds);
 
     /// <summary>予告線の最大の長さ (m)。</summary>
     public float WarningLineMaxLength => _warningLineMaxLength;

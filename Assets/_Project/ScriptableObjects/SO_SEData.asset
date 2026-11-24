@@ -75,3 +75,14 @@ MonoBehaviour:
     _pitchMax: 1
     _maxSimultaneous: 4
     _outputOverride: {fileID: 0}
+  - _type: 2
+    _playMode: 0
+    _clips:
+    - _clip: {fileID: 8300000, guid: 0b35e68e463b9d24a95f6e3168db45f9, type: 3}
+      _startSeconds: 0
+      _delaySeconds: 0
+    _volume: 0.8
+    _pitchMin: 1
+    _pitchMax: 1
+    _maxSimultaneous: 4
+    _outputOverride: {fileID: 0}

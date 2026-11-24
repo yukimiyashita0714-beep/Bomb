@@ -22,6 +22,11 @@ public static class SoundSetupMenu
     private const string MIXER_PATH = "Assets/_Project/Audios/AM_Main.mixer";
     private const string GRENADE_PREFAB_PATH = "Assets/_Project/Prefabs/P_Grenade.prefab";
 
+    private const string ENEMY_AIM_MENU_PATH = "Bomb/Setup/Enemy Aim Sound";
+    private const string ENEMY_AIM_CLIP_PATH = "Assets/_Project/Audios/Sfx/EnemyAim/Sfx_Enemy_Aim.mp3";
+    private const float ENEMY_AIM_VOLUME = 0.8f;
+    private const int ENEMY_AIM_MAX_SIMULTANEOUS = 4;
+
     private const string SFX_GROUP_NAME = "Sfx";
     private const string SYSTEMS_ROOT_NAME = "=== SYSTEMS ===";
     private const string SYSTEMS_KEYWORD = "SYSTEMS";
@@ -42,6 +47,94 @@ public static class SoundSetupMenu
         PlaceManager(data, sfxGroup, report);
 
         EditorUtility.DisplayDialog("Sound Setup", report.ToString(), "OK");
+    }
+
+    /// <summary>敵の狙い音 (予告線が出るときの音) を SO_SEData の EnemyWarning に登録する。</summary>
+    [MenuItem(ENEMY_AIM_MENU_PATH)]
+    private static void SetupEnemyAimSound()
+    {
+        EditorUtility.DisplayDialog("Enemy Aim Sound", RegisterEnemyAimClip(), "OK");
+    }
+
+    private static string RegisterEnemyAimClip()
+    {
+        // まだ取り込まれていなければここで取り込む。
+        AssetDatabase.ImportAsset(ENEMY_AIM_CLIP_PATH);
+        AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(ENEMY_AIM_CLIP_PATH);
+
+        if (clip == null)
+        {
+            return $"音源が見つからない: {ENEMY_AIM_CLIP_PATH}";
+        }
+
+        SEData data = AssetDatabase.LoadAssetAtPath<SEData>(SE_DATA_PATH);
+
+        if (data == null)
+        {
+            return $"SO_SEData が無い。先に {MENU_PATH} を実行する。";
+        }
+
+        SerializedObject serialized = new SerializedObject(data);
+        SerializedProperty entries = serialized.FindProperty("_entries");
+        SerializedProperty entry = FindEntry(entries, SEType.EnemyWarning);
+
+        if (entry == null)
+        {
+            entries.arraySize++;
+            entry = entries.GetArrayElementAtIndex(entries.arraySize - 1);
+            entry.FindPropertyRelative("_type").intValue = (int)SEType.EnemyWarning;
+            entry.FindPropertyRelative("_playMode").intValue = (int)SEPlayMode.Random;
+            entry.FindPropertyRelative("_volume").floatValue = ENEMY_AIM_VOLUME;
+            entry.FindPropertyRelative("_pitchMin").floatValue = 1f;
+            entry.FindPropertyRelative("_pitchMax").floatValue = 1f;
+            entry.FindPropertyRelative("_maxSimultaneous").intValue = ENEMY_AIM_MAX_SIMULTANEOUS;
+            entry.FindPropertyRelative("_outputOverride").objectReferenceValue = null;
+            entry.FindPropertyRelative("_clips").arraySize = 0;
+        }
+
+        SerializedProperty clips = entry.FindPropertyRelative("_clips");
+
+        // 手で別の音を入れていたら上書きしない。
+        for (int i = 0; i < clips.arraySize; i++)
+        {
+            Object current = clips.GetArrayElementAtIndex(i).FindPropertyRelative("_clip").objectReferenceValue;
+
+            if (current == clip)
+            {
+                return "EnemyWarning にはすでに Sfx_Enemy_Aim が入っている。";
+            }
+
+            if (current != null)
+            {
+                return $"EnemyWarning には別の音 ({current.name}) が入っているので変えなかった。";
+            }
+        }
+
+        clips.arraySize = 1;
+        SerializedProperty first = clips.GetArrayElementAtIndex(0);
+        first.FindPropertyRelative("_clip").objectReferenceValue = clip;
+        first.FindPropertyRelative("_startSeconds").floatValue = 0f;
+        first.FindPropertyRelative("_delaySeconds").floatValue = 0f;
+
+        serialized.ApplyModifiedProperties();
+        AssetDatabase.SaveAssets();
+        return "SO_SEData の EnemyWarning に Sfx_Enemy_Aim を登録した。";
+    }
+
+    /// <summary>指定した SEType の行を返す。無ければ null。</summary>
+    private static SerializedProperty FindEntry(SerializedProperty entries, SEType type)
+    {
+        for (int i = 0; i < entries.arraySize; i++)
+        {
+            SerializedProperty entry = entries.GetArrayElementAtIndex(i);
+
+            if (entry.FindPropertyRelative("_type").intValue == (int)type)
+            {
+                return entry;
+            }
+        }
+
+        return null;
     }
 
     private static SEData LoadOrCreateSEData(StringBuilder report)
