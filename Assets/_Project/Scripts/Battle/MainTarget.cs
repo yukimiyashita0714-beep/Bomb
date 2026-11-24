@@ -236,6 +236,23 @@ namespace Bomb.Battle
         }
 
         /// <summary>
+        /// デバッグ用。距離に関係なく、普段のインタラクトと同じ処理で爆弾を置く。
+        /// インスペクターの右クリックメニューからも呼べる (再生中のみ)。
+        /// </summary>
+        [ContextMenu("Debug Plant Bomb")]
+        public void DebugPlant()
+        {
+            if (!Application.isPlaying || !IsInteractable)
+            {
+                return;
+            }
+
+            Debug.Log($"[Debug] メインターゲットに爆弾を設置 ({name})", this);
+
+            Interact();
+        }
+
+        /// <summary>
         /// 爆弾を置く処理
         /// </summary>
         public void Plant()
