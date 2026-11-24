@@ -24,6 +24,7 @@ public class ControlGuideUI : MonoBehaviour
     private string _keyboardGuide =
         "<b>Keyboard</b>\n\n" +
         "WASD<pos=45%>move\n" +
+        "M<pos=45%>mute\n" +
         "Space<pos=45%>jump\n" +
         "F<pos=45%>charge and throw\n" +
         "R<pos=45%>controller guide\n" +
@@ -33,6 +34,7 @@ public class ControlGuideUI : MonoBehaviour
     private string _gamepadGuide =
         "<b>Controller</b>\n\n" +
         "L Stick<pos=45%>move\n" +
+        "RS (R3)<pos=45%>mute\n" +
         "A (×)<pos=45%>jump\n" +
         "RT (R2)<pos=45%>charge and throw\n" +
         "View (Share)<pos=45%>keyboard guide";

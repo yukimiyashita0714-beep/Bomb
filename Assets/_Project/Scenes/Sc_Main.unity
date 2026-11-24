@@ -763,7 +763,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<b>operate</b>\n\nWASD     move\nShift        dash\nF            Charge
+  m_text: "<b>operate</b>\n\nWASD     move\nM            mute\nF            Charge
     with F and throw.\nR           UI close      \nQ           Reload scene"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
@@ -2927,56 +2927,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 757816732}
   m_CullTransparentMesh: 1
---- !u!1 &759558862
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 759558863}
-  - component: {fileID: 759558864}
-  m_Layer: 0
-  m_Name: EscapeWaveSpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &759558863
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 759558862}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1542775780}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &759558864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 759558862}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04c08c2b93cc2ac4b8b5dd0c87b350bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EscapeWaveSpawner
-  _data: {fileID: 11400000, guid: 4411d84618f3c374291585aba1beb1a8, type: 2}
-  _bombEvent: {fileID: 2058929123}
-  _spawnParent: {fileID: 1832635629}
-  _appearSeconds: 0.4
-  _appearEffectPrefab: {fileID: 0}
-  _appearEffectLifetimeSeconds: 2
 --- !u!1 &818207964
 GameObject:
   m_ObjectHideFlags: 0
@@ -3231,7 +3181,7 @@ MonoBehaviour:
 
     WASD<pos=45%>move
 
-    Shift<pos=45%>dash
+    M<pos=45%>mute
 
     Space<pos=45%>jump
 
@@ -3241,7 +3191,7 @@ MonoBehaviour:
     R<pos=45%>controller guide
 
     Q<pos=45%>reload scene'
-  _gamepadGuide: "<b>Controller</b>\n\nL Stick<pos=45%>move\nL Stick push<pos=45%>dash\nA
+  _gamepadGuide: "<b>Controller</b>\n\nL Stick<pos=45%>move\nRS (R3)<pos=45%>mute\nA
     (\xD7)<pos=45%>jump\nRT (R2)<pos=45%>charge and throw\nView (Share)<pos=45%>keyboard
     guide"
   _isGamepadOnStart: 0
@@ -4063,6 +4013,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1165205894}
   m_CullTransparentMesh: 1
+--- !u!4 &1237504855 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1951787158845000151, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 1477564616}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1265795033
 GameObject:
   m_ObjectHideFlags: 0
@@ -5168,7 +5123,6 @@ Transform:
   - {fileID: 2058929122}
   - {fileID: 1582294151}
   - {fileID: 438562353}
-  - {fileID: 759558863}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1543269258
@@ -6189,6 +6143,11 @@ Transform:
   - {fileID: 1842946635548509439}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1692535002 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6004289881312912932, guid: 164531a7d3045fe4c99cf84b366de65f, type: 3}
+  m_PrefabInstance: {fileID: 1477564616}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1710599891
 GameObject:
   m_ObjectHideFlags: 0
@@ -7739,6 +7698,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2058929122}
   - component: {fileID: 2058929123}
+  - component: {fileID: 2058929124}
   m_Layer: 0
   m_Name: BombEvent
   m_TagString: Untagged
@@ -7773,6 +7733,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6db5983130db0114487573995358f34e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb.Core.BombEvent
+--- !u!114 &2058929124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2058929120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa4efe2443cb3fa42b0de786d22635b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPhaseSwitcher
+  _bombEvent: {fileID: 2058929123}
+  _beforeRoot: {fileID: 1237504855}
+  _afterRoot: {fileID: 1692535002}
 --- !u!1 &2083615357
 GameObject:
   m_ObjectHideFlags: 0
