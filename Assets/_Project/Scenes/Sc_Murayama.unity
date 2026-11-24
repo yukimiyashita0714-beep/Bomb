@@ -201,7 +201,7 @@ MonoBehaviour:
   _mainInputAxisController: {fileID: 934881479}
   _mainImpulseSource: {fileID: 1576815022}
   _cameraTarget: {fileID: 1609593026}
-  _impulseMagnification: 0.2
+  _impulseMagnification: 0.1
 --- !u!1 &19686476
 GameObject:
   m_ObjectHideFlags: 0

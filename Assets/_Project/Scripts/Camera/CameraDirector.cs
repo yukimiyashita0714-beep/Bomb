@@ -98,7 +98,7 @@ public class CameraDirector : MonoBehaviour
     {
         var vel = damageValue * _impulseMagnification;
 
-        _mainImpulseSource.GenerateImpulse();
+        _mainImpulseSource.GenerateImpulse(vel);
     }
 
     private void CameraDataUpdate()
