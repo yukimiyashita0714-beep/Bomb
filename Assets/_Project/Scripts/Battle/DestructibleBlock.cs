@@ -1,5 +1,7 @@
 using System.Collections;
+using Bomb.Core;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 爆風が当たると回りながら縮んで破片になり、地面に残る。一定時間たつと破片が元の場所へ戻って復活するブロック。
@@ -7,6 +9,8 @@ using UnityEngine;
 /// ここもそれを実装して「ダメージを受けた = 爆風が当たった」として扱う。
 /// 破片の間はレイヤーを Debris に変え、地面や壁には乗るが、プレイヤーやグレネードとは当たらないようにする
 /// (どのレイヤー同士が当たるかは Project Settings > Physics の Layer Collision Matrix で決めている)。
+/// 爆弾を付けた後 (逃げるフェーズ) は復活しない。数千個のブロックが個別に BombEvent を購読しないよう、
+/// シーンの読み込み時に static でまとめて1回だけ購読し、全ブロック共通のフラグを立てる。
 /// </summary>
 [DisallowMultipleComponent]
 public class DestructibleBlock : MonoBehaviour, IDamageable
@@ -44,6 +48,15 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
 
     private static int _debrisLayer = UNRESOLVED_LAYER;
 
+    /// <summary>爆弾を付けた後は true。シーンを読み込み直すと false に戻る。</summary>
+    private static bool _isRespawnLocked;
+
+    /// <summary>爆弾を付けた時刻 (Time.time)。これより前に壊れたブロックかどうかの判定に使う。</summary>
+    private static float _respawnLockedTime;
+
+    /// <summary>購読中の BombEvent。同じものに二重で購読しないために覚えておく。</summary>
+    private static BombEvent _subscribedBombEvent;
+
     private Rigidbody _rigidbody;
     private Collider[] _colliders;
     private Transform[] _layerTargets;
@@ -80,6 +93,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     /// <summary>メインターゲットの爆発で飛ばされた後は true。元の場所には戻らない。</summary>
     public bool IsLaunched => _isLaunched;
 
+    /// <summary>爆弾を付けた後 (逃げるフェーズ) は true。</summary>
+    public static bool IsRespawnLocked => _isRespawnLocked;
+
     /// <summary>破片のレイヤー番号。登録されていなければ -1。</summary>
     private static int DebrisLayer
     {
@@ -103,6 +119,17 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     // ==========================================
     // Unity Messages
     // ==========================================
+
+    /// <summary>ドメインリロード無しで再生したときに、前回の状態が残らないようにする。</summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        _isRespawnLocked = false;
+        _respawnLockedTime = 0f;
+        _subscribedBombEvent = null;
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
 
     private void Awake()
     {
@@ -180,6 +207,58 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     // ==========================================
     // Private Methods
     // ==========================================
+
+    /// <summary>Retry やタイトルからの読み込み直しで復活を元に戻し、そのシーンの BombEvent を購読し直す。</summary>
+    private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (mode == LoadSceneMode.Single)
+        {
+            _isRespawnLocked = false;
+            _respawnLockedTime = 0f;
+        }
+
+        BombEvent bombEvent = FindAnyObjectByType<BombEvent>(FindObjectsInactive.Include);
+
+        if (bombEvent == null || bombEvent == _subscribedBombEvent)
+        {
+            return;
+        }
+
+        if (_subscribedBombEvent != null)
+        {
+            _subscribedBombEvent.OnPlant -= HandlePlant;
+        }
+
+        bombEvent.OnPlant += HandlePlant;
+        _subscribedBombEvent = bombEvent;
+    }
+
+    private static void HandlePlant()
+    {
+        if (_isRespawnLocked)
+        {
+            return;
+        }
+
+        _isRespawnLocked = true;
+        _respawnLockedTime = Time.time;
+    }
+
+    /// <summary>
+    /// 逃げるフェーズに入っていて、このブロックはもう復活しないなら true。
+    /// 爆弾を付ける前に壊れたものは、設定で復活させるかを選べる。
+    /// </summary>
+    private bool IsRespawnCanceled()
+    {
+        if (!_isRespawnLocked || !_data.IsRespawnStoppedOnEscape)
+        {
+            return false;
+        }
+
+        bool isBrokenBeforePlant = _brokenTime < _respawnLockedTime;
+
+        return !isBrokenBeforePlant || _data.CancelsPendingRespawnOnEscape;
+    }
 
     private void SaveInitialState()
     {
@@ -260,6 +339,12 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
             yield return new WaitForSeconds(respawnTime - Time.time);
         }
 
+        // 逃げるフェーズなら破片のまま残す。_isBreaking は true のままなので、もう壊れることもない。
+        if (IsRespawnCanceled())
+        {
+            yield break;
+        }
+
         // プレイヤーがいる場所に戻すと、ブロックの中に閉じ込めたり弾き飛ばしたりしてしまう。
         // 場所が空くまで待つので、このループはプレイヤーがどけば必ず抜ける。
         WaitForSeconds retryWait = new WaitForSeconds(_data.RespawnRetrySeconds);
@@ -267,7 +352,15 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         while (IsRespawnBlocked())
         {
             yield return retryWait;
+
+            // 場所が空くのを待っている間に爆弾を付けた場合も、ここで止める。
+            if (IsRespawnCanceled())
+            {
+                yield break;
+            }
         }
+
+        // ここから先は戻り始めるので、途中で爆弾を付けても最後まで戻す (途中で止めると宙に浮いて残る)。
 
         yield return ReturnRoutine();
 

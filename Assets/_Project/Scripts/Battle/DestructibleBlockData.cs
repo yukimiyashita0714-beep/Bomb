@@ -61,6 +61,13 @@ public class DestructibleBlockData : ScriptableObject
     [SerializeField, Tooltip("ON なら爆風で飛ばされながら縮む。OFF なら縮み終わるまでその場で止まる")]
     private bool _isMovingWhileFading = true;
 
+    [Header("Escape")]
+    [SerializeField, Tooltip("ON なら爆弾を付けた後 (逃げるフェーズ) は、壊れたブロックが復活しない")]
+    private bool _isRespawnStoppedOnEscape = true;
+
+    [SerializeField, Tooltip("ON なら爆弾を付ける前に壊れて復活待ちのブロックも、そのまま復活しない。OFF なら付ける前に壊れた分だけは復活する。すでに元の場所へ戻り始めているものは最後まで戻る")]
+    private bool _cancelsPendingRespawnOnEscape = true;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -94,6 +101,12 @@ public class DestructibleBlockData : ScriptableObject
 
     /// <summary>true なら爆風で飛ばされながら縮む。</summary>
     public bool IsMovingWhileFading => _isMovingWhileFading;
+
+    /// <summary>true なら爆弾を付けた後は復活しない。</summary>
+    public bool IsRespawnStoppedOnEscape => _isRespawnStoppedOnEscape;
+
+    /// <summary>true なら爆弾を付ける前に壊れて復活待ちのブロックも復活しない。</summary>
+    public bool CancelsPendingRespawnOnEscape => _cancelsPendingRespawnOnEscape;
 
     // ==========================================
     // Public Methods
