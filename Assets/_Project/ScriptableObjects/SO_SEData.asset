@@ -76,9 +76,9 @@ MonoBehaviour:
     _maxSimultaneous: 4
     _outputOverride: {fileID: 0}
   - _type: 2
-    _playMode: 0
+    _playMode: 1
     _clips:
-    - _clip: {fileID: 8300000, guid: 0b35e68e463b9d24a95f6e3168db45f9, type: 3}
+    - _clip: {fileID: 8300000, guid: 177cd16db2c073b4cb5cdc6fdb68800d, type: 3}
       _startSeconds: 0
       _delaySeconds: 0
     _volume: 0.8
