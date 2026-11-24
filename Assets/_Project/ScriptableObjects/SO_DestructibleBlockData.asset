@@ -42,7 +42,9 @@ MonoBehaviour:
   _maxDebrisScaleRatio: 0.5
   _minSpinDegreesPerSecond: 360
   _maxSpinDegreesPerSecond: 900
-  _respawnDelaySeconds: 15
+  _respawnDelaySeconds: 10
   _respawnRetrySeconds: 0.5
   _returnDurationSeconds: 0.6
   _isMovingWhileFading: 1
+  _isRespawnStoppedOnEscape: 1
+  _cancelsPendingRespawnOnEscape: 1
