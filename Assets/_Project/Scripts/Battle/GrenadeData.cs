@@ -20,6 +20,9 @@ public class GrenadeData : ScriptableObject
     [SerializeField, Tooltip("壊せるブロックに当たったら信管を待たずに即爆発する")]
     private bool _isDetonatedOnDestructibleHit = true;
 
+    [SerializeField, Tooltip("生きている敵に当たったら信管を待たずに即爆発する。倒れた敵には反応しない")]
+    private bool _isDetonatedOnEnemyHit = true;
+
     [Header("Explosion")]
     [SerializeField, Tooltip("爆発が届く半径 (m)")]
     [Range(0.5f, 30f)]
@@ -73,6 +76,9 @@ public class GrenadeData : ScriptableObject
 
     /// <summary>壊せるブロックに当たったら即爆発するなら true。</summary>
     public bool IsDetonatedOnDestructibleHit => _isDetonatedOnDestructibleHit;
+
+    /// <summary>生きている敵に当たったら即爆発するなら true。</summary>
+    public bool IsDetonatedOnEnemyHit => _isDetonatedOnEnemyHit;
 
     /// <summary>爆発が届く半径 (m)。</summary>
     public float ExplosionRadius => _explosionRadius;

@@ -52,8 +52,14 @@ public class Grenade : MonoBehaviour
     private float _fuseTimer;
     private bool _hasExploded;
 
-    /// <summary>直接ぶつかって起爆したブロックの Collider。爆風の判定に関係なく必ず壊す。</summary>
+    /// <summary>直接ぶつかって起爆した相手 (ブロックや敵) の Collider。爆風の判定に関係なく必ずダメージを入れる。</summary>
     private Collider _directHitCollider;
+
+    /// <summary>Throw で投げられたら true。自前の重力で飛ぶ。置いただけのものは Unity の重力のまま。</summary>
+    private bool _usesCustomGravity;
+
+    private float _gravityScale = 1f;
+    private float _gravityScaleAfterHit = 1f;
 
     // ==========================================
     // Properties
@@ -140,22 +146,33 @@ public class Grenade : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (!_usesCustomGravity)
+        {
+            return;
+        }
+
+        // 予測線 (ProjectilePath) と同じ重力をかける。質量に関係なく同じ加速度にする。
+        _rigidbody.AddForce(Physics.gravity * _gravityScale, ForceMode.Acceleration);
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
-        if (_hasExploded || !_data.IsDetonatedOnDestructibleHit)
+        // まっすぐ飛ばすための弱い重力は空中だけ。当たったら跳ね方を普通に戻す。
+        _gravityScale = _gravityScaleAfterHit;
+
+        if (_hasExploded)
         {
             return;
         }
 
-        // Collider が子オブジェクトに付いているブロックもあるので、親までさかのぼって探す。
-        DestructibleBlock block = collision.collider.GetComponentInParent<DestructibleBlock>();
-
-        // 消えかけのブロックは判定を切っているので普通は当たらないが、切る前の同じフレームに当たることがある。
-        if (block == null || block.IsBreaking)
+        if (!IsDetonatedByContact(collision.collider))
         {
             return;
         }
 
+        // 当たった相手は遮蔽の判定に関係なく必ずダメージを受ける。
         _directHitCollider = collision.collider;
         Detonate();
     }
@@ -174,6 +191,30 @@ public class Grenade : MonoBehaviour
     // ==========================================
     // Public Methods
     // ==========================================
+
+    /// <summary>
+    /// 初速と重力の倍率を決めて投げ出す。重力は投げた瞬間に固定し、あとから変えない。
+    /// </summary>
+    /// <param name="velocity">初速度 (m/s)</param>
+    /// <param name="gravityScale">飛んでいる間の重力の倍率 (Physics.gravity に掛ける)</param>
+    /// <param name="gravityScaleAfterHit">最初に何かに当たったあとの重力の倍率</param>
+    public void Throw(Vector3 velocity, float gravityScale, float gravityScaleAfterHit)
+    {
+        // 設定不足で止まっていると FixedUpdate が回らず浮きっぱなしになるので、Unity の重力のまま飛ばす。
+        if (!enabled)
+        {
+            _rigidbody.AddForce(velocity, ForceMode.VelocityChange);
+            return;
+        }
+
+        _usesCustomGravity = true;
+        _gravityScale = gravityScale;
+        _gravityScaleAfterHit = gravityScaleAfterHit;
+
+        // Unity の重力と二重にかからないよう、自前の重力だけにする。
+        _rigidbody.useGravity = false;
+        _rigidbody.AddForce(velocity, ForceMode.VelocityChange);
+    }
 
     /// <summary>信管を待たずに即爆発させる。</summary>
     public void Detonate()
@@ -347,6 +388,35 @@ public class Grenade : MonoBehaviour
 
         // Kinematic は動かない壁として扱う。
         return body.isKinematic || _data.IsBlockedByRigidbodies;
+    }
+
+    /// <summary>ぶつかった相手が、信管を待たずに即爆発する対象なら true。</summary>
+    private bool IsDetonatedByContact(Collider hit)
+    {
+        // Collider が子オブジェクトに付いている相手もいるので、親までさかのぼって探す。
+        if (_data.IsDetonatedOnDestructibleHit)
+        {
+            DestructibleBlock block = hit.GetComponentInParent<DestructibleBlock>();
+
+            // 消えかけのブロックは判定を切っているので普通は当たらないが、切る前の同じフレームに当たることがある。
+            if (block != null && !block.IsBreaking)
+            {
+                return true;
+            }
+        }
+
+        if (_data.IsDetonatedOnEnemyHit)
+        {
+            EnemyHealth enemy = hit.GetComponentInParent<EnemyHealth>();
+
+            // 倒れた敵は半分埋まった障害物として残るので、普通の地面と同じく跳ね返るだけにする。
+            if (enemy != null && !enemy.IsDead)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsGrenade(Rigidbody body)

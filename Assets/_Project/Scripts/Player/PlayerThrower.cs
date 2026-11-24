@@ -123,10 +123,15 @@ public class PlayerThrower : MonoBehaviour
     }
 
     /// <summary>今この瞬間に投げたときの初速度 (m/s)。予測線はこれを使う。</summary>
-    public Vector3 PendingVelocity =>
-        _projectileMass > Mathf.Epsilon
-            ? ThrowDirection * (PendingImpulse / _projectileMass)
-            : Vector3.zero;
+    public Vector3 PendingVelocity => CalculateVelocity(PendingImpulse, PendingStraightness);
+
+    /// <summary>今この瞬間に投げたときの重力の倍率。予測線は Physics.gravity にこれを掛ける。</summary>
+    public float PendingGravityScale =>
+        _data != null ? _data.GetFlightGravityScale(PendingStraightness) : 1f;
+
+    /// <summary>今この瞬間に投げたときのまっすぐ度 (0〜1)。Fixed モードでは常に 0。</summary>
+    public float PendingStraightness =>
+        _data != null && _mode == ThrowMode.Charge ? _data.GetStraightness(ChargeRatio) : 0f;
 
     // ==========================================
     // Events
@@ -224,7 +229,7 @@ public class PlayerThrower : MonoBehaviour
             return;
         }
 
-        Throw(_data.FixedThrowImpulse);
+        Throw(_data.FixedThrowImpulse, 0f);
     }
 
     private void UpdateChargeMode()
@@ -253,17 +258,18 @@ public class PlayerThrower : MonoBehaviour
         // 離した。WasReleasedThisFrame を待たずに「押していない」で判定するのは、
         // フォーカスが外れてキーを離した場合に溜めっぱなしで固まるのを避けるため。
         float impulse = _data.GetChargedImpulse(ChargeRatio);
+        float straightness = PendingStraightness;
 
         _isCharging = false;
         _chargeTimer = 0f;
         OnChargeRatioChanged?.Invoke(0f);
 
-        Throw(impulse);
+        Throw(impulse, straightness);
     }
 
-    private void Throw(float impulse)
+    private void Throw(float impulse, float straightness)
     {
-        Vector3 direction = CalculateThrowDirection();
+        Vector3 velocity = CalculateVelocity(impulse, straightness);
         Vector3 spawnPosition = transform.position + transform.rotation * _data.ThrowOffset;
 
         GameObject instance = Instantiate(_grenadePrefab, spawnPosition, transform.rotation);
@@ -279,7 +285,16 @@ public class PlayerThrower : MonoBehaviour
 
         IgnorePlayerCollision(instance);
 
-        body.AddForce(direction * impulse, ForceMode.Impulse);
+        // 予測線と同じ初速・重力で飛ばす。Grenade が無い物は Unity の重力のまま飛ばす。
+        if (instance.TryGetComponent(out Grenade grenade))
+        {
+            float gravityScale = _data.GetFlightGravityScale(straightness);
+            grenade.Throw(velocity, gravityScale, _data.GetGravityScaleAfterHit(gravityScale));
+        }
+        else
+        {
+            body.AddForce(velocity, ForceMode.VelocityChange);
+        }
 
         // 転がるだけだと置物に見えるので、投げた瞬間に軽く回しておく。
         body.AddTorque(UnityEngine.Random.insideUnitSphere * (impulse * SPIN_RATIO), ForceMode.Impulse);
@@ -291,9 +306,27 @@ public class PlayerThrower : MonoBehaviour
 
     private Vector3 CalculateThrowDirection()
     {
+        return CalculateThrowDirection(PendingStraightness);
+    }
+
+    private Vector3 CalculateThrowDirection(float straightness)
+    {
         // transform.right 周りの正回転は下向きなので、投げ上げるには負の角度を与える。
-        Quaternion pitch = Quaternion.AngleAxis(-_data.ThrowAngleDegrees, transform.right);
+        float angle = _data != null ? _data.GetThrowAngleDegrees(straightness) : 0f;
+        Quaternion pitch = Quaternion.AngleAxis(-angle, transform.right);
         return (pitch * transform.forward).normalized;
+    }
+
+    /// <summary>初速度 (m/s) = 向き × 力積 ÷ 質量 × 速さの倍率。</summary>
+    private Vector3 CalculateVelocity(float impulse, float straightness)
+    {
+        if (_data == null || _projectileMass <= Mathf.Epsilon)
+        {
+            return Vector3.zero;
+        }
+
+        float speed = impulse / _projectileMass * _data.FlightSpeedScale;
+        return CalculateThrowDirection(straightness) * speed;
     }
 
     private void IgnorePlayerCollision(GameObject instance)
