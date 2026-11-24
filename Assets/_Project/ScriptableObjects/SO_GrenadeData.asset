@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a311f7332dd9dc34094e8eb8a8679c64, type: 3}
   m_Name: SO_GrenadeData
   m_EditorClassIdentifier: Assembly-CSharp::GrenadeData
-  _fuseSeconds: 1
+  _fuseSeconds: 3
   _isDetonatedOnDestructibleHit: 1
   _explosionRadius: 5
   _explosionForce: 18
   _upwardsModifier: 2
   _affectedLayers:
     serializedVersion: 2
-    m_Bits: 4294963199
+    m_Bits: 4087
   _occluderLayers:
     serializedVersion: 2
     m_Bits: 7671
   _isBlockedByRigidbodies: 0
   _isPushedByOtherGrenades: 0
   _collidesWithOtherGrenades: 0
-  _maxDamage: 5
+  _maxDamage: 3
   _edgeDamageRatio: 0.3
   _destroyDelay: 0
