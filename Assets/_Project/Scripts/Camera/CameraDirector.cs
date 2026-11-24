@@ -1,6 +1,5 @@
 using Bomb.Battle;
 using Bomb.Core;
-using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -14,13 +13,20 @@ public class CameraDirector : MonoBehaviour
 
     [SerializeField] private CameraData _data;
 
-    [SerializeField] private BombEvent _bombEvent;
+    [SerializeField, Tooltip("ボムの処理に追加するためのボムイベント")] 
+    private BombEvent _bombEvent;
+
+    [SerializeField, Tooltip("ダメージを受け取るプレイヤー。爆風の自傷ダメージもここから届く")]
+    private PlayerDamageReceiver _damageReceiver;
 
     [Header("MainCamera")]
     [SerializeField] private CinemachinePanTilt _mainPanTilt;
     [SerializeField] private CinemachinePositionComposer _mainComposer;
     [SerializeField] private CinemachineInputAxisController _mainInputAxisController;
+    [SerializeField] private CinemachineImpulseSource _mainImpulseSource;
     [SerializeField] private Transform _cameraTarget;
+
+    [SerializeField] private float _impulseMagnification;
 
     // ==========================================
     // Unity Messages
@@ -36,6 +42,13 @@ public class CameraDirector : MonoBehaviour
 
         _bombEvent.OnPlant += Plant;
         _bombEvent.OnExplosion += Explosion;
+
+        if (_damageReceiver == null)
+        {
+            return;
+        }
+
+        _damageReceiver.OnDamaged += OnDamaged;
     }
 
     private void Start()
@@ -58,25 +71,35 @@ public class CameraDirector : MonoBehaviour
 
         _bombEvent.OnPlant -= Plant;
         _bombEvent.OnExplosion -= Explosion;
-    }
 
-    // ==========================================
-    // Public Methods
-    // ==========================================
+        if (_damageReceiver == null)
+        {
+            return;
+        }
 
-    public void Plant()
-    {
-        _animator.SetTrigger("Plant");
-    }
-
-    public void Explosion()
-    {
-        _animator.SetTrigger("Explosion");
+        _damageReceiver.OnDamaged -= OnDamaged;
     }
 
     // ==========================================
     // Private Methods
     // ==========================================
+
+    private void Plant()
+    {
+        _animator.SetTrigger("Plant");
+    }
+
+    private void Explosion()
+    {
+        _animator.SetTrigger("Explosion");
+    }
+
+    private void OnDamaged(float damageValue)
+    {
+        var vel = damageValue * _impulseMagnification;
+
+        _mainImpulseSource.GenerateImpulse();
+    }
 
     private void CameraDataUpdate()
     {

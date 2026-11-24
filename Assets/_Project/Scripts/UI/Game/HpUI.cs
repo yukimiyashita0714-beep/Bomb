@@ -106,8 +106,6 @@ public class HpUI : MonoBehaviour
             OnHpDepleted?.Invoke();
         }
 
-        SEEvents.PlayOneShot(SEType.PlayerDamage);
-
         //再生までのクールタイムリセット
         _recoveryCooltimer = _data.HpRecoveryCooltime;
 
