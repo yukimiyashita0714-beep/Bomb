@@ -79,6 +79,14 @@ public class EnemyData : ScriptableObject
     [Range(0f, 5f)]
     private float _fadeSeconds = 0.5f;
 
+    [SerializeField, Tooltip("倒れたときに地面へ沈める割合。モデルの高さに対する割合で、0.5 なら上半分だけ地面から出る")]
+    [Range(0f, 1f)]
+    private float _sinkRatio = 0.5f;
+
+    [SerializeField, Tooltip("倒れてから沈み切るまでの時間 (秒)。最初は速く、最後はゆっくり止まる")]
+    [Range(0f, 3f)]
+    private float _sinkSeconds = 0.8f;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -130,4 +138,10 @@ public class EnemyData : ScriptableObject
 
     /// <summary>半透明になり切るまでの時間 (秒)。</summary>
     public float FadeSeconds => _fadeSeconds;
+
+    /// <summary>倒れたときに沈める割合 (モデルの高さに対して)。</summary>
+    public float SinkRatio => _sinkRatio;
+
+    /// <summary>沈み切るまでの時間 (秒)。</summary>
+    public float SinkSeconds => _sinkSeconds;
 }

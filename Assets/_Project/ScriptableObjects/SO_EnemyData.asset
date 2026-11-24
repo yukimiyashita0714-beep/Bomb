@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4be7c65777dc8a8409dd31a1bdd4b347, type: 3}
   m_Name: SO_EnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  _maxHitCount: 2
+  _maxHitCount: 1
   _attackRange: 15
   _sightBlockLayers:
     serializedVersion: 2
@@ -20,7 +20,9 @@ MonoBehaviour:
   _loseSightGraceSeconds: 0.3
   _turnSeconds: 1
   _warningSeconds: 1
-  _fireIntervalSeconds: 1
+  _shotCooldownSeconds: 1
+  _aimLockSeconds: 0.2
+  _warningLineMaxLength: 30
   _bulletSpeed: 18
   _bulletDamage: 10
   _bulletRadius: 0.15
@@ -30,3 +32,5 @@ MonoBehaviour:
     m_Bits: 4294967295
   _deadAlpha: 0.5
   _fadeSeconds: 0.5
+  _sinkRatio: 0.5
+  _sinkSeconds: 0.8

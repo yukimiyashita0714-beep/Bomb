@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 敵が倒れたときの見た目。煙を出し、モデルを半透明にしてその場に残す。
-/// 当たり判定は消さないので、倒れた敵は通れない障害物として残る。
+/// 敵が倒れたときの見た目。煙を出し、モデルを地面へ半分ほど沈めて半透明にし、その場に残す。
+/// 沈めるのは見た目のモデルだけ。当たり判定は消さないので、倒れた敵は通れない障害物として残る。
 /// モデルのマテリアルは不透明なので、倒れた瞬間に透明用マテリアルへ差し替え、元の色とテクスチャを写す。
 /// </summary>
 [RequireComponent(typeof(EnemyHealth))]
@@ -27,6 +27,9 @@ public class EnemyDeathView : MonoBehaviour
     [SerializeField, Tooltip("半透明にするときに使う透明設定のマテリアル。色とテクスチャは元のものから写す")]
     private Material _fadeMaterial;
 
+    [SerializeField, Tooltip("倒れたときに沈める見た目のモデル。空なら、メッシュを持つ子オブジェクトを自動で探す")]
+    private Transform _sinkTarget;
+
     // ==========================================
     // Private Fields
     // ==========================================
@@ -48,6 +51,10 @@ public class EnemyDeathView : MonoBehaviour
 
     private GameObject _smokeInstance;
     private Coroutine _fadeRoutine;
+    private Coroutine _sinkRoutine;
+
+    /// <summary>沈める前のモデルの位置。復活したらここへ戻す。</summary>
+    private Vector3 _sinkTargetOriginalLocalPosition;
 
     // ==========================================
     // Unity Messages
@@ -56,6 +63,16 @@ public class EnemyDeathView : MonoBehaviour
     private void Awake()
     {
         _health = GetComponent<EnemyHealth>();
+
+        if (_sinkTarget == null)
+        {
+            _sinkTarget = FindModelChild();
+        }
+
+        if (_sinkTarget != null)
+        {
+            _sinkTargetOriginalLocalPosition = _sinkTarget.localPosition;
+        }
     }
 
     private void OnEnable()
@@ -87,6 +104,7 @@ public class EnemyDeathView : MonoBehaviour
     private void HandleDied()
     {
         PlaySmoke();
+        StartSink();
 
         if (_fadeMaterial == null || _data == null)
         {
@@ -112,6 +130,18 @@ public class EnemyDeathView : MonoBehaviour
         {
             StopCoroutine(_fadeRoutine);
             _fadeRoutine = null;
+        }
+
+        // 沈めたモデルは一瞬で元の高さへ戻す。
+        if (_sinkRoutine != null)
+        {
+            StopCoroutine(_sinkRoutine);
+            _sinkRoutine = null;
+        }
+
+        if (_sinkTarget != null)
+        {
+            _sinkTarget.localPosition = _sinkTargetOriginalLocalPosition;
         }
 
         ApplyMaterials(_originalMaterials);
@@ -228,6 +258,114 @@ public class EnemyDeathView : MonoBehaviour
         }
 
         SetAlpha(_data.DeadAlpha);
+    }
+
+    /// <summary>メッシュを持つ直下の子を探す。予告線や銃口はメッシュを持たないので選ばれない。</summary>
+    private Transform FindModelChild()
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (!(renderers[i] is MeshRenderer) && !(renderers[i] is SkinnedMeshRenderer))
+            {
+                continue;
+            }
+
+            Transform current = renderers[i].transform;
+
+            // 自分自身に付いたメッシュだと、当たり判定ごと動いてしまうので沈めない。
+            if (current == transform)
+            {
+                continue;
+            }
+
+            while (current.parent != transform)
+            {
+                current = current.parent;
+            }
+
+            return current;
+        }
+
+        return null;
+    }
+
+    private void StartSink()
+    {
+        if (_sinkTarget == null || _sinkTarget.parent == null || _data == null || _data.SinkRatio <= 0f)
+        {
+            return;
+        }
+
+        if (_sinkRoutine != null)
+        {
+            StopCoroutine(_sinkRoutine);
+        }
+
+        // 復活前に戻した位置から測り直すので、何度倒れても沈む深さは同じ。
+        _sinkTarget.localPosition = _sinkTargetOriginalLocalPosition;
+
+        if (!TryGetModelHeight(out float height))
+        {
+            return;
+        }
+
+        // 真下へ沈める。親が傾いていても、ワールドの下方向を親の座標に直して使う。
+        Vector3 worldOffset = Vector3.down * (height * _data.SinkRatio);
+        Vector3 endLocalPosition = _sinkTargetOriginalLocalPosition + _sinkTarget.parent.InverseTransformVector(worldOffset);
+
+        _sinkRoutine = StartCoroutine(SinkRoutine(endLocalPosition));
+    }
+
+    /// <summary>モデル全体の見た目の高さ (m)。モデルの大きさが違っても同じ割合で沈むように、描画範囲から測る。</summary>
+    private bool TryGetModelHeight(out float height)
+    {
+        height = 0f;
+        Renderer[] renderers = _sinkTarget.GetComponentsInChildren<Renderer>();
+        bool hasBounds = false;
+        Bounds bounds = default;
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (!(renderers[i] is MeshRenderer) && !(renderers[i] is SkinnedMeshRenderer))
+            {
+                continue;
+            }
+
+            if (!hasBounds)
+            {
+                bounds = renderers[i].bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                bounds.Encapsulate(renderers[i].bounds);
+            }
+        }
+
+        height = bounds.size.y;
+        return hasBounds && height > 0f;
+    }
+
+    private IEnumerator SinkRoutine(Vector3 endLocalPosition)
+    {
+        float durationSeconds = _data.SinkSeconds;
+        float elapsedSeconds = 0f;
+
+        while (elapsedSeconds < durationSeconds)
+        {
+            elapsedSeconds += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedSeconds / durationSeconds);
+
+            // 最初は速く、最後はゆっくり止まる (ease-out cubic)。
+            float eased = 1f - (1f - t) * (1f - t) * (1f - t);
+            _sinkTarget.localPosition = Vector3.LerpUnclamped(_sinkTargetOriginalLocalPosition, endLocalPosition, eased);
+            yield return null;
+        }
+
+        _sinkTarget.localPosition = endLocalPosition;
+        _sinkRoutine = null;
     }
 
     private void SetAlpha(float alpha)
