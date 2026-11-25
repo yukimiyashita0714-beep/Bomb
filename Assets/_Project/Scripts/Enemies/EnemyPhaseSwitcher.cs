@@ -1,4 +1,5 @@
 using Bomb.Core;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -26,6 +27,9 @@ public class EnemyPhaseSwitcher : MonoBehaviour
 
     [SerializeField, Tooltip("爆弾を付けたら出す敵の親。空なら名前 (AfterEnemies) で探す")]
     private Transform _afterRoot;
+
+    [SerializeField, Tooltip("アニメーション中かを調べる。空ならシーン上から探す")]
+    private AnimationManager _animationManager;
 
     // ==========================================
     // Private Fields

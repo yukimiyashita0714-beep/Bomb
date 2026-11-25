@@ -87,6 +87,10 @@ public class EnemyData : ScriptableObject
     [Range(0f, 3f)]
     private float _sinkSeconds = 0.8f;
 
+    [Header("Animation")]
+    [SerializeField, Tooltip("アニメーションの速度")]
+    private float _animationSpeed = 1f;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -144,4 +148,7 @@ public class EnemyData : ScriptableObject
 
     /// <summary>沈み切るまでの時間 (秒)。</summary>
     public float SinkSeconds => _sinkSeconds;
+
+    /// <summary>アニメーションの再生速度 </summary>
+    public float AnimationSpeed => _animationSpeed;
 }

@@ -28,6 +28,9 @@ public class CameraDirector : MonoBehaviour
 
     [SerializeField] private float _impulseMagnification;
 
+    [Header("Animation‚ð‹N“®‚³‚¹‚é—p")]
+    [SerializeField] private AnimationManager _animationManager;
+
     // ==========================================
     // Unity Messages
     // ==========================================
@@ -113,7 +116,7 @@ public class CameraDirector : MonoBehaviour
     }
 
     // ==========================================
-    // Animator Method
+    // Animator
     // ==========================================
 
     public void ChangeTimeScale(int timeScale)
