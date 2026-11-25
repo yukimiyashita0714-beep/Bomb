@@ -20301,6 +20301,7 @@ MonoBehaviour:
   _bombEvent: {fileID: 61647013}
   _beforeRoot: {fileID: 184796}
   _afterRoot: {fileID: 184785}
+  _animationManager: {fileID: 0}
 --- !u!4 &61647015
 Transform:
   m_ObjectHideFlags: 0
@@ -32021,6 +32022,7 @@ MonoBehaviour:
   - {fileID: 1812251823}
   - {fileID: 2135309096}
   - {fileID: 2111536169}
+  _bombEvent: {fileID: 61647013}
 --- !u!1 &2003235221
 GameObject:
   m_ObjectHideFlags: 0

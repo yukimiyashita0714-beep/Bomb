@@ -28,9 +28,6 @@ public class CameraDirector : MonoBehaviour
 
     [SerializeField] private float _impulseMagnification;
 
-    [Header("Animation‚ð‹N“®‚³‚¹‚é—p")]
-    [SerializeField] private AnimationManager _animationManager;
-
     // ==========================================
     // Unity Messages
     // ==========================================
