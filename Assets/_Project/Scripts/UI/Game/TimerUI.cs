@@ -87,8 +87,7 @@ public class TimerUI : MonoBehaviour
     {
         if (_bombEvent == null)
         {
-            Debug.LogWarning("BombEventをアタッチして～");
-            return;
+            _bombEvent = FindFirstObjectByType<BombEvent>();
         }
 
         _bombEvent.OnPlant += OnPlantBomb;
@@ -99,8 +98,7 @@ public class TimerUI : MonoBehaviour
     {
         if (_bombEvent == null)
         {
-            Debug.LogWarning("BombEventをアタッチして～");
-            return;
+            _bombEvent = FindFirstObjectByType<BombEvent>();
         }
 
         _bombEvent.OnPlant -= OnPlantBomb;
