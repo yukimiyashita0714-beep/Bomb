@@ -1,5 +1,6 @@
 using Bomb.Core;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -27,6 +28,26 @@ public class ResultUI : MonoBehaviour
     [SerializeField, Tooltip("リザルトのアニメーションの遅れ")]
     [Range(0, 5f)]
     private float _setAnimatorDelay = 1;
+
+    [SerializeField, Tooltip("サブ目標のテキスト")]
+    private TextMeshProUGUI _subTargetText;
+
+    [SerializeField, Tooltip("壊れた物の個数のテキスト")]
+    private TextMeshProUGUI _destroyBlockText;
+
+    // ==========================================
+    // Private Fields
+    // ==========================================
+
+    private const int _subTargetMaxCount = 3;
+
+    private int _subTargetCount = 0;
+
+    private int _destroyBlockCount = 0;
+
+    // ==========================================
+    // Private Fields
+    // ==========================================
 
     private void OnEnable()
     {
@@ -63,6 +84,24 @@ public class ResultUI : MonoBehaviour
     public void OnTitle()
     {
         LoadScene(_titleName, false);
+    }
+
+    public void AddSubTargetCount()
+    {
+        _subTargetCount++;
+        _subTargetText.text = $"SubTarget : {_subTargetCount} / {_subTargetMaxCount}";
+    }
+
+    public void AddDestroyBlockCount()
+    {
+        _destroyBlockCount++;
+        _destroyBlockText.text = $"Destroy Block Count : {_destroyBlockCount}";
+    }
+
+    public void RemoveDestroyBlockCount()
+    {
+        _destroyBlockCount--;
+        _destroyBlockText.text = $"Destroy Block Count : {_destroyBlockCount}";
     }
 
     // ==========================================

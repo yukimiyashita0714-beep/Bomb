@@ -15,6 +15,7 @@ namespace Bomb.Battle
 
         [SerializeField] private BombEvent _bombEvent;
         [SerializeField] private ExplosionArea _explosionArea;
+        [SerializeField] private ResultUI _resultUI;
 
         [SerializeField, Tooltip("–Ú“I‚Ì”š’e")]
         private bool _mainBomb;
@@ -79,6 +80,14 @@ namespace Bomb.Battle
         // ==========================================
         // Unity Events
         // ==========================================
+
+        private void Awake()
+        {
+            if (_resultUI == null)
+            {
+                _resultUI = FindFirstObjectByType<ResultUI>();
+            }
+        }
 
         private void OnEnable()
         {
@@ -282,6 +291,10 @@ namespace Bomb.Battle
                 _bombEvent.Play(BombEvent.EventKind.Plant);
 
                 SEEvents.PlayOneShot(SEType.Alarm);
+            }
+            else
+            {
+                _resultUI.AddSubTargetCount();
             }
         }
 

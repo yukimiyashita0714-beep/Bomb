@@ -22,6 +22,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     [SerializeField, Tooltip("壊れ方と復活の設定。全ブロックで同じアセットを共有する")]
     private DestructibleBlockData _data;
 
+    [SerializeField, Tooltip("壊れたときにリザルトに出す用")]
+    private ResultUI _resultUI;
+
     // ==========================================
     // Private Fields
     // ==========================================
@@ -136,6 +139,11 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         _rigidbody = GetComponent<Rigidbody>();
         _colliders = GetComponentsInChildren<Collider>(true);
         _layerTargets = GetComponentsInChildren<Transform>(true);
+
+        if (_resultUI == null)
+        {
+            _resultUI = FindFirstObjectByType<ResultUI>();
+        }
 
         if (_data == null)
         {
@@ -297,6 +305,8 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         {
             _rigidbody.isKinematic = true;
         }
+
+        _resultUI.AddDestroyBlockCount();
 
         StartSpin();
         StartCoroutine(BreakAndRespawnRoutine());
