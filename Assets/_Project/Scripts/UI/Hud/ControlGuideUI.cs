@@ -1,3 +1,4 @@
+using Bomb.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,6 +18,9 @@ public class ControlGuideUI : MonoBehaviour
     [Header("References")]
     [SerializeField, Tooltip("説明を表示するテキスト。未設定なら子から探す")]
     private TMP_Text _guideText;
+
+    [SerializeField, Tooltip("爆弾の設置、爆発のイベント、空ならシーンから探す")]
+    private BombEvent _bombEvent;
 
     // NOTE: <pos=> で2列目の書き出し位置をそろえている。空白で並べるとフォント幅でずれるため。
     [Header("Guides")]
@@ -75,6 +79,11 @@ public class ControlGuideUI : MonoBehaviour
             _guideText = GetComponentInChildren<TMP_Text>(true);
         }
 
+        if (_bombEvent == null)
+        {
+            _bombEvent = FindFirstObjectByType<BombEvent>();
+        }
+
         if (_guideText == null)
         {
             Debug.LogError($"[{nameof(ControlGuideUI)}] 説明を出すテキストが見つからないため動作できない。", this);
@@ -96,6 +105,7 @@ public class ControlGuideUI : MonoBehaviour
     private void OnEnable()
     {
         _switchAction?.Enable();
+        _bombEvent.OnExplosion += CloseDisplay;
     }
 
     private void Update()
@@ -109,6 +119,7 @@ public class ControlGuideUI : MonoBehaviour
     private void OnDisable()
     {
         _switchAction?.Disable();
+        _bombEvent.OnExplosion -= CloseDisplay;
     }
 
     private void OnDestroy()
@@ -131,5 +142,14 @@ public class ControlGuideUI : MonoBehaviour
     {
         _isGamepadGuide = isGamepad;
         _guideText.text = isGamepad ? _gamepadGuide : _keyboardGuide;
+    }
+
+    // ==========================================
+    // Private Methods
+    // ==========================================
+
+    private void CloseDisplay()
+    {
+        gameObject.SetActive(false);
     }
 }
