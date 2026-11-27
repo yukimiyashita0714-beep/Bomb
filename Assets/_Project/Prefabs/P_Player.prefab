@@ -119,6 +119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageReceiver
   _damageMultiplier: 1
+  _bombEvent: {fileID: 0}
 --- !u!114 &183784814352663294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,6 +135,7 @@ MonoBehaviour:
   _animator: {fileID: 687407131693497410}
   _controller: {fileID: 107390997530308502}
   _thrower: {fileID: 4007211199498807896}
+  _moveDampSeconds: 0.1
 --- !u!1 &2517524684850762829
 GameObject:
   m_ObjectHideFlags: 0

@@ -50,6 +50,28 @@ public class PlayerController : MonoBehaviour
     /// <summary>接地しているとき true。</summary>
     public bool IsGrounded => _characterController.isGrounded;
 
+    /// <summary>
+    /// 体から見た水平移動の向きと速さ。その向きの最高速を 1 とした割合で返す
+    /// (x: 右が +、左が -。y: 前が +、後ろが -)。前後左右の移動アニメーションのブレンドに使う。
+    /// </summary>
+    public Vector2 LocalMoveRatio
+    {
+        get
+        {
+            if (_data == null)
+            {
+                return Vector2.zero;
+            }
+
+            Vector3 local = transform.InverseTransformDirection(_horizontalVelocity);
+            float frontBackSpeed = local.z >= 0f ? _data.ForwardSpeed : _data.BackwardSpeed;
+            float x = _data.StrafeSpeed > 0f ? local.x / _data.StrafeSpeed : 0f;
+            float y = frontBackSpeed > 0f ? local.z / frontBackSpeed : 0f;
+
+            return Vector2.ClampMagnitude(new Vector2(x, y), 1f);
+        }
+    }
+
     // ==========================================
     // Unity Messages
     // ==========================================
