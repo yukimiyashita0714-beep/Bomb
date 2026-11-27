@@ -25,6 +25,13 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     [SerializeField, Tooltip("壊れたときにリザルトに出す用")]
     private ResultUI _resultUI;
 
+    [Header("Asset Map")]
+    [SerializeField, Tooltip("ON なら、普段 Kinematic のブロックでも壊れたら物理で飛んで落ちる破片になる。アセットのマップ用 (普段は凹型 MeshCollider で動かさないため Kinematic にしている)")]
+    private bool _isFallingAsDebris;
+
+    [SerializeField, Tooltip("物理で動く間だけ使う凸の当たり判定 (BoxCollider など)。設定すると、普段は無効にしておき、物理で動く間は凹型 MeshCollider の代わりにこれを使う。凹型 MeshCollider は Kinematic でない Rigidbody と一緒に使えないため")]
+    private Collider _debrisCollider;
+
     // ==========================================
     // Private Fields
     // ==========================================
@@ -85,6 +92,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     private Vector3 _spinAxis;
     private float _spinDegreesPerSecond;
     private bool _isSpinningByTransform;
+
+    /// <summary>物理で動いていて、凹型 MeshCollider の代わりに _debrisCollider を使っている間は true。</summary>
+    private bool _isUsingDebrisCollider;
 
     // ==========================================
     // Properties
@@ -153,6 +163,12 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         }
 
         SaveInitialState();
+
+        // 物理で動く間だけ使う当たり判定なので、最初は切っておく。
+        if (_debrisCollider != null)
+        {
+            _debrisCollider.enabled = false;
+        }
     }
 
     // ==========================================
@@ -206,7 +222,7 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
             return;
         }
 
-        _rigidbody.isKinematic = false;
+        MakeDynamic();
         _rigidbody.WakeUp();
         _rigidbody.AddForce(velocity, ForceMode.VelocityChange);
         _rigidbody.AddTorque(angularVelocity, ForceMode.VelocityChange);
@@ -304,6 +320,12 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         if (_rigidbody != null && !_data.IsMovingWhileFading)
         {
             _rigidbody.isKinematic = true;
+        }
+
+        // 普段は Kinematic のブロックでも、設定があれば爆風で飛ばされるように物理に任せる。
+        if (_isFallingAsDebris && _data.IsMovingWhileFading)
+        {
+            MakeDynamic();
         }
 
         _resultUI.AddDestroyBlockCount();
@@ -432,11 +454,31 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         float ratio = _debrisScaleRatio;
         _rigidbody.mass = Mathf.Max(MIN_DEBRIS_MASS, _initialMass * ratio * ratio * ratio);
 
-        if (!_wasKinematic)
+        if (!_wasKinematic || _isFallingAsDebris)
         {
-            _rigidbody.isKinematic = false;
+            MakeDynamic();
             _rigidbody.WakeUp();
         }
+    }
+
+    /// <summary>
+    /// 物理で動かす。凹型 MeshCollider は Kinematic でない Rigidbody と一緒に使えないので、
+    /// _debrisCollider があれば先にそちらへ切り替えてから Kinematic を外す。
+    /// </summary>
+    private void MakeDynamic()
+    {
+        if (_rigidbody == null)
+        {
+            return;
+        }
+
+        if (_debrisCollider != null && !_isUsingDebrisCollider)
+        {
+            _isUsingDebrisCollider = true;
+            SetCollidersEnabled(true);
+        }
+
+        _rigidbody.isKinematic = false;
     }
 
     /// <summary>破片を今の場所から元の位置・回転・大きさへ、滑らかに戻していく。</summary>
@@ -454,6 +496,8 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
             _rigidbody.isKinematic = true;
         }
 
+        // Kinematic に戻したので、元の凹型 MeshCollider に戻してよい (戻る間は判定ごと切っている)。
+        _isUsingDebrisCollider = false;
         SetCollidersEnabled(false);
 
         Vector3 startPosition = transform.localPosition;
@@ -574,7 +618,23 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     {
         for (int i = 0; i < _colliders.Length; i++)
         {
-            _colliders[i].enabled = isEnabled;
+            Collider target = _colliders[i];
+            bool isTargetEnabled = isEnabled;
+
+            // 物理で動く間は _debrisCollider だけ、止まっている間は凹型 MeshCollider だけを使う。
+            if (_debrisCollider != null)
+            {
+                if (target == _debrisCollider)
+                {
+                    isTargetEnabled = isEnabled && _isUsingDebrisCollider;
+                }
+                else if (target is MeshCollider meshCollider && !meshCollider.convex)
+                {
+                    isTargetEnabled = isEnabled && !_isUsingDebrisCollider;
+                }
+            }
+
+            target.enabled = isTargetEnabled;
         }
     }
 
