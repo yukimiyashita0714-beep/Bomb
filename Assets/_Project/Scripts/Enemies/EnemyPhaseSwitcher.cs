@@ -1,5 +1,6 @@
 using Bomb.Core;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -45,6 +46,9 @@ public class EnemyPhaseSwitcher : MonoBehaviour
 
     /// <summary>復活させる対象。開始時に一度だけ集めておく。</summary>
     private EnemyHealth[] _beforeEnemies = new EnemyHealth[0];
+
+    /// <summary>演出のあいだ隠した、Before / After の外に直接置かれた敵。演出が終わったら表示に戻す。</summary>
+    private readonly List<GameObject> _hiddenOtherEnemies = new List<GameObject>();
 
     private bool _isSubscribed;
     private bool _hasPlanted;
@@ -242,13 +246,15 @@ public class EnemyPhaseSwitcher : MonoBehaviour
         StartCoroutine(ShowEnemiesAfterAnimation());
     }
 
-    /// <summary>演出のあいだ Before の敵を隠しておき、演出が終わってから敵を出す。</summary>
+    /// <summary>演出のあいだ Before の敵とグループ外の敵を隠しておき、演出が終わってから敵を出す。</summary>
     private IEnumerator ShowEnemiesAfterAnimation()
     {
         if (_beforeRoot != null)
         {
             _beforeRoot.gameObject.SetActive(false);
         }
+
+        HideOtherEnemies();
 
         // 演出中は Time.timeScale が 0 になるので、実時間で待つ。
         // Animation はトリガーを引いた次のフレーム以降に true になるため、まず始まるのを待つ。
@@ -270,7 +276,48 @@ public class EnemyPhaseSwitcher : MonoBehaviour
             _beforeRoot.gameObject.SetActive(true);
         }
 
+        ShowOtherEnemies();
         ShowEnemies();
+    }
+
+    /// <summary>
+    /// Before / After の外に直接置かれた敵 (マップに固定配置した敵など) を隠す。
+    /// 演出用の敵 (AnimationManager の子) と、もともと非表示の敵には触らない。
+    /// </summary>
+    private void HideOtherEnemies()
+    {
+        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            Transform enemy = enemies[i].transform;
+
+            if (enemy.IsChildOf(_animationManager.transform)
+                || (_beforeRoot != null && enemy.IsChildOf(_beforeRoot))
+                || (_afterRoot != null && enemy.IsChildOf(_afterRoot)))
+            {
+                continue;
+            }
+
+            enemy.gameObject.SetActive(false);
+            _hiddenOtherEnemies.Add(enemy.gameObject);
+        }
+
+        Debug.Log($"[{nameof(EnemyPhaseSwitcher)}] 演出中: グループ外の敵を{_hiddenOtherEnemies.Count}体隠した。", this);
+    }
+
+    /// <summary>HideOtherEnemies で隠した敵を表示に戻す。</summary>
+    private void ShowOtherEnemies()
+    {
+        for (int i = 0; i < _hiddenOtherEnemies.Count; i++)
+        {
+            if (_hiddenOtherEnemies[i] != null)
+            {
+                _hiddenOtherEnemies[i].SetActive(true);
+            }
+        }
+
+        _hiddenOtherEnemies.Clear();
     }
 
     /// <summary>倒れている Before の敵を復活させ、After の敵を出す。</summary>
