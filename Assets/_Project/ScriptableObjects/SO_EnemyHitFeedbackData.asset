@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: decdfc0f6a273494d9d1637831ba6947, type: 3}
+  m_Name: SO_EnemyHitFeedbackData
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHitFeedbackData
+  _hitSe: 7
+  _killSe: 8
+  _seVolume: 1
+  _damagedEffectPrefab: {fileID: 5974590704319705867, guid: dafea56d1b47ec844a1ec715ba1f0329, type: 3}
+  _damagedEffectRemainingHitCount: 1
+  _damagedEffectHeightRatio: 0.8
+  _damagedEffectScale: 1
+  _damagedEffectFadeOutSeconds: 2
+  _hitRumbleLow: 0.15
+  _hitRumbleHigh: 0.35
+  _hitRumbleSeconds: 0.08
+  _killRumbleLow: 0.45
+  _killRumbleHigh: 0.7
+  _killRumbleSeconds: 0.18
