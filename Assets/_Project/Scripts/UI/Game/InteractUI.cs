@@ -23,7 +23,7 @@ namespace Bomb.UI
 
         private List<InteractKind> _interactKindList;
 
-        private bool _controllerDevice = false;
+        private InputDeviceKind _deviceKind = InputDeviceKind.KeyboardMouse;
 
         // ==========================================
         // Unity Messages
@@ -39,8 +39,8 @@ namespace Bomb.UI
             _interactPlayerController.OnInteractEnable += AddInteract;
             _interactPlayerController.OnInteractDisable += RemoveInteract;
 
-            _controllerDevice = InputDeviceWatcher.IsGamepad;
-            InputDeviceWatcher.OnDeviceChanged += HandleDeviceChanged;
+            _deviceKind = InputDeviceWatcher.CurrentKind;
+            InputDeviceWatcher.OnDeviceKindChanged += HandleDeviceChanged;
             InteractListUpdate();
         }
 
@@ -49,7 +49,7 @@ namespace Bomb.UI
             _interactPlayerController.OnInteractEnable -= AddInteract;
             _interactPlayerController.OnInteractDisable -= RemoveInteract;
 
-            InputDeviceWatcher.OnDeviceChanged -= HandleDeviceChanged;
+            InputDeviceWatcher.OnDeviceKindChanged -= HandleDeviceChanged;
         }
 
         // ==========================================
@@ -57,7 +57,7 @@ namespace Bomb.UI
         // ==========================================
 
         /// <summary>
-        /// ƒCƒ“ƒ^ƒ‰ƒNƒg‚ğ‘‚â‚·
+        /// ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã‚’å¢—ã‚„ã™
         /// </summary>
         /// <param name="interactKind"></param>
         public void AddInteract(InteractKind interactKind)
@@ -67,7 +67,7 @@ namespace Bomb.UI
         }
 
         /// <summary>
-        /// ƒCƒ“ƒ^ƒ‰ƒNƒg‚ğŒ¸‚ç‚·
+        /// ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã‚’æ¸›ã‚‰ã™
         /// </summary>
         public void RemoveInteract()
         {
@@ -79,14 +79,14 @@ namespace Bomb.UI
         // Private Methods
         // ==========================================
 
-        private void HandleDeviceChanged(bool device)
+        private void HandleDeviceChanged(InputDeviceKind kind)
         {
-            _controllerDevice = device;
+            _deviceKind = kind;
             InteractListUpdate();
         }
 
         /// <summary>
-        /// ƒCƒ“ƒ^ƒ‰ƒNƒg‚Ì•\¦XV
+        /// ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã®è¡¨ç¤ºæ›´æ–°
         /// </summary>
         private void InteractListUpdate()
         {
@@ -99,9 +99,9 @@ namespace Bomb.UI
                 return;
             }
 
-            //•¡”‘I‘ğ‚Ìê‡‚ğ‘z’è‚µ‚Äì‚ë‚¤‚Æ‚µ‚½‚ªA
-            //ˆê’U•Û—¯
-            //‚±‚ÌˆÄ‚ª‚±‚Ì‚Ü‚Ü’Ê‚èA•¡”g—p‚µ‚È‚¯‚ê‚Îs‚¯‚È‚¢ê‡ì‚è’¼‚·
+            //è¤‡æ•°é¸æŠã®å ´åˆã‚’æƒ³å®šã—ã¦ä½œã‚ã†ã¨ã—ãŸãŒã€
+            //ä¸€æ—¦ä¿ç•™
+            //ã“ã®æ¡ˆãŒã“ã®ã¾ã¾é€šã‚Šã€è¤‡æ•°ä½¿ç”¨ã—ãªã‘ã‚Œã°è¡Œã‘ãªã„å ´åˆä½œã‚Šç›´ã™
             foreach (var interact in _interactKindList)
             {
                 switch (interact)
@@ -119,16 +119,16 @@ namespace Bomb.UI
                         break;
                 }
 
-                if (!_controllerDevice)
+                // 1ã¤ç›®ã¯ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆã®ãƒœã‚¿ãƒ³ã€‚æ–‡å­—ã¯ ButtonLabels ã‹ã‚‰å¼•ã (ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ E / Xbox X / PS â–¡)ã€‚
+                if (count == 0)
                 {
+                    text += "\n" + ButtonLabels.Get(ButtonAction.Interact, _deviceKind) + " button";
+                }
+                else if (_deviceKind == InputDeviceKind.KeyboardMouse)
+                {
+                    // NOTE: 2ã¤ç›®ä»¥é™ã¯è¤‡æ•°ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆç”¨ã®ä»®ç½®ã (ä¿ç•™ä¸­)ã€‚ä»Šã¯1ã¤ã—ã‹å‡ºãªã„ã®ã§ä½¿ã‚ã‚Œãªã„ã€‚
                     switch (count)
                     {
-                        case 0:
-
-                            text += "\nE button";
-
-                            break;
-
                         case 1:
 
                             text += "\nQ button";
@@ -142,24 +142,13 @@ namespace Bomb.UI
                             break;
                     }
                 }
-                else
-                {
-                    switch (count)
-                    {
-                        case 0:
-
-                            text += "\nY Button";
-
-                            break;
-                    }
-                }
 
                 text += "\n\n";
 
                 count++;
             }
 
-            //XV
+            //æ›´æ–°
             _interactText.text = text;
         }
     }
