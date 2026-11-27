@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 /// マップに置いた敵を、爆弾を付ける前と後で切り替える。
 /// 「BeforeEnemies」の下の敵は最初からいて、爆弾を付けた瞬間 (BombEvent.OnPlant) に倒れている敵だけ復活する。
 /// 「AfterEnemies」の下の敵は最初は隠しておき、爆弾を付けた瞬間に出す。
+/// 爆弾を付けたときの演出 (AnimationManager.Animation が true の間) は、Before / After の敵をどちらも隠しておき、演出が終わってから出す。
 /// 生きている敵には触らず、作り直しもしないので、Instantiate / Destroy は起きない。
 /// シーンに付け忘れても、BeforeEnemies / AfterEnemies があれば実行時に自動で付ける。
 /// </summary>
@@ -27,6 +28,13 @@ public class EnemyPhaseSwitcher : MonoBehaviour
 
     [SerializeField, Tooltip("爆弾を付けたら出す敵の親。空なら名前 (AfterEnemies) で探す")]
     private Transform _afterRoot;
+
+    [SerializeField, Tooltip("爆弾を付けたときの演出。演出中は敵を隠す。空ならシーンから探し、無ければすぐ敵を出す")]
+    private AnimationManager _animationManager;
+
+    [Header("Animation")]
+    [SerializeField, Tooltip("演出が始まる (Animation が true になる) のを待つ最大秒数 (実時間)")]
+    private float _animationStartTimeout = 1f;
 
     // ==========================================
     // Private Fields
@@ -177,6 +185,11 @@ public class EnemyPhaseSwitcher : MonoBehaviour
             _bombEvent = FindAnyObjectByType<BombEvent>(FindObjectsInactive.Include);
         }
 
+        if (_animationManager == null)
+        {
+            _animationManager = FindAnyObjectByType<AnimationManager>(FindObjectsInactive.Include);
+        }
+
         if (_beforeRoot == null)
         {
             _beforeRoot = FindRootInScene(gameObject.scene, BEFORE_ROOT_NAME);
@@ -220,6 +233,49 @@ public class EnemyPhaseSwitcher : MonoBehaviour
 
         _hasPlanted = true;
 
+        if (_animationManager == null)
+        {
+            ShowEnemies();
+            return;
+        }
+
+        StartCoroutine(ShowEnemiesAfterAnimation());
+    }
+
+    /// <summary>演出のあいだ Before の敵を隠しておき、演出が終わってから敵を出す。</summary>
+    private IEnumerator ShowEnemiesAfterAnimation()
+    {
+        if (_beforeRoot != null)
+        {
+            _beforeRoot.gameObject.SetActive(false);
+        }
+
+        // 演出中は Time.timeScale が 0 になるので、実時間で待つ。
+        // Animation はトリガーを引いた次のフレーム以降に true になるため、まず始まるのを待つ。
+        float startTime = Time.realtimeSinceStartup;
+
+        while (!_animationManager.Animation && Time.realtimeSinceStartup - startTime < _animationStartTimeout)
+        {
+            yield return null;
+        }
+
+        while (_animationManager.Animation)
+        {
+            yield return null;
+        }
+
+        // EnemyTurret などは有効な間だけ復活を受け取るので、先に表示してから復活させる。
+        if (_beforeRoot != null)
+        {
+            _beforeRoot.gameObject.SetActive(true);
+        }
+
+        ShowEnemies();
+    }
+
+    /// <summary>倒れている Before の敵を復活させ、After の敵を出す。</summary>
+    private void ShowEnemies()
+    {
         int revivedCount = 0;
 
         for (int i = 0; i < _beforeEnemies.Length; i++)

@@ -7,12 +7,16 @@ using UnityEngine;
 /// <summary>
 /// プレイヤーのアニメーションを、メニュー1回でプロジェクトに組み込むエディタ拡張。
 ///
-///   1. Models/Player の fbx を Generic で取り込み、待機の fbx から Avatar を作って他の fbx に使い回す
-///   2. 待機・走り・構えのクリップをループにし、投げは1回だけ流す
-///   3. AC_Player (Idle / Run / Kamae / Throw) を作る
+///   1. Models/Player の fbx を Generic で取り込み、モデル (SK_Player_Idle) から Avatar を作って他の fbx に使い回す
+///   2. 移動・構えのクリップをループにし、投げは1回だけ流す
+///   3. AC_Player を作り直す
+///      ・Locomotion : MoveX / MoveZ の 2D ブレンド (待機 / 前 / 後ろ / 左 / 右)
+///      ・Aim        : 構えたままの 2D ブレンド (構え / 構え前 / 構え後ろ / 構え左 / 構え右)
+///      ・Throw      : 投げを1回流して Locomotion へ戻る
 ///   4. P_Player の仮モデル (testchara) を止め、新しいモデルを置いて AC_Player と PlayerAnimation をつなぐ
 ///
-/// すでにある物は作り直さないので、何度実行しても同じ結果になる。
+/// 無いクリップは飛ばして結果に書くので、fbx が揃う前でも実行できる。後から fbx を足したらもう一度実行すればよい。
+/// AC_Player は毎回中身を作り直す (アセットは残すので、P_Player などからの参照は切れない)。
 /// </summary>
 public static class PlayerAnimationSetupMenu
 {
@@ -21,12 +25,31 @@ public static class PlayerAnimationSetupMenu
     // ==========================================
 
     private const string MENU_PATH = "Bomb/Setup/Player Animation";
+    private const string DIALOG_TITLE = "Player Animation Setup";
 
     private const string MODEL_FOLDER = "Assets/_Project/Models/Player";
+
+    /// <summary>見た目のモデル。Avatar もここから作る。待機のクリップが別に無ければ、これのクリップを待機に使う。</summary>
     private const string IDLE_PATH = MODEL_FOLDER + "/SK_Player_Idle.fbx";
+
+    /// <summary>待機だけの fbx (taiki)。あればモデルのクリップの代わりに待機に使う。</summary>
+    private const string IDLE_CLIP_PATH = MODEL_FOLDER + "/A_Player_Idle.fbx";
+
     private const string RUN_PATH = MODEL_FOLDER + "/A_Player_Run.fbx";
-    private const string THROW_PATH = MODEL_FOLDER + "/A_Player_Throw.fbx";
+    private const string BACK_PATH = MODEL_FOLDER + "/A_Player_Back.fbx";
+    private const string LEFT_PATH = MODEL_FOLDER + "/A_Player_Left.fbx";
+    private const string RIGHT_PATH = MODEL_FOLDER + "/A_Player_Right.fbx";
+
     private const string KAMAE_PATH = MODEL_FOLDER + "/A_Player_Kamae.fbx";
+
+    /// <summary>構えたまま前に進む fbx。まだ無いので、無ければ前も構え (Kamae) で埋める。</summary>
+    private const string KAMAE_FRONT_PATH = MODEL_FOLDER + "/A_Player_KamaeFront.fbx";
+
+    private const string KAMAE_BACK_PATH = MODEL_FOLDER + "/A_Player_KamaeBack.fbx";
+    private const string KAMAE_LEFT_PATH = MODEL_FOLDER + "/A_Player_KamaeLeft.fbx";
+    private const string KAMAE_RIGHT_PATH = MODEL_FOLDER + "/A_Player_KamaeRight.fbx";
+
+    private const string THROW_PATH = MODEL_FOLDER + "/A_Player_Throw.fbx";
 
     private const string CONTROLLER_FOLDER = "Assets/_Project/Animations/Player";
     private const string CONTROLLER_PATH = CONTROLLER_FOLDER + "/AC_Player.controller";
@@ -37,26 +60,23 @@ public static class PlayerAnimationSetupMenu
     private const string NEW_MODEL_NAME = "SK_Player";
 
     private const string SPEED_PARAMETER = "Speed";
+    private const string MOVE_X_PARAMETER = "MoveX";
+    private const string MOVE_Z_PARAMETER = "MoveZ";
     private const string IS_AIMING_PARAMETER = "IsAiming";
     private const string THROW_PARAMETER = "Throw";
 
-    /// <summary>投げのクリップをどこまで流したら待機へ戻り始めるか (0〜1)。</summary>
-    private const float THROW_EXIT_TIME = 0.85f;
+    private const string LOCOMOTION_STATE_NAME = "Locomotion";
+    private const string AIM_STATE_NAME = "Aim";
+    private const string THROW_STATE_NAME = "Throw";
 
-    /// <summary>これより速ければ走りにする (m/s)。</summary>
-    private const float RUN_SPEED_THRESHOLD = 0.1f;
+    /// <summary>投げのクリップをどこまで流したら移動へ戻り始めるか (0〜1)。</summary>
+    private const float THROW_EXIT_TIME = 0.85f;
 
     /// <summary>アニメーションを切り替えるときに重ねる時間 (秒)。</summary>
     private const float TRANSITION_SECONDS = 0.05f;
 
-    /// <summary>待機から走りへ切り替えるときに重ねる時間 (秒)。短いと動き出しがカクッとする。</summary>
-    private const float START_RUN_TRANSITION_SECONDS = 0.2f;
-
-    /// <summary>走りから待機へ切り替えるときに重ねる時間 (秒)。</summary>
-    private const float STOP_RUN_TRANSITION_SECONDS = 0.15f;
-
-    private const string IDLE_STATE_NAME = "Idle";
-    private const string RUN_STATE_NAME = "Run";
+    /// <summary>構えに入る・抜けるときに重ねる時間 (秒)。</summary>
+    private const float AIM_TRANSITION_SECONDS = 0.1f;
 
     /// <summary>足元を決める部品の名前に含まれる言葉。</summary>
     private const string FOOT_PART_KEYWORD = "boot";
@@ -75,34 +95,46 @@ public static class PlayerAnimationSetupMenu
 
         if (AssetDatabase.LoadAssetAtPath<GameObject>(IDLE_PATH) == null)
         {
-            EditorUtility.DisplayDialog("Player Animation Setup", $"{IDLE_PATH} が無い。", "OK");
+            EditorUtility.DisplayDialog(DIALOG_TITLE, $"{IDLE_PATH} が無い。", "OK");
             return;
         }
 
-        // 待機の fbx を先に取り込み、その Avatar を他の fbx に渡す。
+        // モデルの fbx を先に取り込み、その Avatar を他の fbx に渡す。
         Avatar avatar = ImportModel(IDLE_PATH, null, true, report);
-        ImportModel(RUN_PATH, avatar, true, report);
-        ImportModel(KAMAE_PATH, avatar, true, report);
+
+        string[] loopPaths =
+        {
+            IDLE_CLIP_PATH, RUN_PATH, BACK_PATH, LEFT_PATH, RIGHT_PATH,
+            KAMAE_PATH, KAMAE_FRONT_PATH, KAMAE_BACK_PATH, KAMAE_LEFT_PATH, KAMAE_RIGHT_PATH,
+        };
+
+        foreach (string path in loopPaths)
+        {
+            ImportModel(path, avatar, true, report);
+        }
 
         // 投げは1回だけ流すのでループしない。
         ImportModel(THROW_PATH, avatar, false, report);
 
-        AnimatorController controller = LoadOrCreateController(report);
+        AnimatorController controller = RebuildController(report);
         SetupPrefab(controller, report);
 
         AssetDatabase.SaveAssets();
-        EditorUtility.DisplayDialog("Player Animation Setup", report.ToString(), "OK");
+
+        string message = report.ToString();
+        Debug.Log($"[{nameof(PlayerAnimationSetupMenu)}]\n{message}");
+        EditorUtility.DisplayDialog(DIALOG_TITLE, message, "OK");
     }
 
     /// <summary>
     /// fbx を Generic で取り込み、この fbx の Avatar を返す。
-    /// sourceAvatar が null ならこの fbx から Avatar を作る。
+    /// sourceAvatar が null ならこの fbx から Avatar を作る。fbx が無ければ何もせず null を返す。
     /// </summary>
     private static Avatar ImportModel(string path, Avatar sourceAvatar, bool isLoop, StringBuilder report)
     {
         if (AssetImporter.GetAtPath(path) is not ModelImporter importer)
         {
-            report.AppendLine($"・{path} が無いので飛ばした。");
+            report.AppendLine($"・{System.IO.Path.GetFileName(path)} が無いので飛ばした。");
             return null;
         }
 
@@ -149,6 +181,7 @@ public static class PlayerAnimationSetupMenu
         return AssetDatabase.LoadAssetAtPath<Avatar>(path);
     }
 
+    /// <summary>fbx の中のクリップを返す。fbx が無ければ null。</summary>
     private static AnimationClip LoadClip(string path)
     {
         Object[] assets = AssetDatabase.LoadAllAssetsAtPath(path);
@@ -165,133 +198,172 @@ public static class PlayerAnimationSetupMenu
         return null;
     }
 
-    private static AnimatorController LoadOrCreateController(StringBuilder report)
+    /// <summary>先に見つかったほうのクリップを返す。待機は taiki が無ければモデルのクリップを使う、のように使う。</summary>
+    private static AnimationClip LoadClip(string path, string fallbackPath)
     {
-        AnimatorController existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(CONTROLLER_PATH);
+        AnimationClip clip = LoadClip(path);
+        return clip != null ? clip : LoadClip(fallbackPath);
+    }
 
-        if (existing != null && HasParameter(existing, THROW_PARAMETER))
-        {
-            // 作り直さずに、切り替えの時間だけ今の設定にそろえる。
-            UpdateTransitionSeconds(existing);
-            report.AppendLine($"・AC_Player はすでにある。切り替えの時間を {TRANSITION_SECONDS} 秒にそろえた。");
-            return existing;
-        }
-
-        // 投げが入る前に作った AC_Player は、作り直して投げを足す。
-        if (existing != null)
-        {
-            AssetDatabase.DeleteAsset(CONTROLLER_PATH);
-            report.AppendLine("・投げの無い古い AC_Player を作り直す。");
-        }
-
+    /// <summary>
+    /// AC_Player の中身を作り直す。アセット自体は消さないので、P_Player などからの参照はそのまま。
+    /// </summary>
+    private static AnimatorController RebuildController(StringBuilder report)
+    {
         if (!AssetDatabase.IsValidFolder(CONTROLLER_FOLDER))
         {
             AssetDatabase.CreateFolder("Assets/_Project/Animations", "Player");
         }
 
-        AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(CONTROLLER_PATH);
+        AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(CONTROLLER_PATH);
+
+        if (controller == null)
+        {
+            controller = AnimatorController.CreateAnimatorControllerAtPath(CONTROLLER_PATH);
+        }
+
+        ClearController(controller);
+
         controller.AddParameter(SPEED_PARAMETER, AnimatorControllerParameterType.Float);
+        controller.AddParameter(MOVE_X_PARAMETER, AnimatorControllerParameterType.Float);
+        controller.AddParameter(MOVE_Z_PARAMETER, AnimatorControllerParameterType.Float);
         controller.AddParameter(IS_AIMING_PARAMETER, AnimatorControllerParameterType.Bool);
         controller.AddParameter(THROW_PARAMETER, AnimatorControllerParameterType.Trigger);
 
         AnimatorStateMachine machine = controller.layers[0].stateMachine;
 
-        AnimatorState idle = machine.AddState(IDLE_STATE_NAME, new Vector3(300f, 0f, 0f));
-        idle.motion = LoadClip(IDLE_PATH);
+        AnimationClip idleClip = LoadClip(IDLE_CLIP_PATH, IDLE_PATH);
+        AnimationClip kamaeClip = LoadClip(KAMAE_PATH);
 
-        AnimatorState run = machine.AddState(RUN_STATE_NAME, new Vector3(300f, 120f, 0f));
-        run.motion = LoadClip(RUN_PATH);
+        // 体は常にカメラを向いているので、入力の向き = 体から見た向き。前後左右のクリップを 2D で混ぜる。
+        AnimatorState locomotion = controller.CreateBlendTreeInController(LOCOMOTION_STATE_NAME, out BlendTree locomotionTree, 0);
+        SetupBlendTree(locomotionTree, report, LOCOMOTION_STATE_NAME,
+            (idleClip, Vector2.zero, "待機"),
+            (LoadClip(RUN_PATH), Vector2.up, "前"),
+            (LoadClip(BACK_PATH), Vector2.down, "後ろ"),
+            (LoadClip(LEFT_PATH), Vector2.left, "左"),
+            (LoadClip(RIGHT_PATH), Vector2.right, "右"));
 
-        AnimatorState kamae = machine.AddState("Kamae", new Vector3(600f, 0f, 0f));
-        kamae.motion = LoadClip(KAMAE_PATH);
+        // 構えたまま前に進むクリップが無いうちは、前も構えの姿勢で埋める (止まったまま滑るように見える)。
+        AnimationClip kamaeFrontClip = LoadClip(KAMAE_FRONT_PATH, KAMAE_PATH);
 
-        AnimatorState throwState = machine.AddState("Throw", new Vector3(600f, 120f, 0f));
+        AnimatorState aim = controller.CreateBlendTreeInController(AIM_STATE_NAME, out BlendTree aimTree, 0);
+        SetupBlendTree(aimTree, report, AIM_STATE_NAME,
+            (kamaeClip, Vector2.zero, "構え"),
+            (kamaeFrontClip, Vector2.up, "構え前"),
+            (LoadClip(KAMAE_BACK_PATH), Vector2.down, "構え後ろ"),
+            (LoadClip(KAMAE_LEFT_PATH), Vector2.left, "構え左"),
+            (LoadClip(KAMAE_RIGHT_PATH), Vector2.right, "構え右"));
+
+        AnimatorState throwState = machine.AddState(THROW_STATE_NAME);
         throwState.motion = LoadClip(THROW_PATH);
 
-        machine.defaultState = idle;
+        PlaceState(machine, locomotion, new Vector3(300f, 0f, 0f));
+        PlaceState(machine, aim, new Vector3(600f, 0f, 0f));
+        PlaceState(machine, throwState, new Vector3(450f, 150f, 0f));
+        machine.defaultState = locomotion;
 
-        AnimatorStateTransition idleToRun = AddTransition(idle, run);
-        idleToRun.duration = START_RUN_TRANSITION_SECONDS;
-        idleToRun.AddCondition(AnimatorConditionMode.Greater, RUN_SPEED_THRESHOLD, SPEED_PARAMETER);
+        // 歩いていても止まっていても、チャージを始めたら構える。
+        AnimatorStateTransition toAim = AddTransition(locomotion, aim);
+        toAim.duration = AIM_TRANSITION_SECONDS;
+        toAim.AddCondition(AnimatorConditionMode.If, 0f, IS_AIMING_PARAMETER);
 
-        AnimatorStateTransition runToIdle = AddTransition(run, idle);
-        runToIdle.duration = STOP_RUN_TRANSITION_SECONDS;
-        runToIdle.AddCondition(AnimatorConditionMode.Less, RUN_SPEED_THRESHOLD, SPEED_PARAMETER);
-
-        // 走っていても待機していても、チャージを始めたら構える。
-        AddTransition(idle, kamae).AddCondition(AnimatorConditionMode.If, 0f, IS_AIMING_PARAMETER);
-        AddTransition(run, kamae).AddCondition(AnimatorConditionMode.If, 0f, IS_AIMING_PARAMETER);
-
-        AnimatorStateTransition kamaeToIdle = AddTransition(kamae, idle);
-        kamaeToIdle.AddCondition(AnimatorConditionMode.IfNot, 0f, IS_AIMING_PARAMETER);
+        AnimatorStateTransition toLocomotion = AddTransition(aim, locomotion);
+        toLocomotion.duration = AIM_TRANSITION_SECONDS;
+        toLocomotion.AddCondition(AnimatorConditionMode.IfNot, 0f, IS_AIMING_PARAMETER);
 
         // どこからでも投げた瞬間に投げを流す。投げの途中で次を投げたら頭から流し直す。
         AnimatorStateTransition toThrow = machine.AddAnyStateTransition(throwState);
         SetupTransition(toThrow);
-        toThrow.duration = 0.05f;
         toThrow.canTransitionToSelf = true;
         toThrow.AddCondition(AnimatorConditionMode.If, 0f, THROW_PARAMETER);
 
-        // 投げ終わったら待機へ。走っていれば待機からすぐ走りに移る。
-        AnimatorStateTransition throwToIdle = AddTransition(throwState, idle);
-        throwToIdle.hasExitTime = true;
-        throwToIdle.exitTime = THROW_EXIT_TIME;
+        // 投げ終わったら移動へ。まだチャージしていれば、移動からすぐ構えに移る。
+        AnimatorStateTransition throwToLocomotion = AddTransition(throwState, locomotion);
+        throwToLocomotion.hasExitTime = true;
+        throwToLocomotion.exitTime = THROW_EXIT_TIME;
 
         EditorUtility.SetDirty(controller);
-        report.AppendLine("・AC_Player を作った (Idle / Run / Kamae / Throw)。");
+
+        string throwText = throwState.motion != null ? "投げ" : "投げ (クリップ無し)";
+        report.AppendLine($"・AC_Player を作り直した ({LOCOMOTION_STATE_NAME} / {AIM_STATE_NAME} / {throwText})。");
         return controller;
     }
 
-    /// <summary>入力で切り替わる遷移 (Exit Time を使わないもの) の時間を TRANSITION_SECONDS にする。</summary>
-    private static void UpdateTransitionSeconds(AnimatorController controller)
+    /// <summary>パラメータ・ステート・遷移と、前に作ったブレンドツリーを全部消す。</summary>
+    private static void ClearController(AnimatorController controller)
     {
+        while (controller.parameters.Length > 0)
+        {
+            controller.RemoveParameter(0);
+        }
+
         AnimatorStateMachine machine = controller.layers[0].stateMachine;
+
+        foreach (AnimatorStateTransition transition in machine.anyStateTransitions)
+        {
+            machine.RemoveAnyStateTransition(transition);
+        }
 
         foreach (ChildAnimatorState child in machine.states)
         {
-            foreach (AnimatorStateTransition transition in child.state.transitions)
+            machine.RemoveState(child.state);
+        }
+
+        // ブレンドツリーはステートを消しても AC_Player の中に残るので、別に消す。
+        foreach (Object asset in AssetDatabase.LoadAllAssetsAtPath(CONTROLLER_PATH))
+        {
+            if (asset is BlendTree)
             {
-                if (!transition.hasExitTime)
-                {
-                    transition.duration = GetTransitionSeconds(child.state, transition);
-                }
+                Object.DestroyImmediate(asset, true);
+            }
+        }
+    }
+
+    /// <summary>MoveX / MoveZ で混ぜる 2D ブレンドツリーにクリップを並べる。無いクリップは飛ばして結果に書く。</summary>
+    private static void SetupBlendTree(
+        BlendTree tree,
+        StringBuilder report,
+        string stateName,
+        params (AnimationClip Clip, Vector2 Position, string Label)[] motions)
+    {
+        tree.blendType = BlendTreeType.FreeformDirectional2D;
+        tree.blendParameter = MOVE_X_PARAMETER;
+        tree.blendParameterY = MOVE_Z_PARAMETER;
+
+        List<string> missing = new List<string>();
+
+        foreach ((AnimationClip clip, Vector2 position, string label) in motions)
+        {
+            if (clip == null)
+            {
+                missing.Add(label);
+                continue;
+            }
+
+            tree.AddChild(clip, position);
+        }
+
+        if (missing.Count > 0)
+        {
+            report.AppendLine($"・{stateName} のクリップが足りない: {string.Join("、", missing)}");
+        }
+    }
+
+    /// <summary>ステートの置き場所を、Animator ウィンドウで見やすい位置にそろえる。</summary>
+    private static void PlaceState(AnimatorStateMachine machine, AnimatorState state, Vector3 position)
+    {
+        ChildAnimatorState[] states = machine.states;
+
+        for (int i = 0; i < states.Length; i++)
+        {
+            if (states[i].state == state)
+            {
+                states[i].position = position;
             }
         }
 
-        EditorUtility.SetDirty(controller);
-    }
-
-    /// <summary>待機と走りの間だけ長めに重ね、それ以外 (構え・投げ) は入力にすぐ反応させる。</summary>
-    private static float GetTransitionSeconds(AnimatorState from, AnimatorStateTransition transition)
-    {
-        string toName = transition.destinationState != null ? transition.destinationState.name : string.Empty;
-
-        if (from.name == IDLE_STATE_NAME && toName == RUN_STATE_NAME)
-        {
-            return START_RUN_TRANSITION_SECONDS;
-        }
-
-        if (from.name == RUN_STATE_NAME && toName == IDLE_STATE_NAME)
-        {
-            return STOP_RUN_TRANSITION_SECONDS;
-        }
-
-        return TRANSITION_SECONDS;
-    }
-
-    private static bool HasParameter(AnimatorController controller, string parameterName)
-    {
-        AnimatorControllerParameter[] parameters = controller.parameters;
-
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            if (parameters[i].name == parameterName)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        machine.states = states;
     }
 
     private static AnimatorStateTransition AddTransition(AnimatorState from, AnimatorState to)
@@ -308,6 +380,7 @@ public static class PlayerAnimationSetupMenu
         transition.duration = TRANSITION_SECONDS;
         transition.hasFixedDuration = true;
     }
+
 
     private static void SetupPrefab(AnimatorController controller, StringBuilder report)
     {
