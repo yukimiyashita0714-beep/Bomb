@@ -32,6 +32,8 @@ public class MarkerObjectUI : MonoBehaviour
     // Properties
     // ==========================================
 
+    public Transform TargetObject => _targetObject;
+
     // ==========================================
     // Events
     // ==========================================

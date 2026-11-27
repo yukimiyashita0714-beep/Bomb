@@ -67,6 +67,8 @@ namespace Bomb.Battle
 
         private bool _isBombPlanted = false;
 
+        private ObjectiveMarkerUI _objectiveMarkerUI;
+
         // ==========================================
         // Properties
         // ==========================================
@@ -86,6 +88,11 @@ namespace Bomb.Battle
             if (_resultUI == null)
             {
                 _resultUI = FindFirstObjectByType<ResultUI>();
+            }
+
+            if (_objectiveMarkerUI == null)
+            {
+                _objectiveMarkerUI = FindFirstObjectByType<ObjectiveMarkerUI>();
             }
         }
 
@@ -278,6 +285,19 @@ namespace Bomb.Battle
             _explosionArea.AddBombPlantCount();
 
             SEEvents.PlayOneShot(SEType.MainTargetBombPlant, transform.position);
+
+            // マーカーを消す
+            if (_objectiveMarkerUI != null)
+            {
+                if (_mainBomb)
+                {
+                    _objectiveMarkerUI.HideAllMarkers();      // メインに置いたら全部消す
+                }
+                else
+                {
+                    _objectiveMarkerUI.HideMarker(transform); // サブは置いた目標だけ消す
+                }
+            }
 
             //もしメイン爆弾なら設置した後のフェーズに入る
             if (_mainBomb)

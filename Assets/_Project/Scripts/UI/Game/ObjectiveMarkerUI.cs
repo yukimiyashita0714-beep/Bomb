@@ -36,6 +36,35 @@ public class ObjectiveMarkerUI : MonoBehaviour
     // Public Methods
     // ==========================================
 
+    /// <summary>
+    /// 指定したターゲットのマーカーだけ非表示にする
+    /// </summary>
+    public void HideMarker(Transform target)
+    {
+        foreach (var marker in _markerList)
+        {
+            if (marker == null) continue;
+
+            var ui = marker.GetComponent<MarkerObjectUI>();
+            if (ui.TargetObject == target)
+            {
+                marker.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 全てのマーカーを非表示にする
+    /// </summary>
+    public void HideAllMarkers()
+    {
+        foreach (var marker in _markerList)
+        {
+            if (marker == null) continue;
+            marker.gameObject.SetActive(false);
+        }
+    }
+
     // ==========================================
     // Private Methods
     // ==========================================
