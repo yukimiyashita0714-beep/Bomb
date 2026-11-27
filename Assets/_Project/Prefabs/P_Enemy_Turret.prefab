@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8976070212187282750}
   - component: {fileID: 5076082982715323692}
   - component: {fileID: 1318032538097822228}
+  - component: {fileID: 1574334314644868740}
   m_Layer: 9
   m_Name: P_Enemy_Turret
   m_TagString: Untagged
@@ -136,6 +137,19 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: aa10961d098e4524381ac73ed8dccf3c, type: 2}
   _animator: {fileID: 4271471382499118943}
   _health: {fileID: 2554839336800946344}
+--- !u!114 &1574334314644868740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3861179377645331824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f709def947188b446a0f16e8206d2ed2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHitFeedback
+  _data: {fileID: 11400000, guid: 847c046635cecca47a6490eaf7857f91, type: 2}
 --- !u!1 &4442846163792982243
 GameObject:
   m_ObjectHideFlags: 0
