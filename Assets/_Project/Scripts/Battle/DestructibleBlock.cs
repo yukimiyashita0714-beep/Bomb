@@ -96,6 +96,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     /// <summary>物理で動いていて、凹型 MeshCollider の代わりに _debrisCollider を使っている間は true。</summary>
     private bool _isUsingDebrisCollider;
 
+    /// <summary>付いていれば、自分は飛ばずに隠れて、代わりに割れた破片を出す (アセットの壁用)。</summary>
+    private WallDebrisSpawner _debrisSpawner;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -108,6 +111,9 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
 
     /// <summary>爆弾を付けた後 (逃げるフェーズ) は true。</summary>
     public static bool IsRespawnLocked => _isRespawnLocked;
+
+    /// <summary>WallDebrisSpawner が付いていて、割れた破片を出す壊れ方をするなら true。</summary>
+    private bool IsShatterMode => _debrisSpawner != null && _debrisSpawner.CanShatter;
 
     /// <summary>破片のレイヤー番号。登録されていなければ -1。</summary>
     private static int DebrisLayer
@@ -148,6 +154,7 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
     {
         _rigidbody = GetComponent<Rigidbody>();
         _colliders = GetComponentsInChildren<Collider>(true);
+        TryGetComponent(out _debrisSpawner);
         _layerTargets = GetComponentsInChildren<Transform>(true);
 
         if (_resultUI == null)
@@ -206,6 +213,20 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         StopAllCoroutines();
         _isBreaking = false;
         _isSpinningByTransform = false;
+
+        if (IsShatterMode)
+        {
+            // 割れる壁 (Crumble) は自分では飛ばず、隠れて破片だけを飛ばす。もう復活しないので当たり判定も切ったままにする。
+            if (_debrisSpawner.IsCrumbleStyle)
+            {
+                SetCollidersEnabled(false);
+                _debrisSpawner.Shatter(velocity);
+                return;
+            }
+
+            // 壁ごと飛ぶ壁 (FlyAway) は、下の今までどおりの飛び方に、かけらの飛び散りを足す。
+            _debrisSpawner.Burst(velocity);
+        }
 
         int debrisLayer = DebrisLayer;
 
@@ -305,6 +326,18 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
         _isBreaking = true;
         _brokenTime = Time.time;
 
+        if (IsShatterMode)
+        {
+            if (_debrisSpawner.IsCrumbleStyle)
+            {
+                Shatter();
+                return;
+            }
+
+            // 壁ごと飛ぶ壁 (FlyAway) は、下の今までどおりの壊れ方に、かけらの飛び散りを足す。
+            _debrisSpawner.Burst(Vector3.zero);
+        }
+
         //破片ごとに大きさを変える。
         _debrisScaleRatio = _data.GetRandomDebrisScaleRatio();
 
@@ -332,6 +365,95 @@ public class DestructibleBlock : MonoBehaviour, IDamageable
 
         StartSpin();
         StartCoroutine(BreakAndRespawnRoutine());
+    }
+
+    /// <summary>
+    /// 割れる壁の壊れ方。自分は動かさずに隠し、当たり判定も切って、代わりに破片を飛ばす。
+    /// 復活するときは、飛んだ破片を戻すのではなく、隠した壁をその場に出し直す。
+    /// </summary>
+    private void Shatter()
+    {
+        SetCollidersEnabled(false);
+        _debrisSpawner.Shatter(Vector3.zero);
+        _resultUI.AddDestroyBlockCount();
+
+        StartCoroutine(ShatterAndRespawnRoutine());
+    }
+
+    private IEnumerator ShatterAndRespawnRoutine()
+    {
+        float respawnTime = _brokenTime + _data.RespawnDelaySeconds;
+
+        if (Time.time < respawnTime)
+        {
+            yield return new WaitForSeconds(respawnTime - Time.time);
+        }
+
+        // 逃げるフェーズなら壊れたまま残す。_isBreaking は true のままなので、もう壊れることもない。
+        if (IsRespawnCanceled())
+        {
+            yield break;
+        }
+
+        // プレイヤーがいる場所に戻すと、壁の中に閉じ込めてしまう。場所が空くまで待つ。
+        WaitForSeconds retryWait = new WaitForSeconds(_data.RespawnRetrySeconds);
+
+        while (IsRespawnBlocked())
+        {
+            yield return retryWait;
+
+            if (IsRespawnCanceled())
+            {
+                yield break;
+            }
+        }
+
+        yield return GrowBackRoutine();
+
+        Respawn();
+    }
+
+    /// <summary>
+    /// 割れた壁を、小さく縮んだ状態から元の大きさまで伸ばして戻す。パッと出ないように少しはずませる。
+    /// 壁の真ん中を中心に伸ばすので、壁の置き方 (原点の位置) に関係なく、その場でふくらんで見える。
+    /// 戻る間は当たり判定を切ったままにして、伸びる壁がプレイヤーを押さないようにする。
+    /// </summary>
+    private IEnumerator GrowBackRoutine()
+    {
+        Vector3 centerWorld = _debrisSpawner.GetVolumeCenter();
+        Vector3 center = transform.parent != null ? transform.parent.InverseTransformPoint(centerWorld) : centerWorld;
+
+        _debrisSpawner.BeginRestore();
+
+        float startScale = _debrisSpawner.RestoreStartScale;
+        float durationSeconds = _debrisSpawner.RestoreSeconds;
+        float elapsedSeconds = 0f;
+
+        SetGrowScale(center, startScale);
+
+        while (elapsedSeconds < durationSeconds)
+        {
+            elapsedSeconds += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedSeconds / durationSeconds);
+
+            SetGrowScale(center, Mathf.LerpUnclamped(startScale, 1f, EaseOutBack(t)));
+            yield return null;
+        }
+    }
+
+    /// <summary>元の大きさに対する割合で、壁の真ん中 (親の座標) を中心に大きさを変える。</summary>
+    private void SetGrowScale(Vector3 center, float scale)
+    {
+        transform.localScale = _initialLocalScale * scale;
+        transform.localPosition = center + (_initialLocalPosition - center) * scale;
+    }
+
+    /// <summary>少し行き過ぎてから戻る動き (ease-out back)。</summary>
+    private static float EaseOutBack(float t)
+    {
+        const float overshoot = 1.2f;
+        float u = t - 1f;
+        return 1f + (overshoot + 1f) * u * u * u + overshoot * u * u;
     }
 
     /// <summary>

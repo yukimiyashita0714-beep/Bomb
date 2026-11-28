@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cf33a9058b42534592520737787899a, type: 3}
+  m_Name: SO_WallDebrisData
+  m_EditorClassIdentifier: Assembly-CSharp::WallDebrisData
+  _breakStyle: 0
+  _meshes:
+  - {fileID: 4300000, guid: 9f95f6f6e5e5ad04dba375e0b1716fb0, type: 2}
+  - {fileID: 4300000, guid: 7475dbba50b71f34d97410fa23b0f54e, type: 2}
+  - {fileID: 4300000, guid: b15819e2f26693a4ca47838a9a2efa8f, type: 2}
+  - {fileID: 4300000, guid: 2d5c2106231a7dd44b19f0fab6f0611a, type: 2}
+  - {fileID: 4300000, guid: 00787b350f21ab941a162f1c13eaa8f4, type: 2}
+  - {fileID: 4300000, guid: d8d8ee866e7355a418be26ce16ec6bff, type: 2}
+  - {fileID: 4300000, guid: b55bb5f8fe2292345b4e5c200ba52675, type: 2}
+  - {fileID: 4300000, guid: a58e4ad35f4a2f74eace948b17b9c0c6, type: 2}
+  - {fileID: 4300000, guid: d4a0fde535ed641459a0461f0974bcbf, type: 2}
+  - {fileID: 4300000, guid: 77191041518168946a3dcf098593ee29, type: 2}
+  - {fileID: 4300000, guid: cb22242a1b449fc41a8c7901a82649a1, type: 2}
+  - {fileID: 4300000, guid: fc08b7729be98ff4a8a86074debfad11, type: 2}
+  _pieceSize: 0.6
+  _minSizeRatio: 0.4
+  _maxSizeRatio: 1.4
+  _minBigPieceCount: 2
+  _maxBigPieceCount: 4
+  _minBigPieceRatio: 0.3
+  _maxBigPieceRatio: 0.55
+  _bigPieceSpeedRatio: 0.6
+  _piecesPerCubicMeter: 5
+  _minPieceCount: 8
+  _maxPieceCount: 22
+  _maxActivePieceCount: 250
+  _maxSpeed: 18
+  _minSpeed: 5
+  _blastRadius: 5
+  _upwardsModifier: 2
+  _directionSpread: 0.3
+  _speedJitter: 0.25
+  _minSpinDegreesPerSecond: 360
+  _maxSpinDegreesPerSecond: 900
+  _massPerCubicMeter: 3
+  _lifeSeconds: 4
+  _shrinkSeconds: 1
+  _lifeJitterSeconds: 1.5
+  _breakEffectPrefab: {fileID: 95841141275403192, guid: 5d0c5204dafacae45a317e8f129c948d, type: 3}
+  _restoreEffectPrefab: {fileID: 6041400213593822841, guid: 4e63bd19e601eff4aaf3259dfb8eb67e, type: 3}
+  _restoreSeconds: 0.7
+  _restoreStartScale: 0.15
+  _cleanupShrinkSeconds: 0.4
