@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5076082982715323692}
   - component: {fileID: 1318032538097822228}
   - component: {fileID: 1574334314644868740}
+  - component: {fileID: 7732809711392736448}
   m_Layer: 9
   m_Name: P_Enemy_Turret
   m_TagString: Untagged
@@ -150,6 +151,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHitFeedback
   _data: {fileID: 11400000, guid: 847c046635cecca47a6490eaf7857f91, type: 2}
+--- !u!114 &7732809711392736448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3861179377645331824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0811f537d8333a43acc4f12bf258101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyItemDrop
+  _enemyHealth: {fileID: 2554839336800946344}
+  _itemDrops:
+  - _item: {fileID: 7794146952813626236, guid: 3a99fb1795f1acd47af6483f917fd6be, type: 3}
+    _minParcent: 0
+    _maxParcent: 50
+  _dropVel: {x: 0, y: 15, z: 11}
+  _dropRandomVel: {x: 6, y: 2, z: 3}
 --- !u!1 &4442846163792982243
 GameObject:
   m_ObjectHideFlags: 0

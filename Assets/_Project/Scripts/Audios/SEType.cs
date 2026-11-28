@@ -16,4 +16,5 @@ public enum SEType
     Alarm = 6,
     EnemyHit = 7,
     EnemyKill = 8,
+    ItemRecovery = 9,
 }

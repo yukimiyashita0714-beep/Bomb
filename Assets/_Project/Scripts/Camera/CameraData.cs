@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "CameraData", menuName = "Scriptable Objects/CameraData")]
+[CreateAssetMenu(fileName = "CameraData", menuName = "Bomb/CameraData")]
 public class CameraData : ScriptableObject
 {
     // ==========================================
