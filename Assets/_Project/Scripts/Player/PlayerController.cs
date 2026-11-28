@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour
     /// <summary>接地中に与え続ける下向き速度 (m/s)。</summary>
     private const float GROUND_STICK_VELOCITY = -2f;
 
+    /// <summary>地面へ吸い付けるときに下へ飛ばす球の太さ (体の半径に対する割合)。細めにして、横の壁に当たらないようにする。</summary>
+    private const float GROUND_SNAP_RADIUS_RATIO = 0.9f;
+
     private CharacterController _characterController;
     private PlayerInputReceiver _inputReceiver;
 
@@ -39,6 +42,9 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>今の水平方向の速度。入力の速度へ少しずつ近づけて、動き出しと止まり方を滑らかにする。</summary>
     private Vector3 _horizontalVelocity;
+
+    /// <summary>前のフレームで接地していたら true。段差を下りた瞬間に地面へ吸い付けるかの判断に使う。</summary>
+    private bool _wasGrounded;
 
     // ==========================================
     // Properties
@@ -85,7 +91,10 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError($"[{nameof(PlayerController)}] PlayerData が未設定のため動作できない。", this);
             enabled = false;
+            return;
         }
+
+        ApplyStepOffset();
     }
 
     private void Update()
@@ -103,6 +112,9 @@ public class PlayerController : MonoBehaviour
 
         velocity.y = _verticalVelocity;
         _characterController.Move(velocity * Time.deltaTime);
+
+        SnapToGround();
+        _wasGrounded = _characterController.isGrounded;
     }
 
     // ==========================================
@@ -245,6 +257,57 @@ public class PlayerController : MonoBehaviour
         }
 
         _verticalVelocity += _data.Gravity * Time.deltaTime;
+    }
+
+    /// <summary>
+    /// ジャンプせずに乗り越えられる段差の高さを CharacterController に入れる。
+    /// Step Offset は体の高さより大きくできない (Unity が警告を出して効かなくなる) ので、そこで止める。
+    /// </summary>
+    private void ApplyStepOffset()
+    {
+        float maxStepOffset = _characterController.height;
+        _characterController.stepOffset = Mathf.Clamp(_data.StepOffset, 0f, maxStepOffset);
+    }
+
+    /// <summary>
+    /// 階段や坂を下りるとき、段の縁で一瞬宙に浮いて落ちるのを防ぐ。
+    /// 前のフレームまで接地していて、ジャンプでもないのに浮いたら、真下の近い地面まで体を下ろす。
+    /// 地面が遠ければ (崖から落ちたときなど) 何もしないので、普通に落ちる。
+    /// </summary>
+    private void SnapToGround()
+    {
+        float snapDistance = _data.GroundSnapDistance;
+
+        if (!_wasGrounded || _characterController.isGrounded || _verticalVelocity > 0f || snapDistance <= 0f)
+        {
+            return;
+        }
+
+        Bounds bounds = _characterController.bounds;
+        float radius = _characterController.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.z);
+
+        // 体の一番下の球の中心から、少し細い球を真下へ飛ばす。体の中から始まるので自分の当たり判定には当たらない。
+        float castRadius = radius * GROUND_SNAP_RADIUS_RATIO;
+        Vector3 origin = bounds.center + Vector3.down * (bounds.extents.y - radius);
+        float castDistance = snapDistance + (radius - castRadius) + _characterController.skinWidth;
+
+        if (!Physics.SphereCast(origin, castRadius, Vector3.down, out RaycastHit hit, castDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            return;
+        }
+
+        // 登れない急な面には吸い付かない。
+        if (Vector3.Angle(hit.normal, Vector3.up) > _characterController.slopeLimit)
+        {
+            return;
+        }
+
+        float dropDistance = hit.distance - (radius - castRadius);
+
+        if (dropDistance > 0f)
+        {
+            _characterController.Move(Vector3.down * (dropDistance + _characterController.skinWidth));
+        }
     }
 
     private void TryJump()

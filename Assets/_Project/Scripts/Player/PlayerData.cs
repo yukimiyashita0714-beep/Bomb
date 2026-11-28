@@ -84,6 +84,15 @@ public class PlayerData : ScriptableObject
     [Range(0f, 5f)]
     private float _jumpHeight = 1.2f;
 
+    [Header("Step")]
+    [SerializeField, Tooltip("ジャンプせずに乗り越えられる段差の高さ (m)。CharacterController の Step Offset に入る。アセットの階段は1段 0.25m (2倍で置いた場合)")]
+    [Range(0f, 1f)]
+    private float _stepOffset = 0.45f;
+
+    [SerializeField, Tooltip("下りの段差や坂で、地面からこの距離 (m) までなら浮かずに地面へ吸い付く。0 で吸い付かない")]
+    [Range(0f, 1f)]
+    private float _groundSnapDistance = 0.5f;
+
     [Header("Throw - Common")]
     [SerializeField, Tooltip("投げてから次に投げられるまでの時間 (秒)")]
     [Range(0f, 10f)]
@@ -199,6 +208,12 @@ public class PlayerData : ScriptableObject
 
     /// <summary>ジャンプで上がる高さ (m)。</summary>
     public float JumpHeight => _jumpHeight;
+
+    /// <summary>ジャンプせずに乗り越えられる段差の高さ (m)。</summary>
+    public float StepOffset => _stepOffset;
+
+    /// <summary>下りで地面へ吸い付く距離 (m)。</summary>
+    public float GroundSnapDistance => _groundSnapDistance;
 
     /// <summary>投げてから次に投げられるまでの時間 (秒)。</summary>
     public float ThrowCooldown => _throwCooldown;
