@@ -61,6 +61,10 @@ public class Grenade : MonoBehaviour
     private float _gravityScale = 1f;
     private float _gravityScaleAfterHit = 1f;
 
+    /// <summary>爆風を配っている最中のグレネードの爆心。ダメージを受けた側が、どこから吹き飛ばされたかを知るのに使う。</summary>
+    private static Vector3 _currentExplosionCenter;
+    private static bool _isApplyingExplosion;
+
     // ==========================================
     // Properties
     // ==========================================
@@ -193,6 +197,16 @@ public class Grenade : MonoBehaviour
     // ==========================================
 
     /// <summary>
+    /// 爆風のダメージを配っている最中なら true と爆心を返す。
+    /// <see cref="IDamageable.TakeDamage"/> の中から呼ぶと、どの爆発で当たったかが分かる。
+    /// </summary>
+    public static bool TryGetCurrentExplosionCenter(out Vector3 center)
+    {
+        center = _currentExplosionCenter;
+        return _isApplyingExplosion;
+    }
+
+    /// <summary>
     /// 初速と重力の倍率を決めて投げ出す。重力は投げた瞬間に固定し、あとから変えない。
     /// </summary>
     /// <param name="velocity">初速度 (m/s)</param>
@@ -239,6 +253,8 @@ public class Grenade : MonoBehaviour
         int hitCount = OverlapExplosion(center, radius);
 
         DamagedBuffer.Clear();
+        _currentExplosionCenter = center;
+        _isApplyingExplosion = true;
 
         for (int i = 0; i < hitCount; i++)
         {
@@ -287,6 +303,7 @@ public class Grenade : MonoBehaviour
         }
 
         DamagedBuffer.Clear();
+        _isApplyingExplosion = false;
 
         OnExploded?.Invoke(center, radius);
 
